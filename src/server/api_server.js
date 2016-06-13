@@ -16,6 +16,7 @@ var http                = require('http'),
     CoreServer          = require('./core_server'),
     util                = require('util');
 
+
 /************************* Support Site *********************************/
 
 var COOKIE_SECRET = 'imhotep';
@@ -85,9 +86,16 @@ APIServer.prototype._setSocket = function() {
 
     // Wait on the redis pubSub and relay to clients
     redisPubSubClient.on('message',  function (channel, message) {
-        console.log('nc:delta: ' + message);
-        var msg = JSON.parse(message);
+        //console.log('nc:delta: ' + message);
+        var msg = JSON.parse(message);		
         self.ioServer.emit('nc:delta', msg);
+		if(!msg.prev) { //Message is a state update, we have to cache it locally.
+		//This should check the project, 
+		//but JOE NAMES EVERY PROJECT THE SAME THING.
+		//For now, assume only serving moldy.
+		//TODO FIXME 
+			app.MostCurrentState = msg;
+		}
     });
 };
 
@@ -98,9 +106,11 @@ APIServer.prototype._setRoutes = function(cb) {
     var self = this;
     require('./api/v1/auth')(this, function() {
         require('./api/v1/storage')(self, function() {
-          require('./api/v1/step')(self, function() {
-            if (cb) cb();
-          });
+            require('./api/v2/projects')(self, function() {
+                require('./api/v2/step')(self, function() {
+                    require('./api/v2/state')(self, function () {if(cb)cb();});
+                });
+            });
         });
     });
 };
@@ -110,7 +120,7 @@ APIServer.prototype._setRoutes = function(cb) {
  */
 APIServer.prototype._setSite = function() {
     var self = this;
-    var endpoint = this.config.host ? this.config.protocol + '://' + this.config.host + ':' + this.config.port : '';
+    var endpoint = this.config.host ? this.config.protocol + '://' + this.config.host + ':' + app.port : '';
     var services = {
         api_endpoint: endpoint,
         socket: "",
@@ -137,8 +147,8 @@ APIServer.prototype._setSite = function() {
  */
 APIServer.prototype.run = function() {
     var self = this;
-    this.server.listen(this.config.port, function () {
-        self.logger.info('CAD.js API Server listening on: ' + self.config.port);
+    this.server.listen(app.port, function () {
+        self.logger.info('CAD.js API Server listening on: ' + app.port);
     });
 };
 

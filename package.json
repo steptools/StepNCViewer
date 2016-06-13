@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server/api_server.js",
+    "start-debug": "node-debug -p 8085 src/server/api_server.js",
     "start-dev": "node src/server/api_server.js -e development"
   },
   "author": "G. Hemingway",
@@ -34,11 +35,12 @@
     "node-sass": "^3.4.2",
     "qs": "^6.0.1",
     "query-string": "^3.0.0",
+    "react": "^0.14.8",
+    "react-dom": "^0.14.8",
     "rc-menu": "4.9.0",
-    "react": "latest",
-    "react-dom": "latest",
     "react-tooltip": "^1.0.4",
     "react-ui-tree": "^2.4.1",
+    "react-fittext": "latest",
     "redis": "latest",
     "request": "^2.67.0",
     "serve-favicon": "latest",

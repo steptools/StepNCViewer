@@ -4,6 +4,15 @@
 var path            = require('path');
 var app, rootDir;
 
+//TODO: HACK: FIXME.
+var request	    = require('request');
+var stepServerURL = "http://127.0.0.1";
+var stepServerPort = 8081;
+
+function endpoint(name){
+	return stepServerURL+":"+stepServerPort+name;
+}
+
 /************************************************************************/
 
 /*
@@ -17,19 +26,31 @@ var _fetch = function(req, res) {
     var dirPath, filename;
     // Handle NC files
     if (req.params.ncId && req.params.shellId) {
-        dirPath = path.join(rootDir, req.params.ncId);
-        filename = req.params.shellId + '.json';
-        app.logger.debug('NC Shell: ' + filename);
+	dirPath = endpoint("/projects/"+req.params.ncId+"/geometry/shell/"+req.params.shellId);
+        app.logger.debug('NC Shell');
     } else if (req.params.ncId && req.params.annoId) {
-        dirPath = path.join(rootDir, req.params.ncId);
-        filename = req.params.annoId + '.json';
-        app.logger.debug('NC Annotation: ' + filename);
+	dirPath = endpoint("/projects/"+req.params.ncId+"/geometry/annotation/"+req.params.annoId);
+        app.logger.debug('NC Annotation');
     } else if (req.params.ncId) {
-        dirPath = path.join(rootDir, req.params.ncId);
-        filename = 'state.json';
-        app.logger.debug('NC: ' + filename);
+        dirPath = endpoint("/projects/"+req.params.ncId+"/keystate");
+        app.logger.debug('NC State');
+		if(app.MostCurrentState)
+		{
+			app.logger.debug('NC: newer state in memory');
+			res.status(200).send(app.MostCurrentState);
+			return;
+		}
     }
-    res.status(200).sendFile(filename, { root: dirPath });
+    app.logger.debug("Get: "+dirPath);
+    request(dirPath,function(err,reqres,body){ 
+	    if(!err && reqres.statusCode ==200){
+		    res.status(200).send(body);
+	    }
+	    else{
+		    console.error(err);
+	    }
+    	});
+    //res.status(200).sendFile(filename, { root: dirPath });
 };
 
 /************************************************************************/

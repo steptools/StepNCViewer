@@ -22,7 +22,7 @@ export default class Annotation extends THREE.EventDispatcher {
 
     addGeometry(data) {
         let decompressColors = function(lData, cData, defaultColor=[1.0, 0.0, 0.0]) {
-            return _.map(lData, function(lineStrip, stripIndex) {
+            var ar = _.map(lData, function(lineStrip, stripIndex) {
                 let numVertices = lineStrip.length / 3;
                 let colors = new Float32Array(lineStrip.length);
                 let color = defaultColor;
@@ -39,15 +39,18 @@ export default class Annotation extends THREE.EventDispatcher {
                     }
                 }
                 // Build colors array
-                for (let i=0; i < numVertices; i++) {
+                for (var i=0; i < numVertices; i++) {
                     colors[i * 3] = color[0];
                     colors[i * 3 + 1] = color[1];
                     colors[i * 3 + 2] = color[2];
                 }
+
                 return colors;
             });
+            return ar;
         };
         // Decompress the colors data
+        console.log("colorsData", data.colorsData)
         let colorArrays = decompressColors(data.lines, data.colorsData);
 
         // Create geometry for each linestrip
@@ -65,6 +68,13 @@ export default class Annotation extends THREE.EventDispatcher {
         });
         // All done - signal completion
         this.dispatchEvent({ type: "annotationEndLoad", annotation: this });
+    }
+
+    addToScene(){
+      this.dispatchEvent({ type: "annotationMakeVisible", annotation: this });
+    }
+    removeFromScene(){
+      this.dispatchEvent({ type: "annotationMakeNonVisible", annotation: this });
     }
 
     getGeometry() {

@@ -361,12 +361,6 @@ export default class CADViewer extends React.Component {
             <canvas id="cadjs-canvas" onMouseUp={this.onMouseUp} onMouseMove={this.onMouseMove} />
             {compass}
             <LoadQueueView dispatcher={this.props.manager} />
-            <ModelTreeView
-                onChange={this.onTreeChange}
-                onClick={this.onTreeClick}
-                onNodeEnter={this.onTreeNodeEnterExit}
-                onNodeLeave={this.onTreeNodeEnterExit}
-                tree={this.state.modelTree} />
         </div>;
     }
 };

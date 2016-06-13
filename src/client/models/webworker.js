@@ -657,9 +657,10 @@ function uncompressColors(data, colorsBuffer) {
     for (var i = 0; i < numBlocks; i++) {
         var block = data.colorsData[i];
         for (var j = 0; j < block.duration; j++) {
-            colorsBuffer[index++] = block.data[0];
-            colorsBuffer[index++] = block.data[1];
-            colorsBuffer[index++] = block.data[2];
+            var bdnull = (block.data ===null);
+            colorsBuffer[index++] = bdnull?-1:block.data[0];
+            colorsBuffer[index++] = bdnull?-1:block.data[1];
+            colorsBuffer[index++] = bdnull?-1:block.data[2];
         }
     }
 }

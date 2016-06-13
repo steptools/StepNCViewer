@@ -14,8 +14,9 @@ import Annotation          from './annotation';
 /********************************* Helper Functions ********************************/
 
 export default class DataLoader extends THREE.EventDispatcher {
-    constructor(config) {
+    constructor(config,app) {
         super();
+        this._app = app;
         this._queue = [];       // The queue of requests to load
         this._loading = [];     // List of active loading jobs
         this._maxWorkers = config.maxWorkers ? config.maxWorkers : 4;
@@ -114,6 +115,7 @@ export default class DataLoader extends THREE.EventDispatcher {
 
     load(req, callback) {
         req.base = req.baseURL + '/' + req.type + '/' + req.path;
+        console.log(req.baseURL);
         this.addRequest(req, function(err, model) {
             callback(err, model);
         });
@@ -197,13 +199,24 @@ export default class DataLoader extends THREE.EventDispatcher {
                 }
                 break;
             case "shellLoad":
-                shell = this._shells[event.data.id];
+                shell = this._shells[event.data.id+".json"];
                 if (!shell) {
                     console.log('DataLoader.ShellLoad: invalid shell ID' + event.data.id);
                 } else {
                     data = event.data.data;
+                    for(var i =0;i<data.colors.length;i++)
+                    {
+                        if (data.colors[i] < 0) {
+                            if (i% 3 === 0)
+                                data.colors[i] = shell._color.r;
+                            else if (i % 3 === 1)
+                                data.colors[i] = shell._color.g;
+                            else if (i % 3 === 2)
+                                data.colors[i] = shell._color.b;
+                        }
+                    }
                     // Remove the reference to the shell
-                    delete this._shells[event.data.id];
+                    delete this._shells[event.data.id+".json"];
                     shell.addGeometry(data.position, data.normals, data.colors);
                     this.dispatchEvent({ type: "shellLoad", file: event.data.file });
                 }
@@ -274,6 +287,10 @@ export default class DataLoader extends THREE.EventDispatcher {
             let transform = DataLoader.parseXform(geomData.xform, true);
             // Is this a shell
             if (_.has(geomData, 'shell')) {
+                if(geomData.usage === "cutter")
+                {
+                    color = DataLoader.parseColor("FF530D");
+                }
                 let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
                 let shell = new Shell(geomData.id, nc, nc, geomData.size, color, boundingBox);
                 nc.addModel(shell, geomData.usage, 'shell', geomData.id, transform, boundingBox);
@@ -291,6 +308,7 @@ export default class DataLoader extends THREE.EventDispatcher {
                 // Push the annotation for later completion
                 let name = geomData.polyline.split('.')[0];
                 self._annotations[name] = annotation;
+                // console.log("ASDASD", req.base);
                 self.addRequest({
                     path: name,
                     baseURL: req.base,
@@ -300,6 +318,7 @@ export default class DataLoader extends THREE.EventDispatcher {
                 console.log('No idea what we found: ' + geomData);
             }
         });
+        self._app.actionManager.emit('change-workingstep',doc.workingstep);
         req.callback(undefined, nc);
     }
 

@@ -11,6 +11,7 @@ export default class SidebarView extends React.Component {
         super(props);
         this.state = {
           'mode': 'tree',
+          'ws':-1,
           'tree': {
             "name": "No Project Loaded",
             "isLeaf": true
@@ -24,18 +25,24 @@ export default class SidebarView extends React.Component {
         this.onProjectSelected = this.onProjectSelected.bind(this);
         this.openToleranceTree = this.openToleranceTree.bind(this);
 
-        var self = this;
         this.props.socket.on('modeltree', (items)=>{
           // Node preprocessing
+          var nodes = {};
+            nodes.name = "Workingsteps";
+          nodes.children = [];
           var nodeCheck = (node)=>{
-            node.icon = this.getNodeIcon(node);
-            if (!node.children) node.leaf = true;
-            else node.children.forEach(nodeCheck);
+            node.icon = this.getNodeIcon(node,nodes.children.length+1);
+            //if (!node.children)
+            node.leaf = true;
+            if(node.children) node.children.forEach(nodeCheck);
+            node.children = [];
+              if(!_.has(node,'type'))
+                nodes.children.push(node);
           }
           nodeCheck(items);
           this.setState({
             'mode': 'tree',
-            'tree': items
+            'tree': nodes
           });
         });
 
@@ -49,11 +56,18 @@ export default class SidebarView extends React.Component {
           }).bind(this);
         };
 
+        var self = this;
+        var updateWorkingstep = (state) => {
+          self.setState({'ws':state})
+            return;
+        };
+
         this.props.actionManager.on('open-load-project-menu',  this.openLoadProjectMenu);
         this.props.actionManager.on('open-new-project-menu', disabledView('New Project'));
         this.props.actionManager.on('open-save-project-menu', disabledView('Save Project'));
         this.props.actionManager.on('open-tolerance-tree', this.openToleranceTree);
         this.props.actionManager.on('project-selected', this.onProjectSelected);
+        this.props.actionManager.on('change-workingstep', updateWorkingstep);
     }
 
     openLoadProjectMenu(){
@@ -89,13 +103,13 @@ export default class SidebarView extends React.Component {
       })
     }
 
-    getNodeIcon(node){
+    getNodeIcon(node,num){
       if (node.type == "workplan"){
         return <span className='icon-letter'>W</span>;
       }else if (node.type == "selective"){
         return <span className='icon-letter'>S</span>;
       }else{
-        return null;
+        return <span className='icon-letter'>{num}</span>;;
       }
     }
 
@@ -105,6 +119,7 @@ export default class SidebarView extends React.Component {
 
     renderNode(node){
       var cName = 'node';
+        if(node.id == this.state.ws) cName= 'node running-node';
       //cName += (node.state && node.state.selected) ? ' is-active' : '';
       return <span
           id={node.id}

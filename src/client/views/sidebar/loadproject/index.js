@@ -24,7 +24,7 @@ export default class LoadProjectView extends React.Component {
           type: 'setModel',
           path: projectId,
           baseURL: this.props.app.services.api_endpoint + this.props.app.services.version,
-          modelType: 'cloudassembly'
+          modelType: 'nc'
       });
     }).bind(this);
   }

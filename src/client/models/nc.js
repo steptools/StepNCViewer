@@ -5,12 +5,16 @@
 
 
 import Assembly from './assembly';
+import Annotation          from './annotation';
+import DataLoader from './data_loader'
+import Shell from './shell'
 
 /*************************************************************************/
 
 export default class NC extends THREE.EventDispatcher {
     constructor(project, workingstep, timeIn, loader) {
         super();
+        this.app = loader._app;
         this.project = project;
         this._workingstep = workingstep;
         this._timeIn = timeIn;
@@ -48,7 +52,9 @@ export default class NC extends THREE.EventDispatcher {
             getNamedParent: function() { return this },
             getBoundingBox: function() { return this },
             toggleHighlight: function() { },
-            toggleVisibility: function() { },
+            toggleVisibility: function() {this.object3D.visible = !this.object3D.visible; },
+            setInvisible: function() {this.object3D.visible = false; },
+            setVisible: function() {this.object3D.visible = true; },
             toggleOpacity: function() { },
             toggleSelection: function() { },
             toggleCollapsed: function() { },
@@ -65,7 +71,7 @@ export default class NC extends THREE.EventDispatcher {
         if (type === 'shell') {
             model.addEventListener('shellEndLoad', function (event) {
                 let material = new THREE.ShaderMaterial(new THREE.VelvetyShader());
-                let mesh = new THREE.SkinnedMesh(event.shell.getGeometry(), material, false);
+                let mesh = new THREE.Mesh(event.shell.getGeometry(), material, false);
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
                 mesh.userData = obj;
@@ -89,11 +95,23 @@ export default class NC extends THREE.EventDispatcher {
                     //color: 0xffffff,
                     linewidth: 1
                 });
+                model._addedGeometry = [];
                 for (let i = 0; i < lineGeometries.length; i++) {
                     let lines = new THREE.Line(lineGeometries[i], material);
                     lines.visible = true;
                     obj.annotation3D.add(lines);
+                    model._addedGeometry.push(lines);
                 }
+            });
+            model.addEventListener("annotationMakeVisible", (event)=>{
+              _.each(model._addedGeometry, (line)=>{
+                obj.annotation3D.add(line);
+              });
+            });
+            model.addEventListener("annotationMakeNonVisible", (event)=>{
+              _.each(model._addedGeometry, (line)=>{
+                obj.annotation3D.remove(line);
+              });
             });
         }
     }
@@ -209,21 +227,95 @@ export default class NC extends THREE.EventDispatcher {
     applyDelta(delta) {
         let self = this;
         let alter = false;
-        // Handle each geom update in the delta
-        _.each(delta.geom, function(geom) {
-            let obj = self._objects[geom.id];
-            let transform = new THREE.Matrix4();
-            transform.fromArray(geom.xform);
-            //let inverse = obj.transform.getInverse();
-            obj.transform.copy(transform);
-            //console.log(obj.transform);
-            obj.object3D.position.set(geom.xform[12], geom.xform[13], geom.xform[14]);
-            //obj.object3D.applyMatrix(transform);
-            //console.log(obj.object3D.matrix);
-            //obj.object3D.updateMatrix();
-            //console.log('tick');
-            alter = true;
-        });
+        //Two types of changes- Keyframe and delta.
+        //Keyframe doesn't have a 'prev' property.
+        if (!delta.hasOwnProperty('prev')){
+          //For keyframes, we need to remove current toolpaths, cutters,
+          // As-Is, and To-Be geometry (Collectively, "Stuff") and load new ones.
+          console.log("Keyframe recieved");
+          // this._loader.annotations = {};
+
+          // Delete existing Stuff.
+          var oldgeom = _.filter(_.values(self._objects), (geom) => (geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine"));
+          _.each(oldgeom,(geom)=>geom.setInvisible());
+          var oldannotations =_.values(this._loader._annotations);
+          _.each(oldannotations, (oldannotation) => {
+            oldannotation.removeFromScene();
+          });
+
+            //Load new Stuff.
+            var toolpaths = _.filter(delta.geom, (geom) => geom.usage == 'toolpath');
+            var geoms = _.filter(delta.geom, (geom) => (geom.usage =='cutter' || geom.usage =="tobe" || geom.usage =="asis"||geom.usage=='machine'));
+           _.each(toolpaths, (geomData) => {
+             let name = geomData.polyline.split('.')[0];
+             if (!this._loader._annotations[name]){
+               let annotation = new Annotation(geomData.id, this, this);
+               let transform = DataLoader.parseXform(geomData.xform, true);
+               this.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
+               // Push the annotation for later completion
+               this._loader._annotations[name] = annotation;
+               this._loader.addRequest({
+                   path: name,
+                   baseURL: "/v1/nc/boxy",
+                   type: "annotation"
+               });
+             }else{
+               this._loader._annotations[name].addToScene();
+             }
+           });
+
+           _.each(geoms, (geomData)=>{
+               let name = geomData.shell.split('.')[0];
+               if(geomData.usage =="asis") return;
+               if(self._objects[geomData.id]) {
+                   self._objects[geomData.id].setVisible();
+               }
+               else {
+                   let color = DataLoader.parseColor("7d7d7d");
+                   if(geomData.usage =="cutter"){
+                       color = DataLoader.parseColor("FF530D");
+                   }
+                   let transform = DataLoader.parseXform(geomData.xform,true);
+                   let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
+                   let shell = new Shell(geomData.id,this,this,geomData.size,color,boundingBox);
+                   this.addModel(shell,geomData.usage,'shell',geomData.id,transform,boundingBox);
+                   this._loader._shells[geomData.shell]=shell;
+                   this._loader.addRequest({
+                       path: name,
+                       baseURL: "/v1/nc/boxy",
+                       type: "shell"
+                   })
+                   //this.addModel(geomData,geomData.usage,'cutter',)
+               }
+           });
+           this._loader.runLoadQueue();
+           alter = true;
+          this.app.actionManager.emit('change-workingstep',delta.workingstep);
+            //  let lineGeometries = event.annotation.getGeometry();
+        }
+        else{
+          // Handle each geom update in the delta
+          // This is usually just a tool movement.
+          _.each(delta.geom, function(geom) {
+            if (!window.geom || window.geom.length < 100){
+              window.geom = window.geom || [];
+              window.geom.push(geom);
+            }
+              let obj = self._objects[geom.id];
+			  if(obj.usage==='cutter' || obj.usage==='machine') {
+				let transform = new THREE.Matrix4();
+				if (!geom.xform) return;
+				transform.fromArray(geom.xform);
+				let position = new THREE.Vector3();
+				let quaternion = new THREE.Quaternion();
+				let scale = new THREE.Vector3();
+				transform.decompose(position,quaternion,scale);
+				obj.object3D.position.copy(position);
+				obj.object3D.quaternion.copy(quaternion);
+				alter = true;
+			  }
+          });
+        }
         return alter;
     }
 

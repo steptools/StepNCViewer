@@ -5,3 +5,4 @@ public/js/*
 data/*
 config/*
 npm-debug.log
+*.stpnc

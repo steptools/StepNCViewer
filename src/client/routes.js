@@ -10,6 +10,7 @@ import RegisterView         from './views/user/register';
 import CADView              from './views/cad';
 import HeaderView           from './views/header';
 import SidebarView           from './views/sidebar';
+import FooterView	    from './views/footer';
 // import SidebarView           from './views/sidebar';
 var qs                      = require('qs');
 const queryString =         require('query-string');
@@ -22,7 +23,7 @@ module.exports = Backbone.Router.extend({
         'browse':                       '_browse',
         'login':                        '_login',
         'register':                     '_register',
-        'stepnc':                       '_stepnc',
+        'stepnc/:projectid':            '_stepnc',
         ':modelID':                     '_model',
         '*path':                        '_default',
     },
@@ -98,21 +99,10 @@ module.exports = Backbone.Router.extend({
         }
     },
 
-    _stepnc: function(){
+    _stepnc: function(pid){
         var self = this;
         ReactDOM.render(
                 <div style={{height:'100%'}}>
-                    <HeaderView
-                      cadManager={this.app.cadManager}
-                      actionManager={this.app.actionManager}
-                      socket={this.app.socket}
-                      />
-                    <SidebarView
-                      cadManager={this.app.cadManager}
-                      app={this.app}
-                      actionManager={this.app.actionManager}
-                      socket={this.app.socket}
-                      />
                     <div id='cadview-container'>
                         <CADView
                         manager={this.app.cadManager}
@@ -120,10 +110,21 @@ module.exports = Backbone.Router.extend({
                         root3DObject={this.app._root3DObject}
                         />
                     </div>
+                    <FooterView 
+		      cadManager={this.app.cadManager}
+		      actionManager={this.app.actionManager}
+		      socket={this.app.socket}
+                      />
                 </div>
         , document.getElementById('primary-view'), function () {
             // Dispatch setModel to the CADManager
         });
+	this.app.cadManager.dispatchEvent({
+          type: 'setModel',
+          path: pid,
+          baseURL: this.app.services.api_endpoint + this.app.services.version,
+          modelType: 'nc'
+      })
     },
 
     /************** Default Route ************************/

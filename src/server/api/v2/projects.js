@@ -1,17 +1,22 @@
+"use strict";
 var file = require("./file");
+var fs = require("fs");
 
 function _getProjects(req, res){
-	console.log("\n *START* \n");
-	var content = fs.readFileSync("data/pathmap.json");
-	console.log("Output Content : \n"+ content);
-	console.log("\n *EXIT* \n");
+	let content = fs.readFileSync("data/pathmap.json");
+	let projects = JSON.parse(content);
+	let rtn = {};
+	for(let proj in projects)
+		rtn[proj] = projects[proj];
+	res.status(200).send(rtn);
 }
 
 function _getSpecProject(req, res){
-	console.log("\n *START* \n");
-	var content = fs.readFileSync("data/pathmap.json");
-	var jsoncontent = JSON.parse(content);
-	console.log("Specific Project: " + jsoncontent[req.params.ncId]);
+	let ncId = req.params.ncId;
+	let project = {
+		"path" : file.getPath(ncId),
+	}
+	res.status(200).send(project);
 }
 
 module.exports = function(app, cb){

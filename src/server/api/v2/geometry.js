@@ -9,23 +9,19 @@ var _getGeometry = function(req , res){
     let ncId = req.params.ncId;
     var ms = file.getMachineState(ncId);
   }
-  if(req.params.ncId && req.params.type === "shell"){
-    res.status(200).send(ms.GetGeometryJSON(req.params.shellId , "MESH"));
+  if(req.params.type === "shell"){
+    console.log(ms.GetGeometryJSON(req.params.uuid , "POLYLINE"));
+    res.status(200).send(ms.GetGeometryJSON(req.params.uuid , "MESH"));
 
   }
-  else if(req.params.ncId && req.params.type === "annotation"){
-    res.status(200).send(ms.GetGeometryJSON(req.params.annoId , "POLYLINE"));
+  else if(req.params.type === "annotation"){
+    console.log(ms.GetGeometryJSON(req.params.uuid , "POLYLINE"));
+    res.status(200).send(ms.GetGeometryJSON(req.params.uuid , "POLYLINE"));
 
-  }
-  else if(req.params.ncId){
-     let ret = '';
-     ret = ms.GetGeometryJSON();
-     res.status(200).send(ret);
   }
 }
 module.exports = function(app, cb) {
   app.router.get("/v2/nc/projects/:ncId/geometry", _getGeometry);
   app.router.get("/v2/nc/projects/:ncId/geometry/:uuid/:type", _getGeometry);
-  app.router.get("/v2/nc/projects/:ncId/:type/:uuid", _getGeometry);
   if (cb) cb();
 };

@@ -256,7 +256,7 @@ export default class NC extends THREE.EventDispatcher {
                this._loader._annotations[name] = annotation;
                this._loader.addRequest({
                    path: name,
-                   baseURL: "/v2/nc/projects/boxy",
+                   baseURL: "/v2/nc/boxy",
                    type: "annotation"
                });
              }else{
@@ -282,7 +282,7 @@ export default class NC extends THREE.EventDispatcher {
                    this._loader._shells[geomData.shell]=shell;
                    this._loader.addRequest({
                        path: name,
-                       baseURL: "/v2/nc/projects/boxy",
+                       baseURL: "/v2/nc/boxy",
                        type: "shell"
                    })
                    //this.addModel(geomData,geomData.usage,'cutter',)

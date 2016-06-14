@@ -128,7 +128,7 @@ APIServer.prototype._setSite = function() {
         socket: "",
         version: '/v2',
         auth: "/v1/user",
-        model: "/v1/model"
+        model: "/v2/model"
     };
     // Serve the root client framework - customized as needed
     var _serveRoot = function (req, res) {

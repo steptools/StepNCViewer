@@ -20,7 +20,7 @@ Setting up a development environment
   4. create a new directory in ../StepNCViewer
 
        mkdir data
-       
+
      -----------------------------------------------
   5. create a new directory in data for each project
 
@@ -48,7 +48,7 @@ Setting up a development environment
        npm install
 
      ---------------------------
- 10. Build/compile using webpack
+  10. Build/compile using webpack
 
        # if you installed webpack globally (`npm install -g webpack`)
        webpack
@@ -57,6 +57,6 @@ Setting up a development environment
        ./node_modules/.bin/webpack
 
      --------------    
- 11. Start a server
+  11. Start a server
 
        npm start

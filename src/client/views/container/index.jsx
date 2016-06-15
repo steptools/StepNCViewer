@@ -12,6 +12,11 @@ import FooterView	    from '../footer';
 
 import ReactTooltip from 'react-tooltip';
 
+//TODO: Should this be a xmlhttpreq?
+var getppbtnstate = function() {
+    return 'play';
+}
+
 export default class ContainerView extends React.Component {
     constructor(props){
         super(props);
@@ -30,8 +35,45 @@ export default class ContainerView extends React.Component {
                 "isLeaf": true
             },
             svaltmenu: '',
-	    wstext: ''
+            wstext: '',
+            ppbutton: getppbtnstate()
         };
+
+
+        let self = this;
+        var playpause = ()=>{
+            var xhr = new XMLHttpRequest();
+            var url = "/v2/nc/projects/boxy/loop/";
+            if(self.state.ppbutton ==='play'){
+                ppstate('play');
+                url = url+"start";
+            }
+            else{
+                ppstate('pause');
+                url = url+"stop";
+            }
+            xhr.open("GET", url, true);
+            xhr.send(null);
+        }
+        var ppstate = (state) =>
+        {
+            var notstate;
+            if(state==="play") notstate = "pause";
+            else notstate = "play";
+            self.setState({'ppbutton':notstate});
+        };
+        var ppBtnClicked = (info)=>{
+            var cs = this.state.ppbutton;
+            ppstate(cs);
+            playpause();
+        };
+        ppstate = ppstate.bind(this);
+        ppBtnClicked = ppBtnClicked.bind(this);
+
+        this.props.app.socket.on("nc:state",(state)=>{ppstate(state)});
+
+        this.props.app.actionManager.on('sim-pp',ppBtnClicked);
+
 
         this.updateWorkingstep = this.updateWorkingstep.bind(this);
         
@@ -48,6 +90,22 @@ export default class ContainerView extends React.Component {
 
     componentDidMount() {
         window.addEventListener("resize", this.handleResize);
+
+        let xhr = new XMLHttpRequest();
+        let self = this;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    if(xhr.responseText =="play")
+                        self.setState({"ppbutton": "pause"}); //Loop is running, we need a pause button.
+                    else
+                        self.setState({"ppbutton":"play"});
+                }
+            }
+        };
+        let url = "/v2/nc/projects/boxy/loop/state";
+        xhr.open("GET", url, true);
+        xhr.send(null);
     }
 
     componentWillUnmount() {
@@ -142,6 +200,7 @@ export default class ContainerView extends React.Component {
 	    wstext={this.state.wstext}
 	    cbWS={this.cbWS}
 	    cbWSText={this.footerCBWSText}
+	    ppbutton={this.state.ppbutton}
 	    /> : undefined;
         
         return(

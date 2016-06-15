@@ -356,6 +356,7 @@ export default class CADViewer extends React.Component {
             camera={this.camera}
             controls={this.controls}
             dispatcher={this.props.manager}
+            guiMode={this.props.guiMode}
         /> : undefined;
         return <div id='cadjs-container'>
             <canvas id="cadjs-canvas" onMouseUp={this.onMouseUp} onMouseMove={this.onMouseMove} />

@@ -6,7 +6,7 @@ var app;
 var _getGeometry = function(req , res){
   if (req.params.ncId) {
     let ncId = req.params.ncId;
-    var ms = file.getMachineState(ncId);
+    var ms = file.getMachineState(app, ncId);
   }
   
   if(req.params.type === "shell"){

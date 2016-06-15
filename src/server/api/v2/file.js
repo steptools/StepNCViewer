@@ -26,11 +26,18 @@ module.exports.getPath = function getPath(ncId){
 }
 getPath=module.exports.getPath;
 
-module.exports.getMachineState = function (ncId) {
+module.exports.getMachineState = function (globalApp, ncId) {
     var ncPath = getPath(ncId);
 	if (typeof(machineStates[ncId]) === 'undefined') {
 		machineStates[ncId] = new StepNC.machineState(ncPath);
-		
+		 
+        // load the machine tool using global options
+        if (globalApp.machinetool !== "")
+          if (!machineStates[ncId].LoadMachine(globalApp.machinetool))
+              globalApp.logger.error("Failed to load machine tool: " + globalApp.machinetool);
+          else
+              globalApp.logger.info("Loaded machine tool: " + globalApp.machinetool);
+          
 	}
 	return machineStates[ncId];
 }

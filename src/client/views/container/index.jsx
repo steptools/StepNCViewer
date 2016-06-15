@@ -112,6 +112,7 @@ export default class ContainerView extends React.Component {
 			manager={this.props.app.cadManager}
 			viewContainerId='primary-view'
 			root3DObject={this.props.app._root3DObject}
+			guiMode={this.state.guiMode}
 			/>
 		</div>
 		<FooterView 

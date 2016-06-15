@@ -1,63 +1,62 @@
 StepNCViewer
-======
 
-Web-based feature-rich browser for StepNC Data
-
-No data samples are provided at this time, so this is unlikely to work for you.  
-You probably want to try [Cad.JS](https://github.com/ghemingway/cad.js) instead.
 
 Setting up a development environment
 ====================================
+     
+  1. git clone https://github.com/steptools/StepNCNode
 
-*Assumes Mac OS X or Linux*
+     ----------------
+  2. build StepNCNode
 
-Get the code
-------------
+       node-gyp configure
+       node-gyp build
 
-    git clone https://github.com/steptools/StepNCViewer
-    cd cad.js
+     -----------------------------------------------------------------------------------------
+  3. git clone https://github.com/steptools/StepNCViewer into the same directory that contains
+     /StepNCNode
+     
+     ------------------------------------------
+  4. create a new directory in ../StepNCViewer
 
-Make a place to put cad data
-----------------------------
+       mkdir data
+       
+     -----------------------------------------------
+  5. create a new directory in data for each project
 
-    mkdir data
+       mkdir project
 
-Move models into `data` directory ([find some samples](docs/readme)).
+     ------------------------------------------------------------------------------
+  6. Place the projects .stpnc file in the new directory under the name model.stpnc
 
-Install nodejs packages
------------------------
+     ---------------------------------------------------------------------------------------
+  7. Create a file named pathmap.json in the data directory that contains a json object that 
+     contains each project name as a key and path as a value.
 
-    npm install
+       {
+       "project" : "c:/.../stepncviewer/data/project/model.stpnc"
+       }
 
-Setup Redis
------------
+    ------------
+  8. Create a key
 
-Run a [redis](http://redis.io/) server and update [your config file](config/config.json#L6) to use this redis hostname/ip address and port.
+       ssh-keygen -t rsa -f config/id_rsa
 
-Create a key
-------------
+     ------------------------
+  9. Install nodejs packages
 
-    ssh-keygen -t rsa -f config/id_rsa
+       npm install
 
-run development server
-----------------------
+     ---------------------------
+ 10. Build/compile using webpack
 
-    npm run start-dev
+       # if you installed webpack globally (`npm install -g webpack`)
+       webpack
 
-Building
-========
+       # if you installed webpack via package dependencies (`npm install`)
+       ./node_modules/.bin/webpack
 
-Build/compile using webpack:
+     --------------    
+ 11. Start a server
 
-    # if you installed webpack globally (`npm install webpack -g`)
-    webpack
-
-    # if you installed webpack via package dependencies (`npm install`)
-    ./node_modules/.bin/webpack
-
-Snazzy Demos
-============
-
-*From an older version*
-
-[Live Demo](www.steptools.com/demos/mtc)
+       npm start

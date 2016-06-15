@@ -4,14 +4,16 @@ StepNCViewer
 setting up a development environment
 ====================================
   1. git clone https://github.com/steptools/StepNCNode
+     -------------------------------------------------
 
   2. build StepNCNode
      ----------------
        node-gyp configure
        node-gyp build
 
-  3. git clone https://github.com/steptools/StepNCViewer into the same directory that contains 
+  3. git clone https://github.com/steptools/StepNCViewer into the same directory that contains
      /StepNCNode
+     -----------------------------------------------------------------------------------------
 
   4. create a new directory in ../StepNCViewer
      ------------------------------------------
@@ -22,6 +24,7 @@ setting up a development environment
        mkdir project
 
   6. Place the projects .stpnc file in the new directory under the name model.stpnc
+     ------------------------------------------------------------------------------
 
   7. Create a file named pathmap.json in the data directory that contains a json object that 
      contains each project name as a key and path as a value.
@@ -39,7 +42,7 @@ setting up a development environment
      -----------------------
        npm install
 
-  10. Build/compile using webpack
+ 10. Build/compile using webpack
      ---------------------------
 
        # if you installed webpack globally (`npm install -g webpack`)
@@ -48,6 +51,6 @@ setting up a development environment
        # if you installed webpack via package dependencies (`npm install`)
        ./node_modules/.bin/webpack
   
-  11. Start a server
-     -----------------
+ 11. Start a server
+    --------------
        npm start

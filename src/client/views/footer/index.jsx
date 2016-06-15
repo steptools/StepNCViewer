@@ -25,9 +25,9 @@ class ButtonImage extends React.Component{
 export default class FooterView extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {'ppbutton':getppbtnstate(),"wsid":-1,"wstext":""};
+        this.state = {'ppbutton':getppbtnstate()};
 	this.btnClicked = this.btnClicked.bind(this);
-	this.updateWorkingstep = this.updateWorkingstep.bind(this);
+	
         let self = this;
         var playpause = ()=>{
             var xhr = new XMLHttpRequest();
@@ -61,7 +61,6 @@ export default class FooterView extends React.Component {
 	this.props.socket.on("nc:state",(state)=>{ppstate(state)});
 
 	this.props.actionManager.on('sim-pp',ppBtnClicked);
-	this.props.actionManager.on('change-workingstep', this.updateWorkingstep);
     }
 
     componentDidMount() {
@@ -85,32 +84,13 @@ export default class FooterView extends React.Component {
     btnClicked(info){
 	    this.props.actionManager.emit('sim-pp');
     }
-    updateWorkingstep(ws){
-	    var self = this;
-	    var xhr = new XMLHttpRequest();
-	    xhr.onreadystatechange = ()=>{
-		    if (xhr.readyState == 4) {
-			    if (xhr.status == 200) {
-				    if(xhr.responseText)
-				    {
-					    var workingstep = JSON.parse(xhr.responseText);
-					    self.setState({"wsid": workingstep.id,"wstext":workingstep.name.trim()});
-				    }
-				    else
-					    self.setState({"wsid":ws,"wstxt":"Operation Unknown"});
-			    }
-		    }
-	    };
-	    var url = "/v2/nc/projects/boxy/workplan/"+ws;
-	    xhr.open("GET",url,true);
-	    xhr.send(null);
-    }
+    
     render() {
-        if(this.props.guiMode == 0)
-            return null;
+        //if(this.props.guiMode == 0)
+            //return null;
         var ppbtntxt = this.state.ppbutton;
 		return <div className="Footer-bar">
-			<div className="op-text">{this.state.wstext}</div>
+			<div className="op-text">{this.props.wstext}</div>
 			<ButtonImage onBtnClick={this.btnClicked} icon={ppbtntxt}/>
 			</div>;
     }

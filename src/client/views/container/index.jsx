@@ -24,20 +24,26 @@ export default class ContainerView extends React.Component {
             guiMode: tempGuiMode,
             hvopenMenu: 'file-menu',
             svmode: 'tree',
-            svws: -1,
+            ws: -1,
             svtree: {
                 "name": "No Project Loaded",
                 "isLeaf": true
             },
-            svaltmenu: ''
+            svaltmenu: '',
+	    wstext: ''
         };
 
+        this.updateWorkingstep = this.updateWorkingstep.bind(this);
+        
         this.handleResize   = this.handleResize.bind(this);
+        this.props.app.actionManager.on('change-workingstep', this.updateWorkingstep);
+
         this.headerCB=this.headerCB.bind(this);
         this.sidebarCBMode=this.sidebarCBMode.bind(this);
-        this.sidebarCBWS=this.sidebarCBWS.bind(this);
         this.sidebarCBTree=this.sidebarCBTree.bind(this);
         this.sidebarCBAltMenu=this.sidebarCBAltMenu.bind(this);
+        this.cbWS=this.cbWS.bind(this);
+        this.footerCBWSText=this.footerCBWSText.bind(this);
     }
 
     componentDidMount() {
@@ -55,6 +61,27 @@ export default class ContainerView extends React.Component {
             this.setState({ guiMode: 1 });
     }
 
+    updateWorkingstep(ws){
+        var self = this;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = ()=>{
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    if(xhr.responseText)
+                    {
+                        var workingstep = JSON.parse(xhr.responseText);
+                        self.setState({"ws": workingstep.id,"wstext":workingstep.name.trim()});
+                    }
+                    else
+                        self.setState({"ws":ws,"wstxt":"Operation Unknown"});
+                }
+            }
+        };
+        var url = "/v2/nc/projects/boxy/workplan/"+ws;
+        xhr.open("GET",url,true);
+        xhr.send(null);
+    }
+
     headerCB(newOpenMenu)
     {
         this.setState({ hvopenMenu: newOpenMenu });
@@ -65,11 +92,6 @@ export default class ContainerView extends React.Component {
         this.setState({ svmode: newMode });
     }
 
-    sidebarCBWS(newWS)
-    {
-        this.setState({ svws: newWS });
-    }
-
     sidebarCBTree(newTree)
     {
         this.setState({ svtree: newTree });
@@ -78,6 +100,16 @@ export default class ContainerView extends React.Component {
     sidebarCBAltMenu(newAltMenu)
     {
         this.setState({ svaltmenu: newAltMenu });
+    }
+
+    cbWS(newWS)
+    {
+        this.setState({ ws: newWS });
+    }
+
+    footerCBWSText(newWSText)
+    {
+        this.setState({ wstext: newWSText });
     }
     
     render() {   
@@ -94,13 +126,22 @@ export default class ContainerView extends React.Component {
 	    actionManager={this.props.app.actionManager}
 	    socket={this.props.app.socket}
 	    mode={this.state.svmode}
-	    ws={this.state.svws}
+	    ws={this.state.ws}
 	    tree={this.state.svtree}
 	    altmenu={this.state.svaltmenu}
 	    cbMode={this.sidebarCBMode}
-	    cbWS={this.sidebarCBWS}
+	    cbWS={this.cbWS}
 	    cbTree={this.sidebarCBTree}
 	    cbAltMenu={this.sidebarCBAltMenu}
+	    /> : undefined;
+	let FV = this.state.guiMode == 1 ? <FooterView 
+	    cadManager={this.props.app.cadManager}
+	    actionManager={this.props.app.actionManager}
+	    socket={this.props.app.socket}
+	    wsid={this.state.ws}
+	    wstext={this.state.wstext}
+	    cbWS={this.cbWS}
+	    cbWSText={this.footerCBWSText}
 	    /> : undefined;
         
         return(
@@ -115,12 +156,7 @@ export default class ContainerView extends React.Component {
 			guiMode={this.state.guiMode}
 			/>
 		</div>
-		<FooterView 
-		    cadManager={this.props.app.cadManager}
-		    actionManager={this.props.app.actionManager}
-		    socket={this.props.app.socket}
-		    guiMode={this.state.guiMode}
-		    />
+		{FV}
 	    </div>
 	);
     }

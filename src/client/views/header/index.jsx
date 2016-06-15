@@ -45,45 +45,15 @@ class ButtonImage extends React.Component{
 export default class HeaderView extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { };
 
         this.openBottomMenu = this.openBottomMenu.bind(this);
         this.debugMenuItemClicked = this.debugMenuItemClicked.bind(this);
         this.fileMenuItemClicked = this.fileMenuItemClicked.bind(this);
         this.simulateMenuItemClicked = this.simulateMenuItemClicked.bind(this);
         this.viewMenuItemClicked = this.viewMenuItemClicked.bind(this);
-
-        let self = this;
-        var playpause = function(){
-            var xhr = new XMLHttpRequest();
-            var url = "/v2/nc/boxy/loop/";
-            if(self.state.ppbutton ==='play'){
-                ppstate('play');
-                url = url+"start";
-            }
-            else{
-                ppstate('pause');
-                url = url+"stop";
-            }
-            xhr.open("GET", url, true);
-            xhr.send(null);
-        }
-        var ppstate = (state) =>
-        {
-            var notstate;
-            if(state==="play") notstate = "pause";
-            else notstate = "play";
-            self.setState({'ppbutton':notstate});
-        };
-        ppstate = ppstate.bind(this);
-
-        this.props.actionManager.on('simulate-play',playpause);
-        this.props.actionManager.on('simulate-pause',playpause);
-        this.props.socket.on("nc:state",(state)=>{ppstate(state);});
     }
 
     openBottomMenu(info){
-        //this.setState({ 'openMenu' : info.key });
         this.props.cb(info.key);
     }
 
@@ -116,7 +86,7 @@ export default class HeaderView extends React.Component {
         break;
         case "play":
         this.props.actionManager.emit("sim-pp");
-        if (this.state.ppbutton == "play"){
+        if (this.props.ppbutton == "play"){
           this.setState({"ppbutton":"pause"});
         }
         else{
@@ -141,33 +111,16 @@ export default class HeaderView extends React.Component {
       }
     }
 
-    componentDidMount() {
-        var xhr = new XMLHttpRequest();
-        var self = this;
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    if(xhr.responseText =="play")
-                        self.setState({"ppbutton": "pause"}); //Loop is running, we need a pause button.
-                    else
-                        self.setState({"ppbutton":"play"});
-                }
-            }
-        };
-        var url = "/v2/nc/projects/boxy/loop/state";
-        xhr.open("GET", url, true);
-        xhr.send(null);
-    }
     render() {
         //if(this.props.guiMode == 1)
             //return null;
         var ppbtntxt;
-        var ppbutton = this.state.ppbutton;
-        if(this.state.ppbutton === "play"){
-          ppbtntxt = "Play";
+        var ppbutton = this.props.ppbutton;
+        if(this.props.ppbutton === "play"){
+            ppbtntxt = "Play";
         }
         else{
-          ppbtntxt = "Pause";
+            ppbtntxt = "Pause";
         }
         const topMenu = ( <Menu mode='horizontal' onClick={this.openBottomMenu} className='top-menu'>
             <MenuItem key='file-menu'>File</MenuItem>

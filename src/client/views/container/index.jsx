@@ -173,10 +173,11 @@ export default class ContainerView extends React.Component {
     render() {   
         let HV = this.state.guiMode == 0 ? <HeaderView
 	    cadManager={this.props.app.cadManager}
-        actionManager={this.props.app.actionManager}
-        socket={this.props.app.socket}
-        openMenu={this.state.hvopenMenu}
-        cb={this.headerCB}
+	    actionManager={this.props.app.actionManager}
+	    socket={this.props.app.socket}
+	    openMenu={this.state.hvopenMenu}
+	    cb={this.headerCB}
+	    ppbutton={this.state.ppbutton}
 	    /> : undefined;
         let SV = this.state.guiMode == 0 ? <SidebarView
 	    cadManager={this.props.app.cadManager}

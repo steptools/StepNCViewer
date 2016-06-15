@@ -33,7 +33,9 @@ export default class FooterView extends React.Component {
         var ppbtntxt = this.props.ppbutton;
 		return <div className="Footer-bar">
 			<div className="op-text">{this.props.wstext}</div>
+      <ButtonImage onBtnClick={this.bbBtnClicked} icon="step-backward"/>
 			<ButtonImage onBtnClick={this.btnClicked} icon={ppbtntxt}/>
+      <ButtonImage onBtnClick={this.ffBtnClicked} icon="step-forward"/>
 			</div>;
     }
 }

@@ -28,6 +28,14 @@ var _getNext = function(ncId, ms, cb) {
   cb();
 };
 
+var _getPrev = function(ncId, ms, cb) {
+  //ms.PrevWS();
+  //assume switch was successful
+  app.logger.debug("Switched!");
+  cb();
+};
+
+
 var _loop = function(ncId, ms, key) {
   if (loopStates[ncId] === true) {
     //app.logger.debug("Loop step " + ncId);
@@ -48,6 +56,7 @@ var _loop = function(ncId, ms, key) {
   }
 };
 
+
 var _loopInit = function(req, res) {
   if (req.params.ncId && req.params.loopstate) {
     let ncId = req.params.ncId;
@@ -56,6 +65,10 @@ var _loopInit = function(req, res) {
     if (typeof(loopStates[ncId]) === 'undefined') {
       loopStates[ncId] = false;
     }
+
+    // load the machine tool using global options
+    if (app.machinetool !== "")
+      ms.LoadMachine(app.machinetool);
 
     switch(loopstate) {
       case "state":
@@ -84,6 +97,45 @@ var _loopInit = function(req, res) {
         }
         loopStates[ncId] = false;
         update("pause");
+        res.status(200).send("OK");
+        break;
+      case "stepf":
+        var temp = loopStates[ncId];
+        loopStates[ncId] = true;
+        if (temp) {
+        _getNext(ncId, ms, function() {
+        _loop(ncId, ms, true);
+        });
+        loopStates[ncId] = false;
+        update("pause");
+        }
+        else{
+          _loop(ncId,ms,false);
+          _getNext(ncId, ms, function() {
+          _loop(ncId, ms, true);
+          });
+          loopStates[ncId] = false;
+          update("pause");
+        }
+        res.status(200).send("OK");
+        break;
+      case "stepb":
+        var temp = loopStates[ncId];
+        loopStates[ncId] = true;
+        if (temp) {
+        _getPrev(ncId, ms, function() {
+        _loop(ncId, ms, true);
+        });
+        update("play");
+        }
+        else{
+          _loop(ncId,ms,false);
+          _getPrev(ncId, ms, function() {
+          _loop(ncId, ms, true);
+          });
+          loopStates[ncId] = false;
+          update("pause");
+        }
         res.status(200).send("OK");
         break;
     }

@@ -9,7 +9,15 @@ var MenuItem = Menu.Item;
 export default class SidebarView extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { };
+        this.state = {
+          'mode': 'tree',
+          'ws':-1,
+          'tree': {
+            "name": "No Project Loaded",
+            "isLeaf": true
+          },
+          'altmenu': ''
+        };
 
         this.openObjectTree = this.openObjectTree.bind(this);
         this.renderNode = this.renderNode.bind(this);
@@ -32,23 +40,25 @@ export default class SidebarView extends React.Component {
                 nodes.children.push(node);
           }
           nodeCheck(items);
+          this.setState({
+            'mode': 'tree',
+            'tree': nodes
+          });
         });
 
         var disabledView = (name) => {
           return (() => {
-            /*this.setState({
+            this.setState({
               'mode': "disabled",
               'altmode': 'disabled',
               'altmenu': name
-            })*/
-            this.props.cbMode("disabled");
-            this.props.cbAltMenu(name);
+            })
           }).bind(this);
         };
 
         var self = this;
         var updateWorkingstep = (state) => {
-            self.props.cbWS(state);
+          self.setState({'ws':state})
             return;
         };
 
@@ -61,45 +71,36 @@ export default class SidebarView extends React.Component {
     }
 
     openLoadProjectMenu(){
-      /*this.setState({
+      this.setState({
         'mode': 'load-project',
         'altmode': 'load-project',
         'altmenu': 'Load Project'
-      });*/
-        this.props.cbMode('load-project');
-      this.props.cbAltMenu('Load Project');
+      });
     }
 
     openObjectTree(){
-      /*this.setState({
+      this.setState({
         mode: 'tree'
-      });*/
-        this.props.cbMode('tree');
+      });
     }
 
     openToleranceTree(){
-      /*this.setState({
+      this.setState({
         "mode": "tolerance-tree",
         "altmode": "tolerance-tree",
         "altmenu": "Tolerance Tree"
-      });*/
-        this.props.cbMode('tolerance-tree');
-      this.props.cbAltMenu('Tolerance Tree');
+      });
     }
 
     onProjectSelected(projectId){
       this.props.socket.emit('req:modeltree', projectId);
       this.openObjectTree();
-      /*this.setState({
+      this.setState({
         tree: {
           name : 'Loading project...',
           isLeaf:true
         }
-      })*/
-      this.props.cbTree({
-          name : 'Loading project...',
-          isLeaf:true
-      });
+      })
     }
 
     getNodeIcon(node,num){
@@ -118,7 +119,7 @@ export default class SidebarView extends React.Component {
 
     renderNode(node){
       var cName = 'node';
-        if(node.id == this.props.ws) cName= 'node running-node';
+        if(node.id == this.state.ws) cName= 'node running-node';
       //cName += (node.state && node.state.selected) ? ' is-active' : '';
       return <span
           id={node.id}
@@ -132,10 +133,10 @@ export default class SidebarView extends React.Component {
     }
 
     render() {
-        //if(this.props.guiMode == 1)
-            //return null;
+        if(this.props.guiMode == 1)
+            return null;
       // TODO currently mode menu can only have two layers
-      var nested = this.props.mode != "tree";
+      var nested = this.state.mode != "tree";
       const modeMenu = (
         <div className='sidebar-menu-tabs'>
           <span style={{opacity:nested ?.5:0}} className='glyphicon glyphicon-menu-left back-button'></span>
@@ -143,27 +144,27 @@ export default class SidebarView extends React.Component {
             <div>Object Tree</div>
           </div>
           <div style={{left:nested?200:400}} className='current'>
-            {this.props.altmenu}
+            {this.state.altmenu}
           </div>
         </div>
       );
         return <div className="sidebar">
                   {modeMenu}
-                  {this.props.mode == 'tree' ?
+                  {this.state.mode == 'tree' ?
                   <Tree
                       paddingLeft={32}              // left padding for children nodes in pixels
-                      tree={this.props.tree}        // tree object
+                      tree={this.state.tree}        // tree object
                       renderNode={this.renderNode}  // renderNode(node) return react element
                   />
                   : null}
-                  {this.props.mode == 'load-project' ?
+                  {this.state.mode == 'load-project' ?
                   <LoadProjectView socket={this.props.socket} app={this.props.app} actionManager={this.props.actionManager}/>
                   : null}
-                  {this.props.mode == 'tolerance-tree' ?
+                  {this.state.mode == 'tolerance-tree' ?
                   <ToleranceTreeView socket={this.props.socket} app={this.props.app} actionManager={this.props.actionManager}/>
                   : null}
-                  {this.props.mode == "disabled" ?
-                  <div className='disabled-view'> {this.props.altmenu} is currently disabled.</div>
+                  {this.state.mode == "disabled" ?
+                  <div className='disabled-view'> {this.state.altmenu} is currently disabled.</div>
                   : null}
                </div>;
     }

@@ -21,7 +21,8 @@ export default class ContainerView extends React.Component {
     constructor(props){
         super(props);
 
-        let tempGuiMode=1;
+        //0 is desktop, 1 is mobile
+        let tempGuiMode = 1;
         if((window.innerWidth-390 > window.innerHeight) && (window.innerWidth > 800))
             tempGuiMode=0;
 
@@ -172,42 +173,42 @@ export default class ContainerView extends React.Component {
     
     render() {   
         let HV = this.state.guiMode == 0 ? <HeaderView
-	    cadManager={this.props.app.cadManager}
-	    actionManager={this.props.app.actionManager}
-	    socket={this.props.app.socket}
-	    openMenu={this.state.hvopenMenu}
-	    cb={this.headerCB}
-	    ppbutton={this.state.ppbutton}
-	    /> : undefined;
+    	    cadManager={this.props.app.cadManager}
+    	    actionManager={this.props.app.actionManager}
+    	    socket={this.props.app.socket}
+    	    openMenu={this.state.hvopenMenu}
+    	    cb={this.headerCB}
+    	    ppbutton={this.state.ppbutton}
+    	    /> : undefined;
         let SV = this.state.guiMode == 0 ? <SidebarView
-	    cadManager={this.props.app.cadManager}
-	    app={this.props.app}
-	    actionManager={this.props.app.actionManager}
-	    socket={this.props.app.socket}
-	    mode={this.state.svmode}
-	    ws={this.state.ws}
-	    tree={this.state.svtree}
-	    altmenu={this.state.svaltmenu}
-	    cbMode={this.sidebarCBMode}
-	    cbWS={this.cbWS}
-	    cbTree={this.sidebarCBTree}
-	    cbAltMenu={this.sidebarCBAltMenu}
-	    /> : undefined;
-	let FV = this.state.guiMode == 1 ? <FooterView 
-	    cadManager={this.props.app.cadManager}
-	    actionManager={this.props.app.actionManager}
-	    socket={this.props.app.socket}
-	    wsid={this.state.ws}
-	    wstext={this.state.wstext}
-	    cbWS={this.cbWS}
-	    cbWSText={this.footerCBWSText}
-	    ppbutton={this.state.ppbutton}
-	    /> : undefined;
+    	    cadManager={this.props.app.cadManager}
+    	    app={this.props.app}
+    	    actionManager={this.props.app.actionManager}
+    	    socket={this.props.app.socket}
+    	    mode={this.state.svmode}
+    	    ws={this.state.ws}
+    	    tree={this.state.svtree}
+    	    altmenu={this.state.svaltmenu}
+    	    cbMode={this.sidebarCBMode}
+    	    cbWS={this.cbWS}
+    	    cbTree={this.sidebarCBTree}
+    	    cbAltMenu={this.sidebarCBAltMenu}
+    	    /> : undefined;
+	   let FV = this.state.guiMode == 1 ? <FooterView 
+    	    cadManager={this.props.app.cadManager}
+    	    actionManager={this.props.app.actionManager}
+    	    socket={this.props.app.socket}
+    	    wsid={this.state.ws}
+    	    wstext={this.state.wstext}
+    	    cbWS={this.cbWS}
+    	    cbWSText={this.footerCBWSText}
+    	    ppbutton={this.state.ppbutton}
+    	    /> : undefined;
         
         return(
 	    <div style={{height:'100%'}}>
-		{HV}
-		{SV}
+		  {HV}
+		  {SV}
 		<div id='cadview-container'>
 		    <CADView
 			manager={this.props.app.cadManager}

@@ -72,11 +72,14 @@ export default class LoadQueueView extends React.Component {
     }
 
     render() {
+        let iCantThinkOfAVariableName={"bottom": "10vmin"};
+        if(this.props.guiMode == 0)
+            iCantThinkOfAVariableName={"bottom": "0"};
         let items = this.state.queue.map(function(item) {
             return <QueueItem key={item.name} name={item.name} loaded={item.loaded} />;
         });
         let style = items.length > 0 ? 'load-queue' : 'load-queue out';
-        return <div className={style}>
+        return <div className={style} style={iCantThinkOfAVariableName}>
                 <div className="header">
                     <span>Downloads&nbsp;</span>
                     <span>({items.length}):</span>

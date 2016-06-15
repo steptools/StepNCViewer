@@ -112,8 +112,8 @@ export default class HeaderView extends React.Component {
     }
 
     render() {
-        if(this.props.guiMode == 1)
-            return null;
+        /*if(this.props.guiMode == 1)
+            return null;*/
         var ppbtntxt;
         var ppbutton = this.props.ppbutton;
         if(this.props.ppbutton === "play"){

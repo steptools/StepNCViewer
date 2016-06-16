@@ -174,6 +174,7 @@ export default class CADManager extends THREE.EventDispatcher {
             let model = self._models[key];
             if (model.project === delta.project) {
                 if (model.applyDelta(delta)) {
+                    model.calcBoundingBox();
                     // Only redraw if there were changes
                     self.dispatchEvent({ type: 'invalidate' });
                 }

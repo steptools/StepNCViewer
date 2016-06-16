@@ -156,6 +156,27 @@ export default class NC extends THREE.EventDispatcher {
         return this.boundingBox.clone();
     }
 
+    calcBoundingBox() {
+        let self = this;
+
+        this._overlay3D.remove(this.bbox);
+        this.boundingBox = new THREE.Box3();
+        let keys = _.keys(this._objects);
+        _.each(keys, function(key) {
+            let object = self._objects[key];
+            if (object.type !== 'polyline') {
+                object.bbox = new THREE.Box3().setFromObject(object.object3D);
+                self.boundingBox.union(object.bbox);
+            }
+        });
+        let bounds = self.boundingBox;
+
+        this.bbox = Assembly.buildBoundingBox(bounds);
+        if (this.bbox && this.state.selected) {
+            this._overlay3D.add(this.bbox);
+        }
+    }
+
     getTree(root) {
         let node = {
             id:                 root,
@@ -306,18 +327,20 @@ export default class NC extends THREE.EventDispatcher {
               window.geom.push(geom);
             }
               let obj = self._objects[geom.id];
-			  if(obj.usage==='cutter' || obj.usage==='machine') {
-				let transform = new THREE.Matrix4();
-				if (!geom.xform) return;
-				transform.fromArray(geom.xform);
-				let position = new THREE.Vector3();
-				let quaternion = new THREE.Quaternion();
-				let scale = new THREE.Vector3();
-				transform.decompose(position,quaternion,scale);
-				obj.object3D.position.copy(position);
-				obj.object3D.quaternion.copy(quaternion);
-				alter = true;
-			  }
+              if(obj !== undefined) {
+                  if (obj.usage === 'cutter' || obj.usage === 'machine') {
+                      let transform = new THREE.Matrix4();
+                      if (!geom.xform) return;
+                      transform.fromArray(geom.xform);
+                      let position = new THREE.Vector3();
+                      let quaternion = new THREE.Quaternion();
+                      let scale = new THREE.Vector3();
+                      transform.decompose(position, quaternion, scale);
+                      obj.object3D.position.copy(position);
+                      obj.object3D.quaternion.copy(quaternion);
+                      alter = true;
+                  }
+              }
           });
         }
         return alter;

@@ -361,10 +361,7 @@ export default class CADViewer extends React.Component {
         return <div id='cadjs-container'>
             <canvas id="cadjs-canvas" onMouseUp={this.onMouseUp} onMouseMove={this.onMouseMove} />
             {compass}
-            <LoadQueueView
-		dispatcher={this.props.manager}
-		guiMode={this.props.guiMode}
-		/>
+            <LoadQueueView dispatcher={this.props.manager} guiMode={this.props.guiMode} />
         </div>;
     }
 };

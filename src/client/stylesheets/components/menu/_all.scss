@@ -13,23 +13,24 @@
     border-bottom:2px #2db7f5 solid;
   }
 }
+
 .bottom-menu{
-  background-color: #f8f8f8;
+  background-color:#f8f8f8;
 
   .rc-menu-item:first-child{
     margin-left:8px;
   }
+  
   .rc-menu-item{
-    padding:0;
+    padding:15px;
     height:82px;
+    min-width:90px;
     margin-top:4px;
-    margin-bottom: 4px;
-    width:90px;
-    text-align: center;
-    padding-top:12px;
+    margin-bottom:4px;
+    text-align:center;
     border-right:1px solid #ddd;
     background:none;
-    white-space: normal;
+    white-space:normal;
   }
 
   .rc-menu-item-selected{
@@ -40,7 +41,7 @@
     margin-bottom:0px;
     height:86px;
   }
-
+  
 }
 
 .sidebar-menu{

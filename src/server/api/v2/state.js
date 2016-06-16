@@ -4,9 +4,14 @@ var file = require('./file');
 
 var app;
 var loopStates = {};
+let playbackSpeed = 50;
 
 var update = (val) => {
   app.ioServer.emit("nc:state", val);
+};
+
+var _updateSpeed = (speed) => {
+  app.ioServer.emit("nc:speed", speed);
 };
 
 var _getDelta = function(ncId, ms, key, cb) {
@@ -35,6 +40,13 @@ var _getPrev = function(ncId, ms, cb) {
   cb();
 };
 
+var _getToWS = function(ncId, ms, cb) {
+  ms.GoToWS(ncId);
+  //assume switch was successful
+  app.logger.debug("Switched!");
+  cb();
+};
+
 
 var _loop = function(ncId, ms, key) {
   if (loopStates[ncId] === true) {
@@ -44,7 +56,11 @@ var _loop = function(ncId, ms, key) {
       //app.logger.debug("OK...");
       _getDelta(ncId, ms, key, function(b) {
         app.ioServer.emit('nc:delta', JSON.parse(b));
-        setTimeout(function() { _loop(ncId, ms, false); }, 300);
+        if (playbackSpeed > 0)
+            setTimeout(function() { _loop(ncId, ms, false); }, 50 / (playbackSpeed / 100));
+        else {
+          // app.logger.debug("playback speed is zero, no timeout set");
+        }
       });
     }
     else if (rc == 1) {   // SWITCH
@@ -56,7 +72,6 @@ var _loop = function(ncId, ms, key) {
   }
 };
 
-
 var _loopInit = function(req, res) {
   if (req.params.ncId && req.params.loopstate) {
     let ncId = req.params.ncId;
@@ -65,10 +80,6 @@ var _loopInit = function(req, res) {
     if (typeof(loopStates[ncId]) === 'undefined') {
       loopStates[ncId] = false;
     }
-
-    // load the machine tool using global options
-    if (app.machinetool !== "")
-      ms.LoadMachine(app.machinetool);
 
     switch(loopstate) {
       case "state":
@@ -139,7 +150,43 @@ var _loopInit = function(req, res) {
         }
         res.status(200).send("OK");*/
         break;
-    }
+      case "speed":
+        if (req.params.speed) {
+          if (Number(playbackSpeed) === 0 && req.params.speed > 0 && loopStates[ncId] === true) {
+            // app.logger.debug("Attempting to resume after being 0");
+            playbackSpeed = req.params.speed;
+            _loop(ncId, ms, false);
+          }
+              
+          playbackSpeed = req.params.speed;
+          res.status(200).send("speed " + playbackSpeed);
+          _updateSpeed(playbackSpeed);
+        }
+        else {
+          res.status(200).send(playbackSpeed.toString());
+          // app.logger.debug("Sent playback speed " + playbackSpeed);
+        }
+        break;
+      case "stepto":
+        var temp = loopStates[ncId];
+        loopStates[ncId] = true;
+        if (temp) {
+        _getToWS(ncId, ms, function() {
+        _loop(ncId, ms, true);
+        });
+        loopStates[ncId] = false;
+        update("pause");
+        }
+        else{
+          _loop(ncId,ms,false);
+          _getToWS(ncId, ms, function() {
+          _loop(ncId, ms, true);
+          });
+          loopStates[ncId] = false;
+          update("pause");
+        }
+        res.status(200).send("OK");
+        break;    }
   }
 };
 
@@ -156,5 +203,6 @@ module.exports = function(globalApp, cb) {
   app.router.get('/v2/nc/projects/:ncId', _getKeyState);
   app.router.get('/v2/nc/projects/:ncId/keystate', _getKeyState);
   app.router.get('/v2/nc/projects/:ncId/loop/:loopstate', _loopInit);
+  app.router.get('/v2/nc/projects/:ncId/loop/:loopstate/:speed', _loopInit);
   if (cb) cb();
 };

@@ -3,72 +3,100 @@ StepNCViewer
 
 Setting up a development environment
 ====================================
-     
-  1. git clone https://github.com/steptools/StepNCNode
 
-     ----------------
-  2. build StepNCNode
+  1. Download and build StepNCNode
 
-       ```
-       node-gyp configure
-       node-gyp build
-       ```
+  ```
+  > git clone https://github.com/steptools/StepNCNode.git
+  > cd StepNCNode
+  > npm install
+  ```
 
-     -----------------------------------------------------------------------------------------
-  3. git clone https://github.com/steptools/StepNCViewer into the same directory that contains
-     /StepNCNode
+  ------------------------------------------------------------------------------
+  2. Clone StepNCViewer into the same directory that contains the StepNCNode
+      directory, E.G.:
 
-     ------------------------------------------
-  4. create a new directory in ../StepNCViewer
+  ```
+  > cd ..
+  > git clone https://github.com/steptools/StepNCViewer.git
+  > ls
+  StepNCNode     StepNCViewer
+  ```
 
-       ```
-       mkdir data
-       ```
+  ------------------------------------------------------------------------------
+  4. create a new directory in StepNCViewer
 
-     -----------------------------------------------
+  ```
+  > cd StepNCViewer
+  > mkdir data
+  ```
+
+  ------------------------------------------------------------------------------
   5. create a new directory in data for each project
 
-       ```
-       mkdir project
-       ```
+  ```
+  > cd data
+  > mkdir boxy
+  > mkdir moldy
+  ```
 
-     ------------------------------------------------------------------------------
-  6. Place the projects .stpnc file in the new directory under the name model.stpnc
+  ------------------------------------------------------------------------------
+  6. Place the projects .stpnc file in the new directory under the name
+      model.stpnc
 
-     ---------------------------------------------------------------------------------------
-  7. Create a file named pathmap.json in the data directory that contains a json object that 
-     contains each project name as a key and path as a value.
-       
-       {
-       "project" : "c:/.../stepncviewer/data/project/model.stpnc"
-       }
+  ```
+  > cd boxy
+  > cp ~/Downloads/boxy.stpnc ./model.stpnc
+  > cd ../moldy
+  > cp ~/Downloads/moldy.stpnc ./model.stpnc
+  ```
 
-    ------------
+  ------------------------------------------------------------------------------
+  7. Create a file named pathmap.json in the data directory that contains a json
+      object that contains each project name as a key and path as a value.
+
+ ```
+ > cd ..
+ > nano pathmap.json
+ {
+   "boxy" : "c:/.../stepncviewer/data/boxy/model.stpnc",
+   "moldy" : "c:/.../StepNCViewer/data/moldy/model.stpnc"
+ }
+ ```
+
+  ------------------------------------------------------------------------------
   8. Create a key
 
-       ```
-       ssh-keygen -t rsa -f config/id_rsa
-       ```
+ ```
+ > cd ..
+ > ssh-keygen -t rsa -f config/id_rsa
+ ```
 
-     ------------------------
+  ------------------------------------------------------------------------------
   9. Install nodejs packages
 
-       ```
-       npm install
-       ```
-       
-     ---------------------------
+ ```
+ > npm install
+ ```
+
+  ------------------------------------------------------------------------------
   10. Build/compile using webpack
 
-       # if you installed webpack globally (`npm install -g webpack`)
-       webpack
+  #### if you installed webpack globally (`npm install -g webpack`)
 
-       # if you installed webpack via package dependencies (`npm install`)
-       ./node_modules/.bin/webpack
+ ```
+ > webpack
+ ```
 
-     --------------    
+  #### if you installed webpack via package dependencies (`npm install`)
+
+  ```
+  > ./node_modules/.bin/webpack
+  ```
+
+  ------------------------------------------------------------------------------
   11. Start a server
 
-       ```
-       npm start 
-       ```
+  ```
+  > npm start
+  ```

@@ -9,6 +9,7 @@ var exeFromId = function(id) {
 		"name": find.GetExecutableName(id)
 	};
 	if (find.IsWorkingstep(id)) {
+		ws.type = "workingstep";
 		return ws;
 	} else if (find.IsSelective(id)) {
 		ws.type = "selective";

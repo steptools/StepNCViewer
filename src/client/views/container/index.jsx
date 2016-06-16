@@ -44,7 +44,7 @@ export default class ContainerView extends React.Component {
         var playpause = ()=>{
             var xhr = new XMLHttpRequest();
             var url = "/v2/nc/projects/";
-            url = url + this.props.pid + "/loop/";
+            url = url + this.props.pid + "/state/loop/";
             if(self.state.ppbutton ==='play'){
                 ppstate('play');
                 url = url+"start";
@@ -59,14 +59,14 @@ export default class ContainerView extends React.Component {
         var nextws = function(){
             var xhr = new XMLHttpRequest();
             var url = "/v2/nc/projects/"
-            url = url + self.props.pid + "/loop/stepf";
+            url = url + self.props.pid + "/state/ws/next";
             xhr.open("GET",url,true);
             xhr.send(null);
         }
         var prevws = function(){
             var xhr = new XMLHttpRequest();
             var url = "/v2/nc/projects/";
-            url = url + self.props.pid + "/loop/stepb";
+            url = url + self.props.pid + "/state/ws/prev";
             xhr.open("GET",url,true);
             xhr.send(null);
         }
@@ -131,7 +131,7 @@ export default class ContainerView extends React.Component {
             }
         };
         let url = "/v2/nc/projects/"
-        url = url + this.props.pid + "/loop/state";
+        url = url + this.props.pid + "/state/loop/";
         xhr.open("GET", url, true);
         xhr.send(null);
     }

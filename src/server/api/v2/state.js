@@ -65,6 +65,14 @@ var _loop = function(ncId, ms, key) {
 
 
 var _loopInit = function(req, res) {
+  if(req.params.ncId && !req.params.loopstate){
+    if (loopStates[ncId] === true) {
+          res.status(200).send("play");
+        }
+        else {
+          res.status(200).send("pause");
+      }
+  }
   if (req.params.ncId && req.params.loopstate) {
     let ncId = req.params.ncId;
     let loopstate = req.params.loopstate;
@@ -78,14 +86,6 @@ var _loopInit = function(req, res) {
       ms.LoadMachine(app.machinetool);
 
     switch(loopstate) {
-      case "state":
-        if (loopStates[ncId] === true) {
-          res.status(200).send("play");
-        }
-        else {
-          res.status(200).send("pause");
-        }
-        break;
       case "start":
         if (loopStates[ncId] === true) {
           res.status(200).send("Already running");
@@ -106,7 +106,25 @@ var _loopInit = function(req, res) {
         update("pause");
         res.status(200).send("OK");
         break;
-      case "stepf":
+    }
+  }
+};
+
+var _wsInit = function(req, res) {
+  if (req.params.ncId && req.params.command) {
+    let ncId = req.params.ncId;
+    let command = req.params.command;
+    var ms = file.getMachineState(app, ncId);
+    if (typeof(loopStates[ncId]) === 'undefined') {
+      loopStates[ncId] = false;
+    }
+
+    // load the machine tool using global options
+    if (app.machinetool !== "")
+      ms.LoadMachine(app.machinetool);
+
+    switch(command) {
+      case "next":
         var temp = loopStates[ncId];
         loopStates[ncId] = true;
         if (temp) {
@@ -126,7 +144,7 @@ var _loopInit = function(req, res) {
         }
         res.status(200).send("OK");
         break;
-      case "stepb":
+      case "prev":
         /*var temp = loopStates[ncId];
         loopStates[ncId] = true;
         if (temp) {
@@ -146,26 +164,6 @@ var _loopInit = function(req, res) {
         }
         res.status(200).send("OK");*/
         break;
-      case "stepto":
-        var temp = loopStates[ncId];
-        loopStates[ncId] = true;
-        if (temp) {
-        _getToWS(ncId, ms, function() {
-        _loop(ncId, ms, true);
-        });
-        loopStates[ncId] = false;
-        update("pause");
-        }
-        else{
-          _loop(ncId,ms,false);
-          _getToWS(ncId, ms, function() {
-          _loop(ncId, ms, true);
-          });
-          loopStates[ncId] = false;
-          update("pause");
-        }
-        res.status(200).send("OK");
-        break;
     }
   }
 };
@@ -178,10 +176,19 @@ var _getKeyState = function (req, res) {
   }
 };
 
+var _getDeltaState = function (req, res) {
+  if (req.params.ncId) {
+    var ms = file.getMachineState(app, req.params.ncId);
+    res.status(200).send(ms.GetDeltaJSON());
+  }
+};
+
 module.exports = function(globalApp, cb) {
   app = globalApp;
   app.router.get('/v2/nc/projects/:ncId', _getKeyState);
-  app.router.get('/v2/nc/projects/:ncId/keystate', _getKeyState);
-  app.router.get('/v2/nc/projects/:ncId/loop/:loopstate', _loopInit);
+  app.router.get('/v2/nc/projects/:ncId/state/key', _getKeyState);
+  app.router.get('/v2/nc/projects/:ncId/state/delta', _getDeltaState);
+  app.router.get('/v2/nc/projects/:ncId/state/loop/:loopstate', _loopInit);
+  app.router.get('/v2/nc/projects/:ncId/state/ws/:command', _wsInit)
   if (cb) cb();
 };

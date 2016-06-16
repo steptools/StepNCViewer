@@ -102,10 +102,10 @@ export default class SidebarView extends React.Component {
     }
 
     onObjectTreeNodeClick(self, node){
-        var xhr = new XMLHttpRequest();
-        var url = "/v2/nc/projects/boxy/loop/stepto"
+        /*var xhr = new XMLHttpRequest();
+        var url = "/v2/nc/projects/boxy/state/loop/" + id
         xhr.open("GET",url,true);
-        xhr.send(null);
+        xhr.send(null);*/
     }
 
     renderNode(node){

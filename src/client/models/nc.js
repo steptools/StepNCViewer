@@ -48,6 +48,7 @@ export default class NC extends THREE.EventDispatcher {
             object3D: new THREE.Object3D(),
             transform: (new THREE.Matrix4()).copy(transform),
             bbox: bbox,
+            rendered: true,
             getID: function() { return this.id; },
             getNamedParent: function() { return this },
             getBoundingBox: function() { return this },
@@ -145,10 +146,11 @@ export default class NC extends THREE.EventDispatcher {
         let self = this;
         if (!this.boundingBox) {
             this.boundingBox = new THREE.Box3();
-            let keys = _.keys(this._objects);
-            _.each(keys, function(key) {
-                let object = self._objects[key];
+
+            var oldobj = _.filter(_.values(self._objects), (object) => object.rendered === true);
+            _.each(oldobj, function(object) {
                 if (object.type !== 'polyline') {
+                    object.bbox = new THREE.Box3().setFromObject(object.object3D);
                     self.boundingBox.union(object.bbox);
                 }
             });
@@ -161,6 +163,14 @@ export default class NC extends THREE.EventDispatcher {
 
         this._overlay3D.remove(this.bbox);
         this.boundingBox = new THREE.Box3();
+
+        var oldobj = _.filter(_.values(self._objects), (object) => object.rendered === true);
+        _.each(oldobj, function(object) {
+            if (object.type !== 'polyline') {
+                object.bbox = new THREE.Box3().setFromObject(object.object3D);
+                self.boundingBox.union(object.bbox);
+        }
+        });
         let keys = _.keys(this._objects);
         _.each(keys, function(key) {
             let object = self._objects[key];

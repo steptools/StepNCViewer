@@ -55,32 +55,41 @@ Setting up a development environment
   7. Create a file named pathmap.json in the data directory that contains a json
       object that contains each project name as a key and path as a value.
 
- ```
- > cd ..
- > nano pathmap.json
- {
-   "boxy" : "c:/.../stepncviewer/data/boxy/model.stpnc",
-   "moldy" : "c:/.../StepNCViewer/data/moldy/model.stpnc"
- }
- ```
+  ```
+  > cd ..
+  > nano pathmap.json
+  {
+    "boxy" : "c:/.../stepncviewer/data/boxy/model.stpnc",
+    "moldy" : "c:/.../StepNCViewer/data/moldy/model.stpnc"
+  }
+  ```
 
   ------------------------------------------------------------------------------
   8. Create a key
 
+  ```
+  > cd ..
+  > ssh-keygen -t rsa -f config/id_rsa
+  ```
+ 
+ ------------------------------------------------------------------------------
+ 9. Install Glyphicons
+
  ```
- > cd ..
- > ssh-keygen -t rsa -f config/id_rsa
+ > cd src/client
+ > cp ~Downloads/fonts ./fonts
+ > cp ~Downloads/glyphicons.scss ./stylesheets/fonts
  ```
 
   ------------------------------------------------------------------------------
-  9. Install nodejs packages
+  10. Install nodejs packages
 
  ```
  > npm install
  ```
 
   ------------------------------------------------------------------------------
-  10. Build/compile using webpack
+  11. Build/compile using webpack
 
   #### if you installed webpack globally (`npm install -g webpack`)
 
@@ -95,7 +104,7 @@ Setting up a development environment
   ```
 
   ------------------------------------------------------------------------------
-  11. Start a server
+  12. Start a server
 
   ```
   > npm start

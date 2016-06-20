@@ -2,6 +2,15 @@
 .rc-menu-item:hover {
     cursor: pointer;
 }
+.top-menu {
+    .rc-menu-item:first-child {
+        margin-left: 8px;
+    }
+    .rc-menu-item-selected {
+        background-color: rgba(175, 221, 220,.4);
+        border-bottom: 2px #2db7f5 solid;
+    }
+}
 .bottom-menu {
     background-color: #f8f8f8;
     .rc-menu-item:first-child {
@@ -10,7 +19,7 @@
     .rc-menu-item {
         padding: 0;
         min-width: 90px;
-        height: 86px;
+        height: 82px;
         margin-top: 4px;
         margin-bottom: 4px;
         text-align: center;
@@ -37,7 +46,7 @@
             padding-top: 13px;
         }
     }
-
+    
     .sliderWithIcons {
         output {
             display: inline-block;

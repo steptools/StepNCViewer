@@ -17,7 +17,7 @@ require('./shaders/VelvetyShader');
 
 /*************************************************************************/
 
-export default class CADView extends React.Component {
+export default class CADViewer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -184,22 +184,19 @@ export default class CADView extends React.Component {
         });
 
         // SCREEN RESIZE
+        window.addEventListener("resize", this.handleResize);
         this.animate(true);
         this.handleResize();
     }
 
     componentWillUnmount() {
+        window.removeEventListener("resize", this.handleResize);
         window.removeEventListener("keypress", this.onKeypress);
         this.props.manager.removeEventListener("model:add", this.onModelAdd);
         this.props.manager.removeEventListener("model:remove", this.onModelRemove);
         this.props.manager.removeEventListener("shellLoad", this.invalidate);
         this.props.manager.removeEventListener("annotationLoad", this.invalidate);
         this.props.manager.removeEventListener("invalidate", this.invalidate);
-    }
-    
-    componentDidUpdate() {
-        if (this.props.resize)
-            this.handleResize();
     }
 
     handleResize() {
@@ -369,6 +366,6 @@ export default class CADView extends React.Component {
     }
 };
 
-CADView.propTypes = {
+CADViewer.propTypes = {
     manager: React.PropTypes.object.isRequired
 };

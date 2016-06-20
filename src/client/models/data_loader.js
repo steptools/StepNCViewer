@@ -115,6 +115,7 @@ export default class DataLoader extends THREE.EventDispatcher {
 
     load(req, callback) {
         req.base = req.baseURL + '/' + req.type + '/' + req.path;
+        console.log(req.baseURL);
         this.addRequest(req, function(err, model) {
             callback(err, model);
         });
@@ -248,19 +249,12 @@ export default class DataLoader extends THREE.EventDispatcher {
             type: req.type,
             dataType: req.dataType ? req.dataType : 'json'
         };
-        
         if (data.type === "shell") {
             data.shellSize = req.shellSize;
-            let newpath = (req.baseURL).split('state')[0];
-            if(newpath[newpath.length - 1] === '/')
-                newpath = newpath.substring(0 , newpath.length - 1);
-            data.url = newpath + '/geometry/' + req.path + '/' + req.type;
+            data.url = req.baseURL + '/geometry/' + req.path + '/' + req.type;
         }
         else if (data.type === "annotation") {
-            let newpath = (req.baseURL).split('state')[0];
-            if(newpath[newpath.length - 1] === '/')
-                newpath = newpath.substring(0 , newpath.length - 1);
-            data.url = newpath + '/geometry/' + req.path + '/' + req.type;
+            data.url = req.baseURL + '/geometry/' + req.path + '/' + req.type;
         }
         worker.postMessage(data);
     }
@@ -292,7 +286,7 @@ export default class DataLoader extends THREE.EventDispatcher {
     buildNCStateJSON(jsonText, req) {
         let self = this;
         let doc = JSON.parse(jsonText);
-        //console.log('Process NC: ' + doc.project);
+        //console.log('Process NC: ' + doc.workingstep);
         let nc = new NC(doc.project, doc.workingstep, doc.time_in_workingstep, this);
         _.each(doc.geom, function(geomData) {
             let color = DataLoader.parseColor("7d7d7d");

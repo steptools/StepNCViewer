@@ -53,7 +53,7 @@ class ButtonImage extends React.Component {
     }
     render() {
         return (
-            <div className={"button-icon glyphicon glyphicon-"+this.props.icon}/>
+            <div className={"button-icon glyphicons glyphicons-"+this.props.icon}/>
         );
     }
 }
@@ -75,17 +75,37 @@ class Slider extends React.Component {
             var right = this.props.right;
             return (
                 <div className="slider sliderWithIcons">
+<<<<<<< HEAD
                     <input className={"range-"+this.props.id} onChange={this.changed} type="range" min="0" max="200" step="1" value={this.props.val}/>
                     <span className={"slider-icon slider-left-icon icon-"+left}/>
                     <output className={"text-"+this.props.id}>{name} - {this.props.val}%</output>
                     <span className={"slider-icon slider-right-icon icon-"+right}/>    
+=======
+                    <input className={"range-"+this.props.id}
+                           onChange={this.changed}  // Can remove onMouseUp / onKeyUp if bug is fixed with onChange
+                           onMouseUp={this.changed}
+                           onKeyUp={this.changed}
+                           value={this.props.val}
+                        type="range" min="0" max="200" step="1" />
+                    <div className="sliderData">
+                        <span className={"slider-icon slider-left-icon glyphicons glyphicons-"+left}/>
+                        <output className={"text-"+this.props.id}>{name}</output>
+                        <span className={"slider-icon slider-right-icon glyphicons glyphicons-"+right}/>
+                    </div>
+>>>>>>> master
                 </div>
             );
         } else {
             return (
                 <div className="slider sliderNoIcons">
                     <input className={"range-"+this.props.id} onChange={this.changed} type="range" min="0" max="200" step="1" value={this.props.val}/>
+<<<<<<< HEAD
                     <output className={"text-"+this.props.id}>{name} - {this.props.val}%</output>
+=======
+                    <div className="sliderData">
+                        <output className={"text-"+this.props.id}>{name}</output>
+                    </div>
+>>>>>>> master
                 </div>
             );
         }
@@ -110,7 +130,7 @@ export default class HeaderView extends React.Component {
     }
 
     updateSpeed(info) {
-        this.props.actionManager.emit("simulate-setspeed", info.target.value);
+        this.props.actionManager.emit("simulate-setspeed", info);
     }
 
     debugMenuItemClicked(info) {

@@ -30,11 +30,11 @@ module.exports = {
             },
             { test: /\.png$/,           loader: "url-loader?mimetype=image/png" },
             { test: /\.gif$/,           loader: "url-loader?mimetype=image/gif" },
-            // required for bootstrap icons
-            { test: /\.(woff|woff2)$/,  loader: "url-loader?prefix=font/&limit=5000&mimetype=application/font-woff" },
-            { test: /\.ttf$/,           loader: "file-loader?prefix=font/" },
-            { test: /\.eot$/,           loader: "file-loader?prefix=font/" },
-            { test: /\.svg$/,           loader: "file-loader?prefix=font/" },
+            // required for glyphicons
+            {
+               test: /\.(eot|svg|ttf|woff|woff2)$/,
+               loader: 'file?name=public/fonts/[name].[ext]'
+            },
             // required for react jsx
             {
                 test: /\.jsx?$/,

@@ -129,7 +129,7 @@ export default class SidebarView extends React.Component {
       var nested = this.props.mode != "tree";
       const modeMenu = (
         <div className='sidebar-menu-tabs'>
-          <span style={{opacity:nested ?.5:0}} className='glyphicon glyphicon-menu-left back-button'></span>
+          <span style={{opacity:nested ?.5:0}} className='glyphicons glyphicons-menu-left back-button'></span>
           <div style={{opacity:nested?.5:1, left:nested?40:140}} onClick={this.openObjectTree} className='back'>
             <div>Object Tree</div>
           </div>

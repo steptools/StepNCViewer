@@ -34,7 +34,7 @@ export default class LoadProjectView extends React.Component {
       <div className='load-projects'>
         {this.state.projects.map((project, i) => {
           return <div onClick={this.handleProjectSelected(project.id)} className='project'>
-            <span className='glyphicon glyphicon-file'/>
+            <span className='glyphicons glyphicons-file'/>
             <span className='project-id'>{project.name}</span>
             {project.hasCadjs ? <span className='icon-word'>CadJS</span> : null}
             {project.hasModel ? <span className='icon-word'>Model</span> : null}

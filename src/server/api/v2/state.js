@@ -3,6 +3,7 @@ var StepNC = require('../../../../../StepNCNode/build/Release/StepNC');
 var file = require('./file');
 
 var app;
+var loopTimer;
 var loopStates = {};
 let playbackSpeed = 100;
 
@@ -56,8 +57,11 @@ var _loop = function(ncId, ms, key) {
       //app.logger.debug("OK...");
       _getDelta(ncId, ms, key, function(b) {
         app.ioServer.emit('nc:delta', JSON.parse(b));
-        if (playbackSpeed > 0)
-            setTimeout(function() { _loop(ncId, ms, false); }, 50 / (playbackSpeed / 200));
+        if (playbackSpeed > 0) {
+          if (loopTimer !== undefined)
+              clearTimeout(loopTimer);
+          loopTimer = setTimeout(function () { _loop(ncId, ms, false); }, 50 / (playbackSpeed / 200));
+        }
         else {
           // app.logger.debug("playback speed is zero, no timeout set");
         }
@@ -118,13 +122,29 @@ var _loopInit = function(req, res) {
         default:
           if (!isNaN(parseFloat(loopstate)) && isFinite(loopstate)) {
             let newSpeed = Number(loopstate);
+<<<<<<< HEAD
             if (Number(playbackSpeed) === 0 && Number(loopstate) > 0 && loopStates[ncId] === true) {
               // app.logger.debug("Attempting to resume after being 0");
+=======
+            
+            if (Number(playbackSpeed) !== newSpeed) {
+>>>>>>> master
               playbackSpeed = newSpeed;
-              _loop(ncId, ms, false);
+              app.logger.debug("Changing speed to " + newSpeed);
             }
+            
+            if (loopStates[ncId] === true) {
+              _loop(ncId, ms, false);
+              res.status(200).send(JSON.stringify({"state": "play", "speed": playbackSpeed}));
+            }
+            else {
+              res.status(200).send(JSON.stringify({"state": "pause", "speed": playbackSpeed}));
+            }
+<<<<<<< HEAD
             playbackSpeed = newSpeed;
             res.status(200).send(JSON.stringify({"state": loopStates[ncId], "speed": playbackSpeed}));
+=======
+>>>>>>> master
             _updateSpeed(playbackSpeed);
           }
           else {
@@ -156,8 +176,6 @@ var _wsInit = function(req, res) {
         _getNext(ncId, ms, function() {
         _loop(ncId, ms, true);
         });
-        loopStates[ncId] = false;
-        update("pause");
         }
         else{
           _loop(ncId,ms,false);

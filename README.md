@@ -24,7 +24,7 @@ Setting up a development environment
   ```
 
   ------------------------------------------------------------------------------
-  4. create a new directory in StepNCViewer
+  3. create a new directory in StepNCViewer
 
   ```
   > cd StepNCViewer
@@ -32,7 +32,7 @@ Setting up a development environment
   ```
 
   ------------------------------------------------------------------------------
-  5. create a new directory in data for each project
+  4. create a new directory in data for each project
 
   ```
   > cd data
@@ -41,7 +41,7 @@ Setting up a development environment
   ```
 
   ------------------------------------------------------------------------------
-  6. Place the projects .stpnc file in the new directory under the name
+  5. Place the projects .stpnc file in the new directory under the name
       model.stpnc
 
   ```
@@ -52,41 +52,50 @@ Setting up a development environment
   ```
 
   ------------------------------------------------------------------------------
-  7. Create a file named pathmap.json in the data directory that contains a json
+  6. Create a file named pathmap.json in the data directory that contains a json
       object that contains each project name as a key and path as a value.
 
- ```
- > cd ..
- > nano pathmap.json
- {
-   "boxy" : "c:/.../stepncviewer/data/boxy/model.stpnc",
-   "moldy" : "c:/.../StepNCViewer/data/moldy/model.stpnc"
- }
- ```
+  ```
+  > cd ..
+  > nano pathmap.json
+  {
+    "boxy" : "c:/.../stepncviewer/data/boxy/model.stpnc",
+    "moldy" : "c:/.../StepNCViewer/data/moldy/model.stpnc"
+  }
+  ```
 
   ------------------------------------------------------------------------------
-  8. Create a key
+  7. Create a key
 
- ```
- > cd ..
- > ssh-keygen -t rsa -f config/id_rsa
- ```
+  ```
+  > cd ..
+  > ssh-keygen -t rsa -f config/id_rsa
+  ```
+ 
+ ------------------------------------------------------------------------------
+  8. Install Glyphicons
+
+  ```
+  > cd src/client
+  > cp ~Downloads/fonts ./fonts
+  > cp ~Downloads/glyphicons.scss ./stylesheets/fonts
+  ```
 
   ------------------------------------------------------------------------------
   9. Install nodejs packages
 
- ```
- > npm install
- ```
+  ```
+  > npm install
+  ```
 
   ------------------------------------------------------------------------------
   10. Build/compile using webpack
 
   #### if you installed webpack globally (`npm install -g webpack`)
 
- ```
- > webpack
- ```
+  ```
+  > webpack
+  ```
 
   #### if you installed webpack via package dependencies (`npm install`)
 

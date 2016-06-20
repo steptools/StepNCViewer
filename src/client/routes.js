@@ -98,7 +98,6 @@ module.exports = Backbone.Router.extend({
 
     _stepnc: function(pid){
         var self = this;
-<<<<<<< HEAD
       ReactDOM.render(
         <div style={{height:'100%'}}>
       <ContainerView
@@ -116,53 +115,6 @@ module.exports = Backbone.Router.extend({
           baseURL: this.app.services.api_endpoint + this.app.services.version,
           modelType: 'nc'
       })
-=======
-        
-        let xhr = new XMLHttpRequest();
-        
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    let projectList = JSON.parse(xhr.responseText);
-                    
-                    if (projectList[pid] !== undefined) {
-                        // project exists, render view
-                        ReactDOM.render(
-                        <div style={{ height:'100%'}}>
-                            <ContainerView
-                                app = {self.app }
-                                pid = {pid}
-                                />
-                        </div>
-                        , document.getElementById('primary-view'), function () {
-                            // Dispatch setModel to the CADManager
-                        });
-                         
-                        pid = 'projects/' + pid;
-                        self.app.cadManager.dispatchEvent({
-                            type: 'setModel',
-                            path: pid + '/state/key',
-                            baseURL: self.app.services.api_endpoint + self.app.services.version,
-                            modelType: 'nc'
-                        });
-                        
-                    }
-                    else {
-                        // display an error message
-                        ReactDOM.render(
-                            <div style={{width:'100%'}}>
-                                <h1>Error 404: project '{pid}' not found.</h1>
-                            </div>
-                        , document.getElementById('primary-view'), function() {});            
-                    }
-                }
-            }
-        };
-
-        let url = "/v2/nc/projects/";
-        xhr.open("GET", url, true);
-        xhr.send(null);
->>>>>>> master
     },
 
     /************** Default Route ************************/

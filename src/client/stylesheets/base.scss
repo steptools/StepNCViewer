@@ -7,7 +7,6 @@ body {
 }
 
 @import 'components/all';
-@import 'fonts/glyphicons';
 
 .primary-view {
     width:100%;
@@ -32,5 +31,5 @@ body {
     position:absolute;
 }
 .model-tree{
-  z-index: 2;
+    z-index:2;
 }

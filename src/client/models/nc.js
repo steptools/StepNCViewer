@@ -171,6 +171,8 @@ export default class NC extends THREE.EventDispatcher {
                 self.boundingBox.union(object.bbox);
         }
         });
+
+        /*
         let keys = _.keys(this._objects);
         _.each(keys, function(key) {
             let object = self._objects[key];
@@ -178,7 +180,7 @@ export default class NC extends THREE.EventDispatcher {
                 object.bbox = new THREE.Box3().setFromObject(object.object3D);
                 self.boundingBox.union(object.bbox);
             }
-        });
+        });*/
         let bounds = self.boundingBox;
 
         this.bbox = Assembly.buildBoundingBox(bounds);
@@ -267,10 +269,13 @@ export default class NC extends THREE.EventDispatcher {
           // this._loader.annotations = {};
 
           // Delete existing Stuff.
-            var oldgeom = _.filter(_.values(self._objects), (geom) => (geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine"));
-            _.each(oldgeom,(geom)=> this._object3D.remove(geom.object3D));
+            var oldgeom = _.filter(_.values(this._objects), (geom) => ((geom.rendered) && (geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine")));
+            _.each(oldgeom, function (geom) {
+                geom.object3D.parent.remove(geom.object3D);
+                geom.rendered = false;
+            });
 
-            this._objects = _.reject(this._objects, function(geom) { return (geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine"); });
+            //this._objects = _.reject(this._objects, function(geom) { return (geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine"); });
 
           var oldannotations =_.values(this._loader._annotations);
           _.each(oldannotations, (oldannotation) => {
@@ -301,6 +306,12 @@ export default class NC extends THREE.EventDispatcher {
            _.each(geoms, (geomData)=>{
                let name = geomData.shell.split('.')[0];
                if(geomData.usage =="asis") return;
+                if(self._objects[geomData.id]) {
+                    if (!self._objects[geomData].rendered) {
+                        self.object3D.add(self._objects[geomData.id]);
+                        self._objects[geomData].rendered = true;
+                    }
+                }
                else {
                    let color = DataLoader.parseColor("7d7d7d");
                    if(geomData.usage =="cutter"){

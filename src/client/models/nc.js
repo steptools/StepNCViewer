@@ -258,11 +258,14 @@ export default class NC extends THREE.EventDispatcher {
           // this._loader.annotations = {};
 
           // Delete existing Stuff.
+            var oldgeom = _.filter(_.values(self._objects), (geom) => ((geom.rendered == true) && geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine"));
+            _.each(oldgeom,(geom)=> this._overlay3D.remove(geom.object3D));
 
-            var oldgeom = _.filter(_.values(this._objects), (geom) => ((geom.rendered) && (geom.usage =="cutter" || geom.usage =="tobe" || geom.usage =="asis"|| geom.usage=="machine")));
-            _.each(oldgeom, function (geom) {
-                geom.object3D.parent.remove(geom.object3D);
-                geom.rendered = false;
+            let keys = _.keys(self._objects);
+            _.each(keys, function(key) {
+                let object = self._objects[key];
+                object.rendered = false;
+                //this._objects[key] = object;
             });
 
           var oldannotations =_.values(this._loader._annotations);

@@ -5,6 +5,7 @@ import LoadProjectView from './loadproject';
 import ToleranceTreeView from './tolerancetree';
 import ReactTooltip from 'react-tooltip';
 var MenuItem = Menu.Item;
+var scrolled=false;
 
 export default class SidebarView extends React.Component {
     constructor(props) {
@@ -136,6 +137,13 @@ export default class SidebarView extends React.Component {
           </div>
         </div>
       );
+      if((!scrolled) && (this.props.ws > -1))
+      {
+        $('.m-tree').animate({
+        scrollTop: $("#"+this.props.ws).offset().top-$(".inner").offset().top+$(".inner").height()-10
+        }, 1000);
+        scrolled=true;
+      }
         return <div className="sidebar">
                   {modeMenu}
                   {this.props.mode == 'tree' ?

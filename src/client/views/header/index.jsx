@@ -36,6 +36,7 @@ class MenuItem extends React.Component {
 
 class SliderMenuItem extends React.Component {
     render() {
+        console.log(...this.props);
         return (
             <PlainMenuItem {...this.props}>
                 <div>
@@ -52,7 +53,7 @@ class ButtonImage extends React.Component {
     }
     render() {
         return (
-            <div className={"button-icon glyphicons glyphicons-"+this.props.icon}/>
+            <div className={"button-icon glyphicon glyphicon-"+this.props.icon}/>
         );
     }
 }
@@ -62,11 +63,11 @@ class Slider extends React.Component {
         super(props);
         this.changed = this.changed.bind(this);
     }
-
+    
     changed(info) {
         this.props.changed(info);
     }
-
+    
     render() {
         var name = this.props.id.charAt(0).toUpperCase() + this.props.id.slice(1);
         if (this.props.left && this.props.right) {
@@ -74,26 +75,17 @@ class Slider extends React.Component {
             var right = this.props.right;
             return (
                 <div className="slider sliderWithIcons">
-                    <input className={"range-"+this.props.id}
-                           onChange={this.changed}  // Can remove onMouseUp / onKeyUp if bug is fixed with onChange
-                           onMouseUp={this.changed}
-                           onKeyUp={this.changed}
-                           value={this.props.val}
-                        type="range" min="0" max="200" step="1" />
-                    <div className="sliderData">
-                        <span className={"slider-icon slider-left-icon glyphicons glyphicons-"+left}/>
-                        <output className={"text-"+this.props.id}>{name}</output>
-                        <span className={"slider-icon slider-right-icon glyphicons glyphicons-"+right}/>
-                    </div>
+                    <input className={"range-"+this.props.id} onChange={this.changed} type="range" min="0" max="200" step="1" value={this.props.val}/>
+                    <span className={"slider-icon slider-left-icon icon-"+left}/>
+                    <output className={"text-"+this.props.id}>{name} - {this.props.val}%</output>
+                    <span className={"slider-icon slider-right-icon icon-"+right}/>    
                 </div>
             );
         } else {
             return (
                 <div className="slider sliderNoIcons">
                     <input className={"range-"+this.props.id} onChange={this.changed} type="range" min="0" max="200" step="1" value={this.props.val}/>
-                    <div className="sliderData">
-                        <output className={"text-"+this.props.id}>{name}</output>
-                    </div>
+                    <output className={"text-"+this.props.id}>{name} - {this.props.val}%</output>
                 </div>
             );
         }
@@ -105,14 +97,44 @@ export default class HeaderView extends React.Component {
     constructor(props) {
         super(props);
 
+        this.openBottomMenu = this.openBottomMenu.bind(this);
+        this.debugMenuItemClicked = this.debugMenuItemClicked.bind(this);
+        this.fileMenuItemClicked = this.fileMenuItemClicked.bind(this);
         this.simulateMenuItemClicked = this.simulateMenuItemClicked.bind(this);
+        this.viewMenuItemClicked = this.viewMenuItemClicked.bind(this);
         this.updateSpeed = this.updateSpeed.bind(this);
     }
 
-    updateSpeed(info) {
-        this.props.actionManager.emit("simulate-setspeed", info);
+    openBottomMenu(info){
+        this.props.cb(info.key);
     }
 
+    updateSpeed(info) {
+        this.props.actionManager.emit("simulate-setspeed", info.target.value);
+    }
+
+    debugMenuItemClicked(info) {
+        if (info.key == "db1") {
+            this.props.socket.emit('req:modeltree', "moldy");
+        } else if (info.key == "db2") {
+            this.props.socket.emit('req:projects');
+        }
+    }
+
+    fileMenuItemClicked(info) {
+        switch (info.key) {
+            case "new":
+                this.props.actionManager.emit("open-new-project-menu");
+                break;
+            case "save":
+                this.props.actionManager.emit("open-save-project-menu");
+                break;
+            case "load":
+                this.props.actionManager.emit("open-load-project-menu");
+                break;
+        }
+    }
+    
     simulateMenuItemClicked(info){
       switch (info.key){
         case "forward":
@@ -136,6 +158,14 @@ export default class HeaderView extends React.Component {
       }
     }
 
+    viewMenuItemClicked(info) {
+        switch (info.key) {
+            case "toleranceTree":
+                this.props.actionManager.emit("open-tolerance-tree");
+                break;
+        }
+    }
+
     render() {
         //if(this.props.guiMode == 1)
             //return null;
@@ -147,14 +177,29 @@ export default class HeaderView extends React.Component {
         else{
             ppbtntxt = "Pause";
         }
-        const bottomMenu = (
+        const topMenu = ( <Menu mode='horizontal' onClick={this.openBottomMenu} className='top-menu'>
+            <MenuItem key='file-menu'>File</MenuItem>
+            <MenuItem key='simulate-menu'>Simulate</MenuItem>
+        </Menu> );
+        const bottomMenu = ( <div className='bottom-menus'>
+          {this.props.openMenu == 'file-menu' ?
+          <Menu mode='horizontal' onClick={this.fileMenuItemClicked} className='bottom-menu'>
+              <MenuItem tooltip='New function is currently disabled' key='new'><ButtonImage icon='file'/>New</MenuItem>
+              <MenuItem tooltip='Save function is currently disabled' key='save'><ButtonImage icon='save'/>Save</MenuItem>
+              <MenuItem key='load'><ButtonImage icon='open-file'/>Load</MenuItem>
+          </Menu> : null }
+          {this.props.openMenu == 'simulate-menu' ?
           <Menu mode='horizontal' onClick={this.simulateMenuItemClicked} className='bottom-menu'>
               <MenuItem key='backward'><ButtonImage icon='step-backward'/>Prev</MenuItem>
               <MenuItem key='play'><ButtonImage icon={ppbutton}/>{ppbtntxt}</MenuItem>
               <MenuItem key='forward'><ButtonImage icon='step-forward'/>Next</MenuItem>
               <SliderMenuItem key='speed'><Slider id='speed' changed={this.updateSpeed} val={this.props.speed} left='turtle' right='rabbit'/></SliderMenuItem>
-          </Menu>);
+          </Menu> : null}
+        </div>);
 
-        return <div className="header-bar">{bottomMenu}</div>;
+        return <div className="header-bar">
+            <div>{topMenu}</div>
+            <div>{bottomMenu}</div>
+        </div>;
     }
 }

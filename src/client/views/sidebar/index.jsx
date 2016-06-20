@@ -53,7 +53,7 @@ export default class SidebarView extends React.Component {
               node.leaf = true;
               if(node.children) node.children.forEach(nodeCheck);
               node.children = [];
-                if(node.type === "workingstep")
+                if(node.type === 'workingstep')
                   nodes.children.push(node);
             }
             let json = JSON.parse(xhr.responseText);
@@ -70,7 +70,7 @@ export default class SidebarView extends React.Component {
 
     openLoadProjectMenu(){
         this.props.cbMode('load-project');
-        this.props.cbAltMenu('Load Project');
+      this.props.cbAltMenu('Load Project');
     }
 
     openObjectTree(){
@@ -101,11 +101,11 @@ export default class SidebarView extends React.Component {
       }
     }
 
-    onObjectTreeNodeClick(node, self){
-        var xhr = new XMLHttpRequest();
-        var url = "/v2/nc/projects/"+this.props.pid+"/state/ws/" + node["id"];
+    onObjectTreeNodeClick(self, node){
+        /*var xhr = new XMLHttpRequest();
+        var url = "/v2/nc/projects/"+this.props.pid+"/state/loop/" + id
         xhr.open("GET",url,true);
-        xhr.send(null);
+        xhr.send(null);*/
     }
 
     renderNode(node){
@@ -123,11 +123,13 @@ export default class SidebarView extends React.Component {
     }
 
     render() {
+        //if(this.props.guiMode == 1)
+            //return null;
       // TODO currently mode menu can only have two layers
       var nested = this.props.mode != "tree";
       const modeMenu = (
         <div className='sidebar-menu-tabs'>
-          <span style={{opacity:nested ?.5:0}} className='glyphicons glyphicons-menu-left back-button'></span>
+          <span style={{opacity:nested ?.5:0}} className='glyphicon glyphicon-menu-left back-button'></span>
           <div style={{opacity:nested?.5:1, left:nested?40:140}} onClick={this.openObjectTree} className='back'>
             <div>Object Tree</div>
           </div>

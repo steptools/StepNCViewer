@@ -13,16 +13,10 @@ position: absolute;
     .op-text{
         flex:20;
     }
-
-    .footer-buttons{
+    .button-icon{
+        flex:1;
         background:green;
-        display:flex;
-
-        .button-icon{
-          flex: 1;
-          padding:.5vmin;
-          height:10vmin;
-        }
+        padding:.5vmin;
+        height:10vmin;
     }
-
 }

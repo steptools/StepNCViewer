@@ -168,7 +168,7 @@ export default class Shape extends THREE.EventDispatcher {
         } else {
             let obj = this._parent;
             while (!obj.product && obj.parent) {
-                console.log(obj.getID());
+                //console.log(obj.getID());
                 obj = obj.parent;
             }
             return obj;

@@ -53,7 +53,7 @@ export default class SidebarView extends React.Component {
               node.leaf = true;
               if(node.children) node.children.forEach(nodeCheck);
               node.children = [];
-                if(node.type === 'workingstep')
+                if(node.type === "workingstep")
                   nodes.children.push(node);
             }
             let json = JSON.parse(xhr.responseText);
@@ -70,7 +70,7 @@ export default class SidebarView extends React.Component {
 
     openLoadProjectMenu(){
         this.props.cbMode('load-project');
-      this.props.cbAltMenu('Load Project');
+        this.props.cbAltMenu('Load Project');
     }
 
     openObjectTree(){
@@ -101,11 +101,11 @@ export default class SidebarView extends React.Component {
       }
     }
 
-    onObjectTreeNodeClick(self, node){
-        /*var xhr = new XMLHttpRequest();
-        var url = "/v2/nc/projects/"+this.props.pid+"/state/loop/" + id
+    onObjectTreeNodeClick(node, self){
+        var xhr = new XMLHttpRequest();
+        var url = "/v2/nc/projects/"+this.props.pid+"/state/ws/" + node["id"];
         xhr.open("GET",url,true);
-        xhr.send(null);*/
+        xhr.send(null);
     }
 
     renderNode(node){
@@ -123,8 +123,6 @@ export default class SidebarView extends React.Component {
     }
 
     render() {
-        //if(this.props.guiMode == 1)
-            //return null;
       // TODO currently mode menu can only have two layers
       var nested = this.props.mode != "tree";
       const modeMenu = (

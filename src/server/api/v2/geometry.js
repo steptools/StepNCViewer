@@ -7,6 +7,10 @@ var _getGeometry = function(req , res){
   if (req.params.ncId) {
     let ncId = req.params.ncId;
     var ms = file.getMachineState(app, ncId);
+    if (ms === undefined) {
+      res.status(404).send("Project does not exist");
+      return;
+    }
   }
   
   if(req.params.type === "shell"){

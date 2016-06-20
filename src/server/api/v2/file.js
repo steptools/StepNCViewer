@@ -22,12 +22,14 @@ module.exports.getPath = function getPath(ncId){
 	}
 	else
 		console.log("This project doesn't exist");
-	return 1;
+		return;
 }
 getPath=module.exports.getPath;
 
 module.exports.getMachineState = function (globalApp, ncId) {
     var ncPath = getPath(ncId);
+	if (ncPath === undefined)
+		return;
 	if (typeof(machineStates[ncId]) === 'undefined') {
 		machineStates[ncId] = new StepNC.machineState(ncPath);
 		 

@@ -754,8 +754,9 @@ self.addEventListener("message", function(e) {
     xhr.addEventListener("load", function() {
         // Handle 404 in loadend
         if (xhr.status === 404) return;
-        if (parts[parts.length - 2] === "projects") {
-            var file = parts[parts.length - 2] + '/' + parts[parts.length - 1];
+        //TODO: MAKE THIS LESS HARDCODED
+        if (parts[parts.length - 4] === "projects") {
+            var file = parts[parts.length - 4] + '/' + parts[parts.length - 3] + '/' + parts[parts.length - 2] + '/' + parts[parts.length - 1];
             self.postMessage({type : "loadComplete", file: file });
         }
         else {
@@ -832,7 +833,6 @@ self.addEventListener("message", function(e) {
         }
         self.postMessage(message);
     });
-
     xhr.open("GET", url, true);
     if (dataType == 'tyson'){
         xhr.responseType = 'arraybuffer';

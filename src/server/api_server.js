@@ -18,6 +18,7 @@ var http                = require('http'),
 /************************* Support Site *********************************/
 
 var COOKIE_SECRET = 'imhotep';
+var exiting=false;
 
 function APIServer() {
     CoreServer.call(this);
@@ -131,6 +132,36 @@ APIServer.prototype.run = function() {
     this.server.listen(app.port, function () {
         self.logger.info('CAD.js API Server listening on: ' + app.port);
     });
+    
+
+    process.openStdin().addListener("data", function(inputData) {
+        if((self.server != null) && (self.server != 'undefined'))
+        {
+            inputData=inputData.toString().trim().toLowerCase();
+            if(inputData.length == 0)
+                process.exit(0);
+            //uncomment all the code below for a confirmation method (and get rid of the above two lines)
+            /*if(!exiting)
+            {
+                if((inputData == "quit") || (inputData == "q") || (inputData == "exit"))
+                {
+                    console.log("Are you sure? [y/n]");
+                    exiting=true;
+                }
+            }
+            else
+            {
+                if((inputData == "yes") || (inputData == "y"))
+                {
+                    self.server.close(function () { console.log('Server exiting...'); });
+                    process.exit(0);
+                    //console.log("**pretends to exit**");
+                }
+                exiting=false;
+            }*/
+        }
+    });
+
 };
 
 /************************** Run the server ******************************/

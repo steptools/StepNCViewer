@@ -17,9 +17,12 @@ body {
     position:relative;
     height:100%;
     width:100%;
-}
-#cadjs-container canvas{
-    border:2px #333 solid;
+
+    canvas{
+      border:2px #333 solid;
+      width:100%;
+      height:100%;
+    }
 }
 
 .non-initialized {
@@ -30,6 +33,7 @@ body {
     z-index: 1;
     position:absolute;
 }
+
 .model-tree{
     z-index:2;
 }

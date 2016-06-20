@@ -16,17 +16,28 @@ var exeFromId = function(id) {
 	} else if (find.IsWorkplan(id)) {
 		ws.type = "workplan";
 	}
-	ws.children = find.GetNestedExecutableAllEnabled(id).map(exeFromId);
+	let children = find.GetNestedExecutableAllEnabled(id);
+	if (children !== undefined) {
+		ws.children = children.map(exeFromId);
+	}
 	return ws;
 };
 
 var _getExeFromId = function(req, res) {
-	if (req.params.ncId && req.params.wsId){
+	if (req.params.ncId && req.params.wsId !== undefined){
 		let ncId = req.params.ncId;
 		let wsId = req.params.wsId;
 		let id_new = parseInt(wsId);
 		find.OpenProject(file.getPath(ncId));
-		res.status(200).send(exeFromId(id_new));
+		let exe = exeFromId(id_new);
+		if (exe !== undefined)
+            res.status(200).send(exe);
+		else {
+			res.status(404).send("Executable not found");
+		}
+	}
+	else {
+		res.status(404).send("No workstep ID provided");
 	}
 };
 

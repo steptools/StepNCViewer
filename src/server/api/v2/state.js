@@ -14,13 +14,18 @@ var _updateSpeed = (speed) => {
   app.ioServer.emit("nc:speed", speed);
 };
 
+//TODO: Get rid of this function and consolidate with endpoint functions if possible
 var _getDelta = function(ncId, ms, key, cb) {
   var response = "";
   if (key) {
-    response = ms.GetKeystateJSON();
+    var holder = JSON.parse(ms.GetKeystateJSON()); 
+    holder["project"] = ncId;
+    response = JSON.stringify(holder);
   }
   else {
-    response = ms.GetDeltaJSON();
+    var holder = JSON.parse(ms.GetDeltaJSON()); 
+    holder["project"] = ncId;
+    response = JSON.stringify(holder);
   }
   //app.logger.debug("got " + response);
   cb(response);
@@ -40,8 +45,8 @@ var _getPrev = function(ncId, ms, cb) {
   cb();
 };
 
-var _getToWS = function(ncId, ms, cb) {
-  ms.GoToWS(ncId);
+var _getToWS = function(wsId, ms, cb) {
+  ms.GoToWS(wsId);
   //assume switch was successful
   app.logger.debug("Switched!");
   cb();
@@ -76,7 +81,6 @@ var _loopInit = function(req, res) {
   // app.logger.debug("loopstate is " + req.params.loopstate);
   if (req.params.ncId !== undefined) {
     let ncId = req.params.ncId;
-
     
     if (req.params.loopstate === undefined) {
       if (loopStates[ncId] === true) {
@@ -118,12 +122,10 @@ var _loopInit = function(req, res) {
         default:
           if (!isNaN(parseFloat(loopstate)) && isFinite(loopstate)) {
             let newSpeed = Number(loopstate);
-            if (Number(playbackSpeed) === 0 && Number(loopstate) > 0 && loopStates[ncId] === true) {
-              // app.logger.debug("Attempting to resume after being 0");
+            if (Number(playbackSpeed) !== newSpeed && loopStates[ncId] === true) {
               playbackSpeed = newSpeed;
               _loop(ncId, ms, false);
             }
-            playbackSpeed = newSpeed;
             res.status(200).send(JSON.stringify({"state": loopStates[ncId], "speed": playbackSpeed}));
             _updateSpeed(playbackSpeed);
           }
@@ -189,7 +191,32 @@ var _wsInit = function(req, res) {
         }
         res.status(200).send("OK");*/
         break;
-    }
+        default:
+          if (!isNaN(parseFloat(command)) && isFinite(command)) {
+            let ws = Number(command);
+            var temp = loopStates[ncId];
+            loopStates[ncId] = true;
+            if (temp) {
+            _getToWS(ws, ms, function() {
+            _loop(ncId, ms, true);
+            });
+            loopStates[ncId] = false;
+            update("pause");
+            }
+            else{
+              _loop(ncId,ms,false);
+              _getToWS(ws, ms, function() {
+              _loop(ncId, ms, true);
+              });
+              loopStates[ncId] = false;
+              update("pause");
+            }
+            res.status(200).send("OK");
+              }
+              else {
+                // untested case
+              }
+      }
   }
 };
 
@@ -197,20 +224,29 @@ var _getKeyState = function (req, res) {
   //app.logger.debug("KEYSTATE");
   if (req.params.ncId) {
     var ms = file.getMachineState(app, req.params.ncId);
-    res.status(200).send(ms.GetKeystateJSON());
+    if (ms === undefined) {
+      res.status(404).send("Machine state could not be found");
+      return;
+    }
+    //FIXME: Needs to be fixed once set function for project name comes out
+    var holder = JSON.parse(ms.GetKeystateJSON()); 
+    holder["project"] = req.params.ncId;
+    res.status(200).send(JSON.stringify(holder));
   }
 };
 
 var _getDeltaState = function (req, res) {
   if (req.params.ncId) {
     var ms = file.getMachineState(app, req.params.ncId);
-    res.status(200).send(ms.GetDeltaJSON());
+    var holder = JSON.parse(ms.GetDeltaJSON()); 
+    holder["project"] = req.params.ncId;
+    res.status(200).send(JSON.stringify(holder));
   }
 };
 
 module.exports = function(globalApp, cb) {
   app = globalApp;
-  app.router.get('/v2/nc/projects/:ncId', _getKeyState);
+  //app.router.get('/v2/nc/projects/:ncId', _getKeyState);
   app.router.get('/v2/nc/projects/:ncId/state/key', _getKeyState);
   app.router.get('/v2/nc/projects/:ncId/state/delta', _getDeltaState);
   app.router.get('/v2/nc/projects/:ncId/state/loop/:loopstate', _loopInit);

@@ -52,7 +52,7 @@ class ButtonImage extends React.Component {
     }
     render() {
         return (
-            <div className={"button-icon glyphicon glyphicon-"+this.props.icon}/>
+            <div className={"button-icon glyphicons glyphicons-"+this.props.icon}/>
         );
     }
 }
@@ -80,16 +80,20 @@ class Slider extends React.Component {
                            onKeyUp={this.changed}
                            value={this.props.val}
                         type="range" min="0" max="200" step="1" />
-                    <span className={"slider-icon slider-left-icon icon-"+left}/>
-                    <output className={"text-"+this.props.id}>{name}</output>
-                    <span className={"slider-icon slider-right-icon icon-"+right}/>
+                    <div className="sliderData">
+                        <span className={"slider-icon slider-left-icon glyphicons glyphicons-"+left}/>
+                        <output className={"text-"+this.props.id}>{name} - {this.props.val}%</output>
+                        <span className={"slider-icon slider-right-icon glyphicons glyphicons-"+right}/>
+                    </div>
                 </div>
             );
         } else {
             return (
                 <div className="slider sliderNoIcons">
                     <input className={"range-"+this.props.id} onChange={this.changed} type="range" min="0" max="200" step="1" value={this.props.val}/>
-                    <output className={"text-"+this.props.id}>{name}</output>
+                    <div className="sliderData">
+                        <output className={"text-"+this.props.id}>{name} - {this.props.val}%</output>
+                    </div>
                 </div>
             );
         }

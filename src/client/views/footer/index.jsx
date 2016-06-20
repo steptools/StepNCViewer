@@ -10,7 +10,7 @@ class ButtonImage extends React.Component{
     super(props);
   }
   render(){
-    var classes = 'button-icon glyphicon glyphicon-' + this.props.icon;
+    var classes = 'button-icon glyphicons glyphicons-' + this.props.icon;
     if(this.props.onBtnClick)
       return (<div className={classes} onClick={this.props.onBtnClick}/>);
     return (<div className={classes}/>);

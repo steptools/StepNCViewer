@@ -33,22 +33,27 @@
         padding-right: 15px;
         padding-top: 28px;
         color: #666;
-        output {
+        .sliderData {
             padding-top: 13px;
         }
     }
-
     .sliderWithIcons {
-        output {
-            display: inline-block;
-            width: 81%;
-        }
-        .slider-icon {
-            display: inline-block;
-            font-size: 20px;
-            opacity: 0.5;
-            padding-top: 0px;
-            line-height: 50px;
+        .sliderData {
+            padding-top: 14px;
+            output {
+                padding: 0px;
+                display: inline-block;
+            }
+            .slider-icon {
+                font-size: 20px;
+                opacity: .5;
+            }
+            .slider-left-icon {
+                float: left;
+            }
+            .slider-right-icon {
+                float: right;
+            }
         }
     }
 }
@@ -165,11 +170,4 @@ input[type=range] {
             background: #367ebd;
         }
     }
-}
-// Populate slider icons
-.icon-turtle:before {
-    content: "\1f422";
-}
-.icon-rabbit:before {
-    content: "\1f407";
 }

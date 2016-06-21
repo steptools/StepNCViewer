@@ -274,7 +274,7 @@ export default class ContainerView extends React.Component {
 	    cbAltMenu={this.sidebarCBAltMenu}
 	    pid={this.props.pid}
 	    /> : undefined;
-	let FV = this.state.guiMode == 1 ? <FooterView
+	   let FV = this.state.guiMode == 1 ? <FooterView
 	    cadManager={this.props.app.cadManager}
 	    actionManager={this.props.app.actionManager}
 	    socket={this.props.app.socket}

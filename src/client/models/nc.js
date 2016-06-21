@@ -69,7 +69,8 @@ export default class NC extends THREE.EventDispatcher {
         this._object3D.add(obj.object3D);
         this._overlay3D.add(obj.overlay3D);
         this._annotation3D.add(obj.annotation3D);
-        if (type === 'shell') {
+        // TODO: add selector for displaying asis geometry or not
+        if (type === 'shell' && usage !== 'asis') {
             model.addEventListener('shellEndLoad', function (event) {
                 let material = new THREE.ShaderMaterial(new THREE.VelvetyShader());
                 let mesh = new THREE.Mesh(event.shell.getGeometry(), material, false);
@@ -77,7 +78,7 @@ export default class NC extends THREE.EventDispatcher {
                 mesh.receiveShadow = true;
                 mesh.userData = obj;
                 obj.object3D.add(mesh);
-                // Dim the asis
+                // Dim the asis (should never happen as long as asis geometry isn't loaded
                 if (usage === 'asis' && asisOpacity !== 1.0) {
                     obj.object3D.traverse(function (object) {
                         if (object.material && object.material.uniforms.opacity) {
@@ -270,25 +271,27 @@ export default class NC extends THREE.EventDispatcher {
           });
 
             //Load new Stuff.
-            var toolpaths = _.filter(delta.geom, (geom) => geom.usage == 'toolpath');
-            var geoms = _.filter(delta.geom, (geom) => (geom.usage =='cutter' || geom.usage =="tobe" || geom.usage =="asis"||geom.usage=='machine'));
-            _.each(toolpaths, (geomData) => {
-                let name = geomData.polyline.split('.')[0];
-            if (!this._loader._annotations[name]){
-                let annotation = new Annotation(geomData.id, this, this);
-                let transform = DataLoader.parseXform(geomData.xform, true);
-                this.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
-                // Push the annotation for later completion
-                this._loader._annotations[name] = annotation;
-                this._loader.addRequest({
-                    path: name,
-                    baseURL: "/v2/nc/projects/boxy",
-                    type: "annotation"
-                });
-            }else{
-                this._loader._annotations[name].addToScene();
-            }
-        });
+            var toolpaths = _.filter(delta.geom, (geom) => geom.usage == 'toolpath' || (_.has(geom, 'polyline') && geom.usage =="tobe"));
+            var geoms = _.filter(delta.geom, (geom) => (geom.usage =='cutter' || (geom.usage =="tobe" && _.has(geom, 'shell')) || geom.usage =="asis"||geom.usage=='machine'));
+           _.each(toolpaths, (geomData) => {
+             let name = geomData.polyline.split('.')[0];
+             if (!this._loader._annotations[name]){
+               let annotation = new Annotation(geomData.id, this, this);
+               let transform = DataLoader.parseXform(geomData.xform, true);
+               this.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
+               // Push the annotation for later completion
+               this._loader._annotations[name] = annotation;
+               var url = "/v2/nc/projects/";
+               url = url + this.project;
+               this._loader.addRequest({
+                   path: name,
+                   baseURL: url,
+                   type: "annotation"
+               });
+             }else{
+               this._loader._annotations[name].addToScene();
+             }
+           });
 
             _.each(geoms, (geomData)=>{
                 let name = geomData.shell.split('.')[0];

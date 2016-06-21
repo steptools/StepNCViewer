@@ -3,19 +3,12 @@
     padding:20px;
     height:77%;
     max-height: none;
-    .m-node .collapse{
-      height:100%;
-      width:30px;
-      text-align: center;
-      background-color:#fff;
-    }
     .m-node .collapse:hover{
       background-color:#f00;
     }
     .m-node .inner{
       background-color:rgba(255,255,255,.5);
       margin-bottom:1px;
-      padding-left:30px;
     }
     .icon-letter{
       background-color: #333;

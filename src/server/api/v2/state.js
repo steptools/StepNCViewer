@@ -256,7 +256,6 @@ var _getDeltaState = function (req, res) {
 
 module.exports = function(globalApp, cb) {
   app = globalApp;
-  //app.router.get('/v2/nc/projects/:ncId', _getKeyState);
   app.router.get('/v2/nc/projects/:ncId/state/key', _getKeyState);
   app.router.get('/v2/nc/projects/:ncId/state/delta', _getDeltaState);
   app.router.get('/v2/nc/projects/:ncId/state/loop/:loopstate', _loopInit);

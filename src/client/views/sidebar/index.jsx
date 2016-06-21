@@ -3,6 +3,7 @@ import Tree from 'react-ui-tree';
 import Menu from 'rc-menu';
 import LoadProjectView from './loadproject';
 import ToleranceTreeView from './tolerancetree';
+import WorkingstepList from './workingstepslist';
 import ReactTooltip from 'react-tooltip';
 var MenuItem = Menu.Item;
 var scrolled=false;
@@ -13,7 +14,6 @@ export default class SidebarView extends React.Component {
         this.state = { };
 
         this.openObjectTree = this.openObjectTree.bind(this);
-        this.renderNode = this.renderNode.bind(this);
         this.openLoadProjectMenu = this.openLoadProjectMenu.bind(this);
         this.onProjectSelected = this.onProjectSelected.bind(this);
         this.openToleranceTree = this.openToleranceTree.bind(this);
@@ -40,33 +40,6 @@ export default class SidebarView extends React.Component {
     }
 
     componentDidMount(){
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = ()=>{
-        if (xhr.readyState == 4) {
-          if (xhr.status == 200) {
-            // Node preprocessing
-            var nodes = {};
-              nodes.name = "Workingsteps";
-            nodes.children = [];
-            var nodeCheck = (node)=>{
-              node.icon = this.getNodeIcon(node,nodes.children.length+1);
-              //if (!node.children)
-              node.leaf = true;
-              if(node.children) node.children.forEach(nodeCheck);
-              node.children = [];
-                if(node.type === "workingstep")
-                  nodes.children.push(node);
-            }
-            let json = JSON.parse(xhr.responseText);
-            nodeCheck(json);
-            this.props.cbMode('tree');
-            this.props.cbTree(nodes);
-          }
-        }
-      };
-      var url = "/v2/nc/projects/"+this.props.pid+"/workplan/";
-      xhr.open("GET",url,true);
-      xhr.send(null);
     }
 
     openLoadProjectMenu(){
@@ -92,37 +65,6 @@ export default class SidebarView extends React.Component {
       });
     }
 
-    getNodeIcon(node,num){
-      if (node.type == "workplan"){
-        return <span className='icon-letter'>W</span>;
-      }else if (node.type == "selective"){
-        return <span className='icon-letter'>S</span>;
-      }else{
-        return <span className='icon-letter'>{num}</span>;;
-      }
-    }
-
-    onObjectTreeNodeClick(node, self){
-        var xhr = new XMLHttpRequest();
-        var url = "/v2/nc/projects/"+this.props.pid+"/state/ws/" + node["id"];
-        xhr.open("GET",url,true);
-        xhr.send(null);
-    }
-
-    renderNode(node){
-      var cName = 'node';
-        if(node.id == this.props.ws) cName= 'node running-node';
-      return <span
-          id={node.id}
-          className={cName}
-          onClick={this.onObjectTreeNodeClick.bind(this, node)}
-          onMouseDown={function(e){e.stopPropagation()}}
-      >
-          {node.icon}
-          {node.name}
-      </span>;
-    }
-
     render() {
       // TODO currently mode menu can only have two layers
       var nested = this.props.mode != "tree";
@@ -130,7 +72,7 @@ export default class SidebarView extends React.Component {
         <div className='sidebar-menu-tabs'>
           <span style={{opacity:nested ?.5:0}} className='glyphicons glyphicons-menu-left back-button'></span>
           <div style={{opacity:nested?.5:1, left:nested?40:140}} onClick={this.openObjectTree} className='back'>
-            <div>Object Tree</div>
+            <div>Workingsteps</div>
           </div>
           <div style={{left:nested?200:400}} className='current'>
             {this.props.altmenu}
@@ -140,18 +82,14 @@ export default class SidebarView extends React.Component {
       if((!scrolled) && (this.props.ws > -1))
       {
         $('.m-tree').animate({
-        scrollTop: $("#"+this.props.ws).offset().top-$(".inner").offset().top+$(".inner").height()-10
+        scrollTop: $("#"+this.props.ws).offset().top-$(".m-tree").offset().top
         }, 1000);
         scrolled=true;
       }
         return <div className="sidebar">
                   {modeMenu}
                   {this.props.mode == 'tree' ?
-                  <Tree
-                      paddingLeft={32}              // left padding for children nodes in pixels
-                      tree={this.props.tree}        // tree object
-                      renderNode={this.renderNode}  // renderNode(node) return react element
-                  />
+                  <WorkingstepList pid = {this.props.pid} cbMode = {this.props.cbMode} cbTree = {this.props.cbTree} ws = {this.props.ws}/>
                   : null}
                   {this.props.mode == 'load-project' ?
                   <LoadProjectView socket={this.props.socket} app={this.props.app} actionManager={this.props.actionManager}/>

@@ -121,6 +121,9 @@ export default class HeaderView extends React.Component {
         chlog.onreadystatechange = function(){
             if (chlog.readyState == 4 && chlog.status == 200) {
                 document.getElementById("changes").innerHTML = md(chlog.responseText.toString());
+                document.getElementById("logbutton").innerHTML = "v"+md(chlog.responseText.toString()).split("\n")[0].split(" ")[1];
+
+
             }
         }
         chlog.send();
@@ -177,7 +180,7 @@ export default class HeaderView extends React.Component {
                 <MenuItem key='play'><ButtonImage prefix='glyphicon' icon={ppbutton}/>{ppbtntxt}</MenuItem>
                 <MenuItem key='forward'><ButtonImage prefix='glyphicon' icon='step-forward'/>Next</MenuItem>
                 <SliderMenuItem key='speed'><Slider id='speed' changed={this.updateSpeed} val={this.props.speed} prefix='glyphicons' left='turtle' right='rabbit'/></SliderMenuItem>
-                <MenuItem key='showlog' id="logbutton"><ButtonImage prefix='glyphicon' icon='book'/>v1.1.0</MenuItem>
+                <MenuItem key='showlog'><ButtonImage prefix='glyphicon' icon='book'/><span id="logbutton">v1.1.0</span></MenuItem>
             </Menu>
             
         );

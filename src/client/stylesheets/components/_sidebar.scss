@@ -359,6 +359,12 @@ $icons: '../icons/';
 
                 &.rc-menu-item-disabled {
                     cursor: inherit;
+                    -webkit-touch-callout: auto; /* iOS Safari */
+                    -webkit-user-select: auto;   /* Chrome/Safari/Opera */
+                    -khtml-user-select: auto;    /* Konqueror */
+                    -moz-user-select: auto;      /* Firefox */
+                    -ms-user-select: auto;       /* Internet Explorer/Edge */
+                    user-select: auto;
                 }
 
                 &.goTo {
@@ -368,6 +374,13 @@ $icons: '../icons/';
                     background-color: #333333;
                     color: #F8F8F8;
                     border-bottom: 2px solid #AFAFAF;
+
+                    -webkit-touch-callout: none; /* iOS Safari */
+                    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+                    -khtml-user-select: none;    /* Konqueror */
+                    -moz-user-select: none;      /* Firefox */
+                    -ms-user-select: none;       /* Internet Explorer/Edge */
+                    user-select: none;
 
                     &:hover {
                         color: #35B7FD;

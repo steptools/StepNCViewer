@@ -8,7 +8,11 @@ var find = file.find;
 var exeFromId = function(id) {
 	let ws = {
 		"id": id,
-		"name": find.GetExecutableName(id)
+		"name": find.GetExecutableName(id),
+		'baseTime' : find.GetExecutableBaseTime(id),
+		'timeUnits' : find.GetExecutableTimeUnit(id),
+		'distance' : find.GetExecutableDistance(id),
+		'distanceUnits' : find.GetExecutableDistanceUnit(id)
 	};
 	if(find.IsEnabled(id))
 		ws.enabled = true;
@@ -17,7 +21,7 @@ var exeFromId = function(id) {
 	if (find.IsWorkingstep(id)) {
 		ws.type = "workingstep";
 		ws.tool = find.GetWorkingstepTool(id);
-
+		
 		return ws;
 	} else if (find.IsSelective(id)) {
 		ws.type = "selective";

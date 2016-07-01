@@ -76,7 +76,43 @@ export default class PropertiesPane extends React.Component {
         if (entity.workingsteps === undefined || entity.workingsteps.length <= 0) {
             hasWorkingsteps = false;
         }
-        
+      
+        let timeDistance = null;
+        if (entity.type === 'workingstep' || entity.type === 'selective' || entity.type === 'workplan') {
+          
+          let formattedTime = '';
+          
+          if (entity.timeUnits !== 'second')
+            formattedTime = entity.baseTime + ' ' + entity.timeUnits;
+          else {
+
+            // format the time for display
+            let stepTime = new Date(entity.baseTime * 1000);
+            let h = stepTime.getUTCHours();
+            let mm = stepTime.getUTCMinutes();
+            let ss = stepTime.getUTCSeconds();
+
+            if (h > 0) {
+              if (h === 1)
+                formattedTime = h + ' hr ' + mm + ' min ' + ss + ' sec';
+              else
+                formattedTime = h + ' hrs ' + mm + ' min ' + ss + ' sec';
+            }
+            else if (mm > 0) {
+              formattedTime = mm + ' min ' + ss + ' sec';
+            }
+            else {
+              formattedTime = ss + ' sec';
+            }
+          }
+
+            timeDistance = <MenuItem disabled key='timeDistance' className='property timeDistance'>
+              <div className='baseTime'>Base time: {formattedTime}</div>
+              <div className='distance'>Distance: {entity.distance.toFixed(2)} {entity.distanceUnits}
+              </div>
+            </MenuItem>;
+        }
+      
         switch (entity.type) {
             case 'tolerance':
                 items = (
@@ -100,14 +136,15 @@ export default class PropertiesPane extends React.Component {
                 
                 break;
           case 'workingstep':
-                let selectStep, goToButton, toolInfo;
-                
+            let selectStep, goToButton, toolInfo;
+            
+
                 goToButton = (<MenuItem key='goto'
                     disabled={!(entity.enabled && this.props.ws !== entity.id)}
                     className='property goTo'>Go to Workingstep</MenuItem>);
 
                 toolInfo = (<MenuItem key='tool' className='property toolInfo'>Tool: {this.props.tools[entity.tool].name} </MenuItem>);
-                
+
                 if (this.props.ws === entity.id) {
                     selectStep = <MenuItem disabled className='property'>Status: Active</MenuItem>;
                 }
@@ -120,6 +157,7 @@ export default class PropertiesPane extends React.Component {
                 items = (
                     <Menu className='properties' onSelect={(event) => {this.selectWS(event, entity);}}>
                         {selectStep}
+                        {timeDistance}
                         {toolInfo}
                         {goToButton}
                     </Menu>
@@ -129,6 +167,7 @@ export default class PropertiesPane extends React.Component {
             case 'selective':
                 items = (
                     <Menu className='properties'>
+                        {timeDistance}
                         <MenuItem key='children' className='property children'>
                             <div className='title'>Children:</div>
                             <div className='list'>

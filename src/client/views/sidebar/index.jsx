@@ -99,8 +99,6 @@ export default class SidebarView extends React.Component {
                       : null}
                   {this.props.mode == 'tree' ?
                       <WorkplanList
-                          cbMode = {this.props.cbMode}
-                          cbTree = {this.props.cbTree}
                           ws = {this.props.ws}
                           workplanCache = {this.props.workplanCache}
                           propertyCb = {this.props.openProperties}

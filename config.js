@@ -28,7 +28,7 @@ module.exports = function(environment) {
             "upload": true
           },
           "file" : {
-            "dir": "./moldy.stpnc"
+            "dir": "./model.stpnc"
           },
           "machine" : {
             "dir" : ""

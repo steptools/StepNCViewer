@@ -11,17 +11,20 @@ Features:
 - Relative pathing can now be used
 - Now supports running only one file
 - Pressing escape will close the properties pane
+- Styling overhaul of the sidebar
 - config.json deprecated and moved to config.js
 
 Bugfixes:
 
 - Sidebar can now be scrolled in Firefox
+- Speed slider is now styled correctly in Edge
 - Render radius is properly calculated when workingstep changes
 - Bounding boxes update properly with each workingstep
 - Tool Loactions now properly update when workingstep changes
 - View loads properly without errors on Safari / iOS
 - Properties pane has correct height for scrolling
 - Scrolling happens whenever tab is switched and on all tabs
+- Contents of the Workplan tab can no longer be dragged
 - Colors stopped working after code refactor but are now fixed
 
 Version 1.1.0

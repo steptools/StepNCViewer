@@ -27,7 +27,7 @@ export default class ToolList extends React.Component {
           style={{"paddingLeft" : "5px"}}
           key={node.id} >
           {node.icon}
-          <span className="textbox-tool">{node.name} {node.value}</span>
+          <span className="textbox">{node.name} {node.value}</span>
       </ol>;
   }
 

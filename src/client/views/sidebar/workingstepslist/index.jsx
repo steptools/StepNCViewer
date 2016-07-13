@@ -20,7 +20,7 @@ export default class WorkingstepList extends React.Component {
         if (isNaN(node.number)) {
             return;
         }
-        return <span className='icon-letter'>{node.number}</span>;
+        return <span className='icon custom letter'>{node.number}</span>;
     }
 
     shouldComponentUpdate(nextProps, nextState) {

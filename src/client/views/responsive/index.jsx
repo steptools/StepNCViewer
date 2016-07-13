@@ -189,7 +189,7 @@ export default class ResponsiveView extends React.Component {
                 let json = JSON.parse(res.text);
 
                 _.each(json, (tool)=> {
-                    tool.icon = <span className='icon-tool' />
+                    tool.icon = <span className='icon custom tool' />
                     
                     // collect workingstep info
                     let steps = [];

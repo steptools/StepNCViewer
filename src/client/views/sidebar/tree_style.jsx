@@ -3,50 +3,50 @@
 import React from 'react';
 
 function getNodeIcon(node) {
-    if (node.type === "workplan") {
-        return <span className="tree-icon glyphicons glyphicons-cube-empty"/>
-    } else if (node.type === "selective") {
-        return <span className="tree-icon glyphicons glyphicons-list-numbered"/>
-    } else if (node.type === "workplan-setup") {
-        return <span className="tree-icon glyphicons glyphicons-cube-black"/>
-    } else if (node.type === "workingstep") {
-        return <span className="tree-icon glyphicons glyphicons-blacksmith"/>
+    if (node.type === 'workplan') {
+        return <span className='icon glyphicons glyphicons-cube-empty'/>
+    } else if (node.type === 'selective') {
+        return <span className='icon glyphicons glyphicons-list-numbered'/>
+    } else if (node.type === 'workplan-setup') {
+        return <span className='icon glyphicons glyphicons-cube-black'/>
+    } else if (node.type === 'workingstep') {
+        return <span className='icon glyphicons glyphicons-blacksmith'/>
     } else if (node.type === 'tolerance') {
-        return <span className={'tree-icon tolerance '+node.toleranceType} />
+        return <span className={'icon custom tolerance '+node.toleranceType} />
     } else if (node.type === 'workpiece') {
-        return <span className="tree-icon workpiece" />
+        return <span className='icon custom workpiece' />
     } else {
-        return <span className='tree-icon glyphicons glyphicons-question-sign'/>
+        return <span className='icon glyphicons glyphicons-question-sign'/>
     }
 }
 
 function hasActiveChildren(node, id){
     if(node.id === id){
-      return "active";
+      return 'active';
     }
     else if(!node.leaf){
       for(let i = 0; i < node.children.length; i++){
-        if(hasActiveChildren(node.children[i],id) === "active"){
+        if(hasActiveChildren(node.children[i],id) === 'active'){
             if(node.toggled === false){
-                return "active";  
+                return 'active';  
             }
             else{
-                return "child-active";
+                return 'child-active';
             }
        
         }
-        else if(hasActiveChildren(node.children[i],id) ==="child-active"){
+        else if(hasActiveChildren(node.children[i],id) ==='child-active'){
             if (node.toggled === false){
-                 return "active";
+                 return 'active';
             }
             else{
-                return "child-active";
+                return 'child-active';
             }
         }
       }
 
     }
-    return "inactive";    
+    return 'inactive';    
 }
 
 const Container = (props) => {
@@ -54,10 +54,10 @@ const Container = (props) => {
     //console.log(props);
     let node = props.node;
     node.icon = getNodeIcon(node);
-    let innerName = "inner";
-    let outerName = "node";
-    if (hasActiveChildren(node, props.decorators.ws) === "active") {
-        innerName += " running-node";
+    let innerName = 'inner';
+    let outerName = 'node';
+    if (hasActiveChildren(node, props.decorators.ws) === 'active') {
+        innerName += ' running-node';
     } else if (node.enabled === false) {
         innerName += ' disabled';
     }
@@ -83,7 +83,7 @@ const Container = (props) => {
                 className={innerName} onClick={(event)=>{props.decorators.propertyCb(node)}}
             >
                 {node.icon}
-                <span className='node-text'>
+                <span className='textbox'>
                     {node.name}
                 </span>
             </div>

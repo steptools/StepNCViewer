@@ -1,7 +1,5 @@
 $icons: '../icons/';
 
-// TODO: Combine sidebar styles
-
 .sidebar {
     width: $sidebarWidth;
     height: 100%;
@@ -22,7 +20,29 @@ $icons: '../icons/';
         background-color: rgba(#FFFFFF, 0.5);
 
         .m-node {
-            padding: 1px 0px;
+            margin: 1px 0px;
+            
+            .icon {
+                margin-right: 8px;
+            }
+            
+            .node {
+                display: inline-block;
+                cursor: pointer;
+                width: calc(100%);
+                padding: 4px 5px;
+                margin: 0px 0px;
+                
+                &:hover:not(.setup) {
+                    background-color: rgba(#2BAEE9, 0.5);
+                }
+                
+                &.setup {
+                    cursor: default;
+                    border-top: 2px solid #666666;
+                    border-bottom: 2px solid #666666;
+                }
+            }
             
             .textbox {
                 vertical-align: middle;
@@ -34,82 +54,14 @@ $icons: '../icons/';
                 display: table;
                 margin: 0px auto;
             }
-
-            .icon-letter,
-            .icon-workpiece,
-            .icon-tolerance,
-            .icon-tool {
-                background-color: rgba(#FFFFFF, 0);
-                border: 2px solid #333333;
-                padding: 15px;
-                vertical-align: middle;
-                background-size: cover;
-                background-position: center;
-                padding: 5px;
-                border-radius: 5px;
-                width: 30px;
-                height: 30px;
-                display: inline-block;
-                text-align: center;
-                margin-right: 8px;
-            }
-
-            .icon-letter {
-                background-color: #333333;
-                color: #FFFFFF;
-                border: none;
-            }
-
-            .icon-workpiece{
-                background-image: url($icons + 'tolerance/unknown.svg');
-            }
-
-            .icon-tolerance {
-                background-image: url($icons + 'tolerance/unknown.svg');
-            }
-
-            .icon-tool {
-                background-image: url($icons + 'tools/tool.svg');
-            }
-
-            .icon-workplan {
-                font-size: 24px;
-                margin-right: 8px;
-                vertical-align: middle;
-            }
-
-
         }
-    }
-
-    .m-node .node {
-        display: inline-block;
-        cursor: pointer;
-        width: calc(100%);
-        padding: 4px 5px;
-        margin: 0px 0px;
-        
-        &:hover:not(.setup) {
-            background-color: rgba(#2BAEE9, 0.5);
-        }
-    }
-    
-    .node.setup {
-        cursor: default;
-        border-top: 2px solid #666666;
-        border-bottom: 2px solid #666666;
-    }
-
-    .m-node .inner {
-        position: relative;
-        cursor: pointer;
     }
 
     .running-node {
         background-color: #9BFA9B;
     }
 
-    .disabled span {
+    .disabled {
         opacity: 0.5;
     }
 }
@@ -214,7 +166,20 @@ $icons: '../icons/';
     .properties {
         height: calc(100% - 54px);
         width: 100%;
+        padding-top: 5px;
+        padding-bottom: 5px;
         overflow-y: scroll;
+        
+        .icon {
+            font-size: 24px;
+            margin-left: 3px;
+            margin-right: 11px;
+            
+            &.custom {
+                width: 24px;
+                height: 24px;
+            }
+        }
 
         .property {
             padding: 5px;
@@ -223,17 +188,13 @@ $icons: '../icons/';
             display: inline-flex;
             align-items: center;
             white-space: normal;
-            
-            .property-icon {
-                margin-right: 5px;    
-            } 
 
-            &:hover {
+            &:hover:not(.rc-menu-item-disabled) {
                 cursor: pointer;
+                background-color: rgba(#2BAEE9, 0.5);
             }
 
             &.rc-menu-item-disabled {
-                cursor: inherit;
                 -webkit-touch-callout: auto;
                 -webkit-user-select: auto;
                 -khtml-user-select: auto;
@@ -247,7 +208,7 @@ $icons: '../icons/';
                 width: 50%;
                 text-align: center;
                 padding: 10px 0px;
-                margin: 0px 25%;
+                margin: 5px 25%;
                 background-color: #333333;
                 color: #F8F8F8;
                 border-bottom: 2px solid transparent;
@@ -262,6 +223,7 @@ $icons: '../icons/';
                 &:hover:not(.rc-menu-item-disabled) {
                     cursor: pointer;
                     color: #2BAEE9;
+                    background-color: #333333;
                     border-bottom-color: #2BAEE9;
                 }
 
@@ -281,6 +243,12 @@ $icons: '../icons/';
                     text-align: center;
                     cursor: default;
                     margin-bottom: 5px;
+                    -webkit-touch-callout: auto;
+                    -webkit-user-select: auto;
+                    -khtml-user-select: auto;
+                    -moz-user-select: auto;
+                    -ms-user-select: auto;
+                    user-select: auto;
                 }
                 
                 .list {
@@ -289,7 +257,8 @@ $icons: '../icons/';
                         width: 100%;
                         display: inline-flex;
                         align-items: center;
-                        padding: 4px 5px;
+                        padding: 4px 0px;
+                        margin: 1px 0px;
 
                         &.invalid {
                             cursor: default;
@@ -326,117 +295,34 @@ $icons: '../icons/';
     }
 
     .titlebar {
-        display: inline-flex;
+        cursor: default;
+        display: flex;
+        justify-content: center;
         align-items: center;
         width: 100%;
         padding: 5px;
         border-bottom: 1px solid #DDDDDD;
         
-        .icon {
-            display: inherit;
+        .icon:first-child {
+            margin-right: 8px;
         }
         
-        .title {
-            width: 100%;
-            font-size: 14px;
-            font-weight: bold;
-
-            .type {
-                border-bottom: 1px solid #666666;
-            }
-        }
-
-        .exit {
-            display: inherit;
-            margin-right: 0px;
+        .icon:last-child {
             margin-left: 8px;
-            float: right;
-
+            
             &:hover {
                 cursor: pointer;
                 color: #2BAEE9;
             }
         }
-    }
-    
-    .icon-tool {
-        background-image: url($icons + 'tools/tool.svg');
-        background-color: rgba(#FFFFFF, 0);
-        vertical-align: middle;
-        background-size: cover;
-        background-position: center;
-        display: inline-block;
-        text-align: center;
-    }
-    
-    .titlebar .icon-tool {
-        border: 2px solid #333333;
-        border-radius: 5px;
-        width: 30px;
-        height: 30px;
-    }
-    
-    .property .icon-tool {
-        border: none;
-        width: 15px;
-        height: 15px;
-    }
+        
+        .title {
+            flex-grow: 1;
+            font-size: 14px;
+            font-weight: bold;
 
-    .icon {
-        font-size: 24px;
-        margin-right: 8px;
-
-        &.tolerance {
-            &.angularity {
-                background-image: url($icons + 'tolerance/angularity.svg');
-            }
-
-            &.circularity {
-                background-image: url($icons + 'tolerance/circularity.svg');
-            }
-
-            &.concentricity {
-                background-image: url($icons + 'tolerance/concentricity.svg');
-            }
-
-            &.cylindricity {
-                background-image: url($icons + 'tolerance/cylindricity.svg');
-            }
-
-            &.flatness {
-                background-image: url($icons + 'tolerance/flatness.svg');
-            }
-
-            &.parallelism {
-                background-image: url($icons + 'tolerance/parallelism.svg');
-            }
-
-            &.perpendicularity {
-                background-image: url($icons + 'tolerance/perpendicularity.svg');
-            }
-
-            &.position {
-                background-image: url($icons + 'tolerance/position.svg');
-            }
-
-            &.profile-line {
-                background-image: url($icons + 'tolerance/profile_line.svg');
-            }
-
-            &.profile-surface {
-                background-image: url($icons + 'tolerance/profile_surface.svg');
-            }
-
-            &.straightness {
-                background-image: url($icons + 'tolerance/straightness.svg');
-            }
-
-            &.symmetry {
-                background-image: url($icons + 'tolerance/symmetry.svg');
-            }
-
-            &.total-runout {
-                background-image: url($icons + 'tolerance/total_runout.svg');
+            .type {
+                border-bottom: 2px solid #666666;
             }
         }
     }
@@ -505,123 +391,10 @@ $icons: '../icons/';
         }
     }
 
-    .node .tree-icon {
-        width: 30px;
+    .node .icon {
+        margin-left: 5px;
         margin-right: 8px;
-        text-align: center;
         font-size: 24px;
-
-        &.tolerance,&.workpiece {
-            background-color: rgba(#FFF, 0);
-            // border: 2px solid #333;
-            padding: 15px;
-            vertical-align: middle;
-            background-size: cover;
-            background-position: center;
-            padding: 5px;
-            border-radius: 5px;
-            width: 30px;
-            height: 30px;
-            display: inline-block;
-            text-align: center;
-            margin-right: 8px;
-        }
-
-        &.workpiece {
-            background-image: url($icons + 'workpiece.svg');
-        }
-
-        &.angularity {
-            background-image: url($icons + 'tolerance/angularity.svg');
-        }
-
-        &.circular-runout {
-            background-image: url($icons + 'tolerance/circular_runout.svg');
-        }
-
-        &.circularity {
-            background-image: url($icons + 'tolerance/circularity.svg');
-        }
-
-        &.concentricity {
-            background-image: url($icons + 'tolerance/concentricity.svg');
-        }
-
-        &.cylindricity {
-            background-image: url($icons + 'tolerance/cylindricity.svg');
-        }
-
-        &.flatness {
-            background-image: url($icons + 'tolerance/flatness.svg');
-        }
-
-        &.parallelism {
-            background-image: url($icons + 'tolerance/parallelism.svg');
-        }
-
-        &.perpendicularity {
-            background-image: url($icons + 'tolerance/perpendicularity.svg');
-        }
-
-        &.position {
-            background-image: url($icons + 'tolerance/position.svg');
-        }
-
-        &.line {
-            background-image: url($icons + 'tolerance/profile_line.svg');
-        }
-
-        &.surface {
-            background-image: url($icons + 'tolerance/profile_surface.svg');
-        }
-
-        &.straightness {
-            background-image: url($icons + 'tolerance/straightness.svg');
-        }
-
-        &.symmetry {
-            background-image: url($icons + 'tolerance/symmetry.svg');
-        }
-
-        &.total-runout {
-            background-image: url($icons + 'tolerance/total_runout.svg');
-        }
-
-        &.directed {
-            background-image: url($icons + 'dimension/linear_distance.svg');
-        }
-
-        &.radial {
-            background-image: url($icons + 'dimension/radial.svg');
-        }
-
-        &.width {
-            background-image: url($icons + 'dimension/width.svg');
-        }
-
-        &.height {
-            background-image: url($icons + 'dimension/height.svg');
-        }
-
-        &.diameter {
-            background-image: url($icons + 'dimension/diameter.svg');
-        }
-
-        &.angle-size {
-            background-image: url($icons + 'dimension/angle_size.svg');
-        }
-
-        &.datum {
-            background-image: url($icons + 'tolerance/datum.svg');
-        }
-
-        &.datum-target {
-            background-image: url($icons + 'tolerance/datum_target.svg');
-        }
-
-        &.texture {
-            background-image: url($icons + 'tolerance/texture.svg');
-        }
     }
 
     .node .node-text {
@@ -632,7 +405,132 @@ $icons: '../icons/';
         background-color: #9BFA9B;
     }
 
-    .node .disabled span {
+    .node .disabled {
         opacity: 0.5;
     }
+}
+
+.icon {
+    font-size: 30px;
+    
+    &.custom {
+        padding: 15px;
+        vertical-align: middle;
+        background-size: cover;
+        background-position: center;
+        padding: 5px;
+        border-radius: 5px;
+        display: inline-block;
+        text-align: center;
+        height: 30px;
+        width: 30px;
+    }
+
+    &.workpiece {
+        background-image: url($icons + 'workpiece.svg');
+    }
+    
+    &.tool {
+        border: 2px solid #333333;
+        border-radius: 5px;
+        background-image: url($icons + 'tools/tool.svg');
+    }
+    
+    &.letter {
+        font-size: 14px;
+        background-color: #333333;
+        color: #FFFFFF;
+    }
+
+    &.angularity {
+        background-image: url($icons + 'tolerance/angularity.svg');
+    }
+
+    &.circular-runout {
+        background-image: url($icons + 'tolerance/circular_runout.svg');
+    }
+
+    &.circularity {
+        background-image: url($icons + 'tolerance/circularity.svg');
+    }
+
+    &.concentricity {
+        background-image: url($icons + 'tolerance/concentricity.svg');
+    }
+
+    &.cylindricity {
+        background-image: url($icons + 'tolerance/cylindricity.svg');
+    }
+
+    &.flatness {
+        background-image: url($icons + 'tolerance/flatness.svg');
+    }
+
+    &.parallelism {
+        background-image: url($icons + 'tolerance/parallelism.svg');
+    }
+    
+    &.line {
+        background-image: url($icons + 'tolerance/profile_line.svg');
+    }
+
+    &.surface {
+        background-image: url($icons + 'tolerance/profile_surface.svg');
+    }
+
+    &.perpendicularity {
+        background-image: url($icons + 'tolerance/perpendicularity.svg');
+    }
+
+    &.position {
+        background-image: url($icons + 'tolerance/position.svg');
+    }
+
+    &.straightness {
+        background-image: url($icons + 'tolerance/straightness.svg');
+    }
+
+    &.symmetry {
+        background-image: url($icons + 'tolerance/symmetry.svg');
+    }
+
+    &.total-runout {
+        background-image: url($icons + 'tolerance/total_runout.svg');
+    }
+
+    &.directed {
+        background-image: url($icons + 'dimension/linear_distance.svg');
+    }
+
+    &.radial {
+        background-image: url($icons + 'dimension/radial.svg');
+    }
+
+    &.width {
+        background-image: url($icons + 'dimension/width.svg');
+    }
+
+    &.height {
+        background-image: url($icons + 'dimension/height.svg');
+    }
+
+    &.diameter {
+        background-image: url($icons + 'dimension/diameter.svg');
+    }
+
+    &.angle-size {
+        background-image: url($icons + 'dimension/angle_size.svg');
+    }
+
+    &.datum {
+        background-image: url($icons + 'tolerance/datum.svg');
+    }
+
+    &.datum-target {
+        background-image: url($icons + 'tolerance/datum_target.svg');
+    }
+
+    &.texture {
+        background-image: url($icons + 'tolerance/texture.svg');
+    }  
 }

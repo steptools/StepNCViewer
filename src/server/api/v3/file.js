@@ -1,5 +1,5 @@
 "use strict";
-let StepNC = require('../../../../../STEPNode/build/Release/StepNC');
+let StepNC = require("stepncnode/build/Release/StepNC");
 let fs = require("fs");
 //Query for a json file that maps all projects in the data directory
 //to a particular path in the data folder

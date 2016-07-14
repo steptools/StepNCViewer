@@ -1,5 +1,5 @@
 "use strict";
-var StepNC = require('../../../../../STEPNode/build/Release/StepNC');
+var StepNC = require('stepncnode/build/Release/StepNC');
 var file = require('./file');
 
 ///*******************************************************************\
@@ -18,7 +18,7 @@ var file = require('./file');
 
 let _getGeometry = function(req , res){
   let ms = file.ms;
-  
+
   if(req.params.type === "shell"){
     res.status(200).send(ms.GetGeometryJSON(req.params.uuid , "MESH"));
     return;

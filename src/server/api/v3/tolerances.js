@@ -1,5 +1,5 @@
 "use strict";
-var StepNC = require('../../../../../STEPNode/build/Release/StepNC');
+var StepNC = require('stepncnode/build/Release/StepNC');
 var file = require('./file');
 var _ = require('lodash');
 var tol = file.tol;
@@ -46,7 +46,7 @@ var getTolerance = function(id) {
     name = name.replace(/_/g, ' ').toLowerCase();
     tolType = name.split(' ')[0];
   }
-  
+
   return {
     "id": id,
     "type": 'tolerance',
@@ -71,7 +71,7 @@ var getWp = function(id, type) {
   };
   if (type)
     ret.type = "workpiece";
-  
+
   let asm_list = find.GetWorkpieceImmediateSubAssemblyAll(id);
   let subs = [];
 
@@ -86,10 +86,10 @@ var getWp = function(id, type) {
       subs.push(sub);
     }
   }
-  
+
   if (subs.length > 0)
     ret.children = subs;
-  
+
   return ret;
 };
 

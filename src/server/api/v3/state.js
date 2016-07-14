@@ -1,5 +1,5 @@
 "use strict";
-var StepNC = require('../../../../../STEPNode/build/Release/StepNC');
+var StepNC = require('stepncnode/build/Release/StepNC');
 var file = require('./file');
 var step = require('./step');
 var find = file.find;
@@ -277,6 +277,8 @@ var _getDeltaState = function (req, res) {
       res.status(404).send("Machine state could not be found");
       return;
     }
+    console.log("apricots");
+    console.log(ms.GetDeltaJSON());
     res.status(200).send(ms.GetDeltaJSON());
 };
 

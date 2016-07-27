@@ -28,10 +28,10 @@ module.exports = function(environment) {
             "upload": true
           },
           "file" : {
-            "dir": "./model.stpnc"
+            "dir": "./models/boxywfixture.stpnc"
           },
           "machine" : {
-            "dir" : ""
+            "dir" : "./models/okuma_M560-V.xml"
           }
     };
     try {

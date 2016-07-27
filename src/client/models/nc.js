@@ -262,7 +262,7 @@ export default class NC extends THREE.EventDispatcher {
 
             _.each(geoms, (geomData)=>{
                 let name = geomData.id;
-                if(geomData.usage =='asis' || (this.app.services.machine.dir === '' && geomData.usage == 'fixture')) return;
+                if(geomData.usage =='asis' || (this.app.services.machine === null && geomData.usage == 'fixture')) return;
 
                 if(this._objects[name]) {
                     let obj = this._objects[name];

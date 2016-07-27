@@ -104,19 +104,16 @@ APIServer.prototype._setRoutes = function(cb) {
  */
 APIServer.prototype._setSite = function() {
   var self = this;
-  var endpoint = '';
-  if (this.config.host) {
-    endpoint = this.config.protocol + '://' + this.config.host + ':' + app.port;
-  }
+  var endpoint = this.config.host ? this.config.protocol + '://' + this.config.host + ':' + app.port : '';
   var services = {
-    apiEndpoint: endpoint,
-    socket: '',
+    api_endpoint: endpoint,
+    socket: "",
     version: '/v3',
-    machine: self.config.machine,
+    machine: self.machinetool,
   };
   // Serve the root client framework - customized as needed
-  var _serveRoot = function(req, res) {
-    var change = fs.readFileSync('CHANGELOG.md', 'utf8');
+  var _serveRoot = function (req, res) {
+    var change = fs.readFileSync("CHANGELOG.md", "utf8");
     var appConfig = {
       title: 'NC.js',
       source: '/js/main.js',

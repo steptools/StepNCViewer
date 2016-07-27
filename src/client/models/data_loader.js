@@ -344,7 +344,7 @@ export default class DataLoader extends THREE.EventDispatcher {
                 {
                     color = DataLoader.parseColor("FF530D");
                 }
-                if(geomData.usage === 'fixture' && this._app.services.machine.dir === ''){
+                if(geomData.usage === 'fixture' && this._app.services.machine === null){
                     return;
                 }
                 let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);

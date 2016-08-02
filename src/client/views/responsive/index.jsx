@@ -70,7 +70,7 @@ export default class ResponsiveView extends React.Component {
 
     this.openProperties = this.openProperties.bind(this);
     this.openPreview = this.openPreview.bind(this);
-    
+
     this.toggleHighlight = this.toggleHighlight.bind(this);
   }
 

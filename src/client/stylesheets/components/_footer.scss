@@ -1,8 +1,8 @@
 .Footer-container {
-    
     position: absolute;
     bottom: 0;
     width: 100%;
+    cursor: default;
 
     .drawerbutton {
         height: 3vmin;
@@ -13,6 +13,11 @@
         background-color: #DDDDDD;
         z-index: 100;
         border-bottom: 1px solid rgba(102, 102, 102, 0.5);
+        cursor: pointer;
+        
+        span {
+            line-height: 3vmin;
+        }
     }
 
     .Footer-bar {
@@ -25,8 +30,9 @@
         background-color: #DDDDDD;
         z-index: 99;
         padding-left: 5px;
-        flex-flow: row nowrap;
         display: flex;
+        flex-flow: row nowrap;
+        cursor: pointer;
         -moz-user-select: none;
         -ms-user-select: none;
         -khtml-user-select: none;
@@ -51,7 +57,7 @@
         }
 
         .footer-buttons {
-
+            cursor: pointer;
             display: flex;
 
             .button-icon {

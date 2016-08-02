@@ -267,6 +267,8 @@ $icons: '../icons/';
             z-index: 12;
             width: 100%;
             height: 50px;
+            flex-grow: 0;
+            flex-shrink: 0;
             cursor: default;
             display: flex;
             align-items: center;

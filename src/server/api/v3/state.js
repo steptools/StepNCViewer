@@ -11,6 +11,7 @@ let spindleSpeed;
 let feedRate;
 let path = find.GetProjectName();
 let changed = false;
+let justchanged = false;
 
 /****************************** Helper Functions ******************************/
 
@@ -51,7 +52,6 @@ function loop(ms, key) {
   let spindleSpeedNew;
   let feedRateNew;
   if (loopStates[path] === true) {
-    //app.logger.debug('Loop step ' + path);
     let rc = ms.AdvanceState();
     spindleSpeedNew = Number(ms.GetCurrentSpindleSpeed());
     feedRateNew = Number(ms.GetCurrentFeedrate());
@@ -85,27 +85,24 @@ function loop(ms, key) {
         loopStates[path] = false;
         update('pause');
         changed = true;
+        justchanged = true;
       }
-      getNext(ms, function() {
-        loop(ms, true);
-      });
-      getDelta(ms, false, function(b) {
-        app.ioServer.emit('nc:delta', JSON.parse(b));
-        if (playbackSpeed > 0) {
-          if (loopTimer !== undefined) {
-            clearTimeout(loopTimer);
+      if(!changed){
+        getNext(ms, function() {
+          loop(ms, true);
+        });
+      }
+        getDelta(ms, key, function(b) {
+          app.ioServer.emit('nc:delta', JSON.parse(b));
+          if (playbackSpeed > 0) {
+            if (loopTimer !== undefined) {
+              clearTimeout(loopTimer);
+            }
+            loopTimer = setTimeout(() => loop(ms, false), 50/(playbackSpeed/200));
           }
-          loopTimer = setTimeout(() => loop(ms, false), 50/(playbackSpeed/200));
-        }
-      });
-    }
+        });
+      }
   }
-}
-
-function getWorkingstep() {
-  var ms = file.ms;
-  let keyjson = JSON.parse(ms.GetKeystateJSON());
-  return keyjson.workingstep;
 }
 
 function sameSetup(newid, oldid) {
@@ -173,6 +170,7 @@ function handleWSInit(command, res) {
 function _loopInit(req, res) {
   // app.logger.debug('loopstate is ' + req.params.loopstate);
   var ms = file.ms;
+  //console.log(req);
   spindleSpeed = Number(ms.GetCurrentSpindleSpeed());
   feedRate = Number(ms.GetCurrentFeedrate());
   if (req.params.loopstate === undefined) {
@@ -197,7 +195,6 @@ function _loopInit(req, res) {
     if (typeof loopStates[path] === 'undefined') {
       loopStates[path] = false;
     }
-
     switch (loopstate) {
       case 'start':
         if (loopStates[path] === true) {
@@ -206,6 +203,12 @@ function _loopInit(req, res) {
         }
         // app.logger.debug('Looping ' + path);
         loopStates[path] = true;
+        if (justchanged) {
+          justchanged = false;
+          getNext(file.ms, function() {
+            loop(file.ms, true);
+          });
+        }
         res.sendStatus(200);
         update('play');
         loop(ms, false);
@@ -248,6 +251,7 @@ function _loopInit(req, res) {
 }
 
 var _wsInit = function(req, res) {
+  let temp = false;
   if (!req.params.command) {
     return;
   }
@@ -256,8 +260,10 @@ var _wsInit = function(req, res) {
   }
 
   handleWSInit(req.params.command, res);
-
-  getDelta(file.ms, false, function(b) {
+  if(justchanged){
+    temp = true;
+  }
+  getDelta(file.ms, justchanged, function(b) {
     app.ioServer.emit('nc:delta', JSON.parse(b));
     if (playbackSpeed > 0) {
       if (loopTimer !== undefined) {

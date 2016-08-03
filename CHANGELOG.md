@@ -1,10 +1,12 @@
 Version 1.7.0
 
 Features:
+- Modifiers for tolerances have been added
 
 Bugfixes:
 
 - Disabled workplans disable all children, not just immediate
+- Feedrate has proper rounding
 
 Version 1.6.0
 

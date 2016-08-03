@@ -6,10 +6,47 @@ var apt = file.apt;
 var find = file.find;
 
 /****************************** Helper Functions ******************************/
+function getModIcon(mod){
+  switch(mod){
+    case 'maximum_material_requirement':
+      return '\u24C2 ';
+    case 'reciprocity_requirement':
+      return '\u24C7 ';
+    case 'least_material_requirement':
+      return '\u24C1 ';
+    case 'any_cross_section':
+      return '(ACS) ';
+    case 'common_zone':
+      return '(CZ) ';
+    case 'each_radial_element':
+      return '(EACH RADIAL ELEMENT)';
+    case 'free_state':
+      return '\u24BB ';
+    case 'line_element':
+      return '(LE) ';
+    case 'major_diameter':
+      return '(MD) ';
+    case 'minor_diameter':
+      return '(LD) ';
+    case 'not_convex':
+      return '(NC) ';
+    case 'pitch_diameter':
+      return '(PD) ';
+    case 'separate_requirement':
+      return '(SEP REQT) ';
+    case 'statistical_tolerance':
+      return '<ST> ';
+    case 'tangent_plane':
+      return '\u24C9 ';
+    default:
+      return mod + 'hasn\'t been implemented yet';
+  }
+}
 
 function getTolerance(id) {
   let name = apt.SetNameGet(id);
   let tolTypeName = tol.GetToleranceType(id);
+  let unit = tol.GetToleranceUnit(id);
   let tolType;
   if (tolTypeName) {
     tolTypeName = tolTypeName.replace(/_/g, ' ').toLowerCase();
@@ -22,6 +59,27 @@ function getTolerance(id) {
   if (name.trim() === '') {
     name = tolTypeName;
   }
+  let range = tol.GetTolerancePlusMinus(id);
+  let rangeName;
+  let mods = tol.GetToleranceModifierAll(id);
+  let modName;
+  if(mods.length > 0){
+    modName = mods.map((mod) => getModIcon(mod)).join(' ');
+    name = name + ' ' + modName;
+  }
+  if (!range || range.flag === false) {
+    rangeName = '';  
+  }
+  else{
+    if(Math.abs(range.upper) === Math.abs(range.lower)){
+      rangeName = '\u00B1 ' + Math.abs(range.upper) + unit;
+      name = name + ' ' + rangeName;
+    }
+    else{
+      rangeName = range.upper + ' ' + range.lower + ' ' + unit;
+      name = name + ' ' + rangeName;
+    }
+  }
 
   return {
     'id': id,
@@ -30,9 +88,10 @@ function getTolerance(id) {
     'tolTypeName': tolTypeName,
     'toleranceType': tolType,
     'value': tol.GetToleranceValue(id),
-    'unit' : tol.GetToleranceUnit(id),
+    'unit' : unit,
     'faces': tol.GetToleranceFaceAll(id),
-    'range': tol.GetTolerancePlusMinus(id),
+    'range': range,
+    'modifiers': mods,
   };
 }
 

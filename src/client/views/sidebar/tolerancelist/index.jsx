@@ -50,7 +50,10 @@ export default class ToleranceList extends React.Component {
           type: 'divider',
           id: -1,
         });
-        Array.prototype.push.apply(tolList, wp.children);
+        Array.prototype.push.apply(tolList, wp.children.map((val) => {
+          val.upcoming = false;
+          return val;
+        }));
       } else {
         tolList.push({
           name: 'No Active Tolerances',
@@ -112,7 +115,6 @@ export default class ToleranceList extends React.Component {
         if (wsList[i] < 0 || !this.props.workingstepCache[wsList[i]].enabled) {
           continue;
         }
-        //console.log(this.props.workingstepCache[wsList[i]]);
         upcomingWS.push(wsList[i]);
         n--;
       } else if (n <= 0) {

@@ -9,6 +9,13 @@ export default class WorkingstepList extends React.Component {
     this.setWS = this.setWS.bind(this);
   }
 
+  componentWillUnmount() {
+    // icons need to be removed/reset before unmounting
+    for (let i in this.props.workingstepCache) {
+      delete this.props.workingstepCache[i].icon;
+    }
+  }
+
   setWS(node) {
     let url = '/v3/nc/state/ws/' + node['id'];
     request.get(url).end();
@@ -56,7 +63,6 @@ export default class WorkingstepList extends React.Component {
   }
 
   render() {
-
     let treeHeight;
     if (this.props.isMobile) {
       treeHeight={'height': '100%'};

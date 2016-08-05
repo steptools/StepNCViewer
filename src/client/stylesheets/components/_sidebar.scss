@@ -567,6 +567,10 @@ $icons: '../icons/';
     .node .icon {
         margin-right: 8px;
         font-size: 24px;
+        
+        &.custom {
+            font-size: 14px;
+        }
     }
 
     .node .textbox {

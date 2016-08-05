@@ -11,3 +11,7 @@ src/client/stylesheets/fonts/*
 *.mtc
 config.js
 models/
+DLLS/dependencies.json
+DLLS/dependencies.dll.js
+DLLS/devdepends.json
+DLLS/devdepends.dll.js

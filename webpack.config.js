@@ -67,11 +67,11 @@ module.exports = {
         }),
         new ExtractTextPlugin("[name].css"),
         new webpack.DllReferencePlugin({
-            context: process.cwd(),
+            context: path.join(process.cwd(),"DLLS"),
             manifest: require('./DLLS/dependencies.json')
         }),
         new webpack.DllReferencePlugin({
-            context: process.cwd(),
+            context: path.join(process.cwd(),"DLLS"),
             manifest: require('./DLLS/devdepends.json')
         })
     ]

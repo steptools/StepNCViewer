@@ -64,9 +64,13 @@ module.exports = {
             "jQuery":   "jquery",
             "Backbone": "backbone",
             "THREE":    "three"
+        }),
+        new ExtractTextPlugin("[name].css"),
+        new webpack.DLLReferencePlugin({
+            context: process.cwd(),
+            manifest: require('depends.json')
         })
-        ,new ExtractTextPlugin("[name].css")
-    ],
+    ]
     
 };
 if(minimize){

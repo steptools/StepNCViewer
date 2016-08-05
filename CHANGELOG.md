@@ -5,6 +5,7 @@ Features:
 - Modifiers for tolerances have been added
 - Tolerances for the next 5 workingsteps are displayed in the tolerance view
 - Datums for tolerances have been added to tolerance pane and properties pane
+- webpack caches modules now 
 
 Bugfixes:
 

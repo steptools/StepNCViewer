@@ -66,9 +66,13 @@ module.exports = {
             "THREE":    "three"
         }),
         new ExtractTextPlugin("[name].css"),
-        new webpack.DLLReferencePlugin({
+        new webpack.DllReferencePlugin({
             context: process.cwd(),
-            manifest: require('depends.json')
+            manifest: require('./DLLS/dependencies.json')
+        }),
+        new webpack.DllReferencePlugin({
+            context: process.cwd(),
+            manifest: require('./DLLS/devdepends.json')
         })
     ]
     

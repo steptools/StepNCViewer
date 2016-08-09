@@ -14,6 +14,7 @@ Bugfixes:
 - Sidebar should scroll properly on initial load
 - Tool properties pane now shows/hides the correct workingsteps
 - Improved program flow
+- Improved touch controls on mobile
 
 Version 1.6.0
 

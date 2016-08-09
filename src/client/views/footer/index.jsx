@@ -1,11 +1,11 @@
 import React from 'react';
 import MobileSidebar from '../mobilesidebar';
 
-let soy = 0; //for detecting offset clicked from top of footerbar
-let soy2 = 0; //for detecting clicks
-let lastTouch = 0;
+let soy = 0; // for detecting offset clicked from top of footerbar
+let firstTouch = {};
 let dragged = false;
-let fClicked=false;//need this to keep animation for soclick
+let fv, fb, db;
+let fClicked = false; //need this to keep animation for soclick
 
 class ButtonImage extends React.Component {
   constructor(props) {
@@ -27,32 +27,72 @@ export default class FooterView extends React.Component {
     this.btnClicked = this.btnClicked.bind(this);
     this.ffBtnClicked = this.ffBtnClicked.bind(this);
     this.bbBtnClicked = this.bbBtnClicked.bind(this);
+    this.footerController = this.footerController.bind(this);
+    this.footerMove = this.footerMove.bind(this);
     this.soMouseDown = this.soMouseDown.bind(this);
     this.soMouseUp = this.soMouseUp.bind(this);
     this.soMouseMove = this.soMouseMove.bind(this);
+    this.soClick = this.soClick.bind(this);
     this.soTouchStart = this.soTouchStart.bind(this);
     this.soTouchEnd = this.soTouchEnd.bind(this);
-    this.soTouchCancel = this.soTouchCancel.bind(this);
     this.soTouchMove = this.soTouchMove.bind(this);
-    this.soClick = this.soClick.bind(this);
   }
 
   btnClicked() {
     this.props.actionManager.emit('sim-pp');
   }
+
   ffBtnClicked() {
     this.props.actionManager.emit('sim-f');
   }
+
   bbBtnClicked() {
     this.props.actionManager.emit('sim-b');
   }
 
-  soMouseDown(info) {
-    $('.Footer-bar .op-text').off('mousedown');
+  footerController() {
+    let mode = this.props.msGuiMode;
+    let offset = fv.offset().top;
+    let height = db.height() + fb.height();
+    let newMode = false;
 
-    let fv = $('.Footer-container');
-    let fb = $('.Footer-bar');
-    let db = $('.drawerbutton');
+    if (!mode && (window.innerHeight - offset) > (height * 2)) {
+      this.props.cbMobileSidebar(true);
+      newMode = true;
+    } else if (mode && (offset > height)) {
+      this.props.cbMobileSidebar(false);
+      newMode = false;
+    }
+
+    if (newMode === false) {
+      let bottomPos = (window.innerHeight - (db.height() + fb.height()));
+      fv.stop().animate({top: bottomPos+'px'}, 500);
+    } else if (newMode === true) {
+      fv.stop().animate({top: '0px'}, 500);
+    }
+    soy = 0;
+  }
+
+  footerMove(y) {
+    //let mode = this.props.msGuiMode;
+    let footerHeight = fb.height() + db.height();
+    let maxTop = window.innerHeight - footerHeight;
+    if (soy > 0) {
+      let newTop = y - soy;
+      //console.log(y, soy, newTop);
+      if (newTop < 0) {
+        newTop = 0;
+      } else if (newTop > maxTop) {
+        newTop = maxTop;
+      }
+      fv.css('top', newTop+'px');
+    }
+  }
+
+  soMouseDown(info) {
+    //console.log('mouse down');
+    $(fv, '.draggable').off('mousedown');
+
     soy = (fv.offset().top + (db.height() + fb.height())) - info.clientY;
 
     $(window).on('mousemove', this.soMouseMove);
@@ -60,161 +100,30 @@ export default class FooterView extends React.Component {
   }
 
   soMouseUp() {
-    $('.Footer-bar .op-text').on('mousedown', this.soMouseDown);
-
-    let fv = $('.Footer-container');
-    let offset = fv.offset().top;
-    let height = $('.drawerbutton').height() + $('.Footer-bar').height();
-    let currentMSGuiMode = this.props.msGuiMode;
-
-    if (soy > 0) {
-      if (!currentMSGuiMode && (window.innerHeight - offset) > (height * 2)) {
-        this.props.cbMobileSidebar(true);
-        currentMSGuiMode = true;
-      } else if (currentMSGuiMode && (offset > height)) {
-        this.props.cbMobileSidebar(false);
-        currentMSGuiMode = false;
-      }
-    }
-
-    if (currentMSGuiMode === false) {
-      let bottomPos = (window.innerHeight - height);
-      fv.animate({top: bottomPos+'px'}, 500);
-    }
-    if (currentMSGuiMode === true) {
-      fv.animate({top: '0px'}, 500);
-    }
-    soy = 0;
-
+    //console.log('mouse up');
+    $(fv, '.draggable').on('mousedown', this.soMouseDown);
     $(window).off('mousemove');
     $(window).off('mouseup');
+
+    if (dragged === false) {
+      return;
+    }
+
+    this.footerController();
   }
 
   soMouseMove(info) {
-    dragged = true;
-    let fv = $('.Footer-container');
-    let fb = $('.Footer-bar').height();
-    let db = $('.drawerbutton').height();
-    let maxTop = window.innerHeight - (fb + db);
-    if (soy > 0) {
-      let newTop = info.clientY - soy;
-      if (newTop < 0) {
-        newTop = 0;
-      } else if (newTop > maxTop) {
-        newTop = maxTop;
-      }
-      fv.css('top', newTop+'px');
-    }
+    this.footerMove(info.clientY);
   }
 
-  soTouchStart(info) {
-    info.preventDefault();
-    info.stopPropagation();
-
-    let fv = $('.Footer-container').offset().top;
-    let fb = $('.Footer-bar').height();
-    let db = $('.drawerbutton').height();
-    soy = (fv + (db + fb)) - info.touches[0].pageY;
-    soy2 = info.touches[0].pageY;
-  }
-
-  soTouchEnd(info) {
-    info.preventDefault();
-    info.stopPropagation();
-
-    let fv = $('.Footer-container');
-    let fb = $('.Footer-bar');
-    let db = $('.drawerbutton');
-    let currentMSGuiMode = this.props.msGuiMode;
-
-    if (soy > 0) {
-      if (soy2 - lastTouch > 0) {
-        this.props.cbMobileSidebar(true);
-        currentMSGuiMode = true;
-      } else if (soy2 - lastTouch < 0) {
-        this.props.cbMobileSidebar(false);
-        currentMSGuiMode = false;
-      }
-    }
-
-    if (currentMSGuiMode === false) {
-      let bottomPos = (window.innerHeight - (db.height() + fb.height()));
-      fv.animate({top: bottomPos+'px'}, 500);
-      //fv.css('height', 'unset');
-    }
-    if (currentMSGuiMode === true) {
-      fv.animate({top: '0px'}, 500);
-      //fv.css('height', '100%');
-    }
-    soy = 0;
-  }
-
-  soTouchCancel(info) {
-    info.preventDefault();
-    info.stopPropagation();
-
-    let fv = $('.Footer-container');
-    let fb = $('.Footer-bar');
-    let db = $('.drawerbutton');
-    let currentMSGuiMode = this.props.msGuiMode;
-
-    if (soy > 0) {
-      if (soy2 - lastTouch > 0) {
-        this.props.cbMobileSidebar(true);
-        currentMSGuiMode = true;
-      } else if (soy2 - lastTouch < 0) {
-        this.props.cbMobileSidebar(false);
-        currentMSGuiMode = false;
-      }
-    }
-
-    if (currentMSGuiMode === false) {
-      let bottomPos = (window.innerHeight - (db.height() + fb.height()));
-      fv.animate({top: bottomPos+'px'}, 500);
-      //fv.css('height', 'unset');
-    }
-    if (currentMSGuiMode === true) {
-      fv.animate({top: '0px'}, 500);
-      //fv.css('height', '100%');
-    }
-    soy = 0;
-  }
-
-  soTouchMove(info) {
-    info.preventDefault();
-    info.stopPropagation();
-
-    lastTouch = info.touches[0].pageY;
-
-    let fv = $('.Footer-container');
-    let fb = $('.Footer-bar').height();
-    let db = $('.drawerbutton').height();
-    let maxTop = window.innerHeight - (fb + db);
-    if (soy > 0) {
-      let newTop = info.touches[0].pageY - soy;
-      if (newTop < 0) {
-        newTop = 0;
-      } else if (newTop > maxTop) {
-        newTop = maxTop;
-      }
-      fv.css('top', newTop+'px');
-    }
-  }
-
-  soClick(info) {
-    info.preventDefault();
-    info.stopPropagation();
+  soClick() {
+    //console.log('click');
 
     if (dragged === true) {
       dragged = false;
       return;
     }
 
-    fClicked=true;
-
-    let fv = $('.Footer-container');
-    let fb = $('.Footer-bar');
-    let db = $('.drawerbutton');
     let currentMSGuiMode = this.props.msGuiMode;
 
     currentMSGuiMode = !currentMSGuiMode;
@@ -222,29 +131,72 @@ export default class FooterView extends React.Component {
 
     if (currentMSGuiMode === false) {
       let bottomPos = (window.innerHeight - (db.height() + fb.height()));
-      fv.animate({top: bottomPos+'px'}, 500);
-      //fv.css('height', 'unset');
-    }
-    if (currentMSGuiMode === true) {
-      fv.animate({top: '0px'}, 500);
-      //fv.css('height', '100%');
+      fv.stop().animate({top: bottomPos+'px'}, 500);
+    } else if (currentMSGuiMode === true) {
+      fv.stop().animate({top: '0px'}, 500);
     }
     soy = 0;
-    fClicked=false;
+    fClicked = false;
+  }
+
+  soTouchStart(info) {
+    //console.log('touch start');
+    info.preventDefault();
+    info.stopPropagation();
+    let touches = info.originalEvent.touches;
+
+    // prevents changes from multiple touches, we only use the first touch
+    if (touches.length > 1) {
+      return;
+    }
+
+    soy = (fv.offset().top + (db.height() + fb.height())) - touches[0].pageY;
+    firstTouch = touches[0];
+    firstTouch.timeStamp = info.timeStamp;
+  }
+
+  soTouchEnd(info) {
+    //console.log('touch end');
+    info.preventDefault();
+    info.stopPropagation();
+
+    let touchDuration = info.timeStamp - firstTouch.timeStamp;
+
+    // if the duration of the touch was less than 250ms consider it a tap
+    if (touchDuration < 250) {
+      fClicked = true;
+      this.soClick();
+      return;
+    }
+
+    this.footerController(this.msGuiMode);
+  }
+
+  soTouchMove(info) {
+    //console.log('touch move');
+    info.preventDefault();
+    info.stopPropagation();
+    let touch = info.originalEvent.touches[0];
+
+    let touchY = touch.pageY - touch.radiusY;
+    this.footerMove(touchY);
   }
 
   componentDidMount() {
-    $('.Footer-bar .op-text').on('mousedown', this.soMouseDown);
-    $('.Footer-bar .op-text').on('click', this.soClick);
-    $('.drawerbutton').on('click', this.soClick);
+    fv = $('.Footer-container');
+    fb = $('.Footer-bar');
+    db = $('.drawerbutton');
+
+    $(fv, '.draggable').on('mousedown', this.soMouseDown);
+    $(fv, '.draggable').on('click', this.soClick);
+    $(fv, '.draggable').on('touchstart', this.soTouchStart);
+    $(fv, '.draggable').on('touchend', this.soTouchEnd);
+    $(fv, '.draggable').on('touchmove', this.soTouchMove);
+    $(fv, '.draggable').on('touchcancel', this.soTouchEnd);
   }
 
   render() {
-    //if (this.props.guiMode === 0) {
-    //  return null;
-    //}
-    let SO;
-    SO = (
+    let SO = (
       <MobileSidebar
         cadManager={this.props.cadManager}
         app={this.props.app}
@@ -283,8 +235,7 @@ export default class FooterView extends React.Component {
       drawerbutton = 'glyphicons glyphicons-chevron-up';
     }
 
-    if((soy == 0) && (!fClicked))
-    {
+    if (soy === 0 && !fClicked) {
       let fv = $('.Footer-container');
       let fb = $('.Footer-bar');
       let db = $('.drawerbutton');
@@ -301,16 +252,11 @@ export default class FooterView extends React.Component {
 
     return (
       <div className='Footer-container'>
-        <div className='drawerbutton'>
+        <div className='drawerbutton draggable'>
             <span className={drawerbutton}/>
         </div>
         <div className='Footer-bar'>
-          <div
-            className='op-text'
-            onTouchStart={this.soTouchStart}
-            onTouchEnd={this.soTouchEnd}
-            onTouchCancel={this.soTouchCancel}
-            onTouchMove={this.soTouchMove}>
+          <div className='op-text draggable'>
             <p>{this.props.wstext}</p>
           </div>
           <div className='footer-buttons'>

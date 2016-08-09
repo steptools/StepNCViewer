@@ -567,10 +567,6 @@ $icons: '../icons/';
     .node .icon {
         margin-right: 8px;
         font-size: 24px;
-        
-        &.custom {
-            font-size: 14px;
-        }
     }
 
     .node .textbox {
@@ -600,6 +596,15 @@ $icons: '../icons/';
         text-align: center;
         height: 30px;
         width: 30px;
+        
+        &.letter {
+            width: auto;
+            min-width: 30px;
+            font-size: 14px;
+            line-height: 20px;
+            background-color: #333333;
+            color: #FFFFFF;
+        }    
     }
 
     &.workpiece {
@@ -616,13 +621,6 @@ $icons: '../icons/';
         background-image: url($icons + 'tolerance/datum.svg');
     }
     
-    &.letter {
-        font-size: 14px;
-        line-height: 20px;
-        background-color: #333333;
-        color: #FFFFFF;
-    }
-
     &.angularity {
         background-image: url($icons + 'tolerance/angularity.svg');
     }

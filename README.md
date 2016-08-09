@@ -45,8 +45,16 @@
   ```
   > npm install
   ```
+  ------------------------------------------------------------------------------
+  6. Webpack the DLLs
+
+  ```
+  > cd DLLs
+  > webpack
+  > cd ..
+  ```
  ------------------------------------------------------------------------------
-  6. Making a server
+  7. Making a server
 
   Making a server will build and then start the server
 
@@ -60,9 +68,7 @@
   > npm run make-release
   ```
   ------------------------------------------------------------------------------
- 
-
- 7. Start a server
+  8. Start a server
 
   If a server doesn't need to be rebuilt, this will be faster than making everytime. 
 

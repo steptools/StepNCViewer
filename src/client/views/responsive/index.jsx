@@ -581,9 +581,12 @@ export default class ResponsiveView extends React.Component {
     } else {
       let cadviewHeight = '80%';
       let fv = $('.Footer-container');
+      let rv = $('.RespView');
+      let fb = $('.Footer-bar');
+      let db = $('.drawerbutton');
 
       if (typeof fv.offset() != 'undefined') {
-        cadviewHeight = fv.offset().top;
+        cadviewHeight = (rv.height() - (db.height() + fb.height()));
         cadviewHeight = cadviewHeight + 'px';
       } else {
         cadviewHeight = '100%';
@@ -598,7 +601,7 @@ export default class ResponsiveView extends React.Component {
     }
 
     return (
-      <div style={{height:'100%'}}>
+      <div className='RespView' style={{height:'100%'}}>
         {HV}
         {SV}
         <div id='cadview-container' style={cadviewStyle}>

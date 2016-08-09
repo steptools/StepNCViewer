@@ -5,6 +5,7 @@ let soy = 0; //for detecting offset clicked from top of footerbar
 let soy2 = 0; //for detecting clicks
 let lastTouch = 0;
 let dragged = false;
+let fClicked=false;//need this to keep animation for soclick
 
 class ButtonImage extends React.Component {
   constructor(props) {
@@ -209,6 +210,8 @@ export default class FooterView extends React.Component {
       return;
     }
 
+    fClicked=true;
+
     let fv = $('.Footer-container');
     let fb = $('.Footer-bar');
     let db = $('.drawerbutton');
@@ -227,6 +230,7 @@ export default class FooterView extends React.Component {
       //fv.css('height', '100%');
     }
     soy = 0;
+    fClicked=false;
   }
 
   componentDidMount() {
@@ -277,6 +281,22 @@ export default class FooterView extends React.Component {
       drawerbutton = 'glyphicons glyphicons-chevron-down';
     } else { //drawer closed
       drawerbutton = 'glyphicons glyphicons-chevron-up';
+    }
+
+    if((soy == 0) && (!fClicked))
+    {
+      let fv = $('.Footer-container');
+      let fb = $('.Footer-bar');
+      let db = $('.drawerbutton');
+      let currentMSGuiMode = this.props.msGuiMode;
+
+      if (currentMSGuiMode === false) {
+        let bottomPos = (window.innerHeight - (db.height() + fb.height()));
+        fv.css('top', bottomPos+'px');
+      }
+      if (currentMSGuiMode === true) {
+        fv.css('top', '0px');
+      }
     }
 
     return (

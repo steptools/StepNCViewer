@@ -210,19 +210,6 @@ var loop = function(ms, key, wsgcode) {
 var parseGCodes = function() {
   let GCodeFile = app.project.substring(0, app.project.length - 5) + 'min';
   let MTCfile = app.project.substring(0, app.project.length - 5) + 'mtc';
-  console.log('');
-  fs.stat(MTCfile, function (err, stats) {
-  console.log(stats);//here we got all information of file in stats variable
-
- if (err) {
-     return console.error(err);
- }
-
- fs.unlink(MTCfile,function(err){
-      if(err) return console.log(err);
-      console.log('file deleted successfully');
- });
-});
   let lineNumber = 0;
 
   let fileRead = new Promise(function(resolve) {
@@ -285,7 +272,7 @@ var _loopInit = function(req, res) {
     init = true;
     workingstepsArrayDriver();
   }
-  WSGCode = parseGCodes();
+
   fs.readFile(MTCfile, function(err, data) {
     if (err) {
       WSGCode = parseGCodes();

@@ -55,9 +55,7 @@ function updateSpeed(speed) {
 
 var MTListen = function() {
   var resCoords = [];
-  var xOffset;
-  var yOffset;
-  var zOffset;
+  var offset = {"x":0,"y":0,"z":0};
   var currentgcode;
   var feedrate;
   var live = false;
@@ -93,10 +91,10 @@ var MTListen = function() {
         }
       });
 
-      var coords = [];
-      coords[0] = parseInt(resCoords[0]);
-      coords[1] = parseInt(resCoords[1]);
-      coords[2] = parseInt(resCoords[2]);
+      var coords = {};
+      coords.x = parseInt(resCoords[0]);
+      coords.y = parseInt(resCoords[1]);
+      coords.z = parseInt(resCoords[2]);
 
       let addr = 'http://' + app.config.machineList[currentMachine].address + '/';
       let mtc = request.get(addr);
@@ -112,7 +110,7 @@ var MTListen = function() {
             }
           });
           feedrateUnits = feedrateUnits['$']['units'];
-          resolve([coords, xOffset, yOffset, zOffset, currentgcode, feedrate, feedrateUnits, live, gcode]);
+          resolve({"coords":coords, "offset":offset,"currentGcodeNumber":currentgcode,"currentGcode":gcode,"feedrate":feedrate,"feedUnits":feedrateUnits,"isLive":live});
         });
       });
     });
@@ -148,13 +146,13 @@ var _getDelta = function(ms, key, cb) {
     MTCHold.feedrate = 'Not defined';
     MTCHold.gcode = 'Not defined';
     MTCHold.spindleSpeed = 'Not defined';
-    MTCHold.feedrate = res[5];
-    MTCHold.feedrateUnits = res[6];
-    MTCHold.gcode = WSGCode['GCode'][res[4]];
-    MTCHold.live = res[7];
-    MTCHold.realgcode = res[8];
+    MTCHold.feedrate = res.feedrate;
+    MTCHold.feedrateUnits = res.feedUnits;
+    MTCHold.gcode = WSGCode['GCode'][res.currentGcodeNumber];
+    MTCHold.live = res.isLive;
+    MTCHold.realgcode = res.currentGcode;
 
-    if (findWS(res[4]) ) {
+    if (findWS(res.currentGcodeNumber) ) {
       ms.GoToWS(WSArray[WSGCodeIndex]);
       holder = JSON.parse(ms.GetKeystateJSON());
       holder.next = true;
@@ -162,9 +160,9 @@ var _getDelta = function(ms, key, cb) {
       holder = JSON.parse(ms.GetDeltaJSON());
       holder.next = false;
     }
-    holder.mtcoords = res[0];
-    holder.gcode = res[4];
-    holder.feed = res[5];
+    holder.mtcoords = res.coords;
+    holder.gcode = res.currentGcodeNumber;
+    holder.feed = res.feedrate;
     let workplansetup = step.getSetupFromId(holder['workingstep']);
     if (workplansetup !== 0) {
       holder.offset = apt.GetWorkplanSetup(workplansetup);

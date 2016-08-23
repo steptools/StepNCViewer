@@ -332,7 +332,7 @@ export default class NC extends THREE.EventDispatcher {
                 if(obj !== undefined) {
                         this._object3D.add(this.traceLine);
                         this._overlay3D.add(this.traceLine);
-                        this.getPathTrace(delta.mtcoords[0], delta.mtcoords[1], delta.mtcoords[2]);
+                        this.getPathTrace(delta.mtcoords.x, delta.mtcoords.y, delta.mtcoords.z);
                         //console.log(self.traceLine);
                     if (obj.rendered !== false && obj.usage == "cutter") {
                         let transform = new THREE.Matrix4();
@@ -343,7 +343,7 @@ export default class NC extends THREE.EventDispatcher {
                         let scale = new THREE.Vector3();
                         transform.decompose(position, quaternion, scale);
 
-                        let mtposition = new THREE.Vector3(delta.mtcoords[0], delta.mtcoords[1], delta.mtcoords[2]);
+                        let mtposition = new THREE.Vector3(delta.mtcoords.x, delta.mtcoords.y, delta.mtcoords.z);
                         let mtoffset = new THREE.Vector3(delta.offset[0], delta.offset[1], delta.offset[2]);
                         mtposition.sub(mtoffset);
 

@@ -26,6 +26,39 @@ let changed=false;
 var MTCHold = {};
 
 let currentMachine = 0;
+
+let feedUnits ="";
+let resolverRunning=false;
+let resolveFeedUnits = ()=>{
+  return new Promise(function(resolve) {
+    if(feedUnits!=="") {
+      //We already set feedUnits. Don't go get it again.
+      resolve(feedUnits);
+    }
+    else if (resolverRunning) {
+      //Somebody's looking for feedUnits but we're still trying to get it. Wait.
+      while(feedUnits===""){};
+      resolve(feedUnits);
+    }
+    else resolverRunning=true;
+    let addr = 'http://' + app.config.machineList[currentMachine].address + '/';
+    request.get(addr)
+        .then(function (res,err) {
+          parseXMLString.parseString(res.text, function (error, result) {
+            let ret = result['MTConnectDevices']['Devices'][0]['Device'][0]['Components'][0]['Controller'][0]['Components'][0]['Path'][0]['DataItems'][0]['DataItem'];
+            let feedrateUnits = _.find(ret, function (dataitem) {
+              if (dataitem['$'].type === 'PATH_FEEDRATE') {
+                return true;
+              } else {
+                return false;
+              }
+            });
+            feedUnits = feedrateUnits['$']['units'];
+            resolve(feedUnits);
+          });
+        });
+  });
+};
 /****************************** Helper Functions ******************************/
 
 function getWorkingstepsArray(id){
@@ -95,24 +128,31 @@ var MTListen = function() {
       coords.x = parseInt(resCoords[0]);
       coords.y = parseInt(resCoords[1]);
       coords.z = parseInt(resCoords[2]);
-
-      let addr = 'http://' + app.config.machineList[currentMachine].address + '/';
-      let mtc = request.get(addr);
-
-      mtc.end(function (err, res) {
-        parseXMLString.parseString(res.text, function (error, result) {
-          let ret = result['MTConnectDevices']['Devices'][0]['Device'][0]['Components'][0]['Controller'][0]['Components'][0]['Path'][0]['DataItems'][0]['DataItem'];
-          let feedrateUnits = _.find(ret, function(dataitem) {
-            if (dataitem['$'].type === 'PATH_FEEDRATE') {
-              return true;
-            } else {
-              return false;
-            }
+      if(feedUnits==="")
+      {
+        resolveFeedUnits().then(function(res) {
+          resolve({
+            "coords": coords,
+            "offset": offset,
+            "currentGcodeNumber": currentgcode,
+            "currentGcode": gcode,
+            "feedrate": feedrate,
+            "feedUnits": res,
+            "isLive": live
           });
-          feedrateUnits = feedrateUnits['$']['units'];
-          resolve({"coords":coords, "offset":offset,"currentGcodeNumber":currentgcode,"currentGcode":gcode,"feedrate":feedrate,"feedUnits":feedrateUnits,"isLive":live});
         });
-      });
+      }
+      else {
+        resolve({
+          "coords": coords,
+          "offset": offset,
+          "currentGcodeNumber": currentgcode,
+          "currentGcode": gcode,
+          "feedrate": feedrate,
+          "feedUnits": feedUnits,
+          "isLive": live
+        });
+      }
     });
   });
 };

@@ -3,6 +3,8 @@ var file = require('./file');
 var find = file.find;
 var apt = file.apt;
 var step = require('./step');
+var getMultipartRequest = require('./getmultipartrequest');
+
 var request = require('superagent');
 var parseXMLString = require('xml2js');
 var _ = require('lodash');
@@ -124,7 +126,7 @@ var MTListen = function() {
         }
       });
 
-      var coords = {};
+      let coords = {};
       coords.x = parseInt(resCoords[0]);
       coords.y = parseInt(resCoords[1]);
       coords.z = parseInt(resCoords[2]);
@@ -191,7 +193,27 @@ var _getDelta = function(ms, key, cb) {
     MTCHold.gcode = WSGCode['GCode'][res.currentGcodeNumber];
     MTCHold.live = res.isLive;
     MTCHold.realgcode = res.currentGcode;
-
+    let offset = [0, 0, 0, 0, 0, 1, 1, 0, 0];
+    let workplansetup = 0;
+    let curws = ms.GetWSID();
+    if (findWS(res.currentGcondeNumber)) {
+      workplansetup = step.getSetupFromId(WSArray[WSGCodeIndex]);
+    } else {
+      workplansetup = step.getSetupFromId(curws);
+    }
+    if (workplansetup !== 0) {
+      offset = apt.GetWorkplanSetup(workplansetup);
+    }
+    offset.x = offset[0];
+    offset.y = offset[1];
+    offset.z = offset[2];
+    offset.i = offset[3];
+    offset.j = offset[4];
+    offset.k = offset[5];
+    offset.a = offset[6];
+    offset.b = offset[7];
+    offset.c = offset[8];
+    ms.SetToolPosition(res.coords.x-offset.x,res.coords.y-offset.y,res.coords.z-offset.z,0,0,1);
     if (findWS(res.currentGcodeNumber) ) {
       ms.GoToWS(WSArray[WSGCodeIndex]);
       holder = JSON.parse(ms.GetKeystateJSON());
@@ -203,12 +225,7 @@ var _getDelta = function(ms, key, cb) {
     holder.mtcoords = res.coords;
     holder.gcode = res.currentGcodeNumber;
     holder.feed = res.feedrate;
-    let workplansetup = step.getSetupFromId(holder['workingstep']);
-    if (workplansetup !== 0) {
-      holder.offset = apt.GetWorkplanSetup(workplansetup);
-    } else {
-      holder.offset = [0, 0, 0, 0, 0, 1, 1, 0, 0];
-    }
+
     let response = JSON.stringify(holder);
     //app.logger.debug('got ' + response);
     cb(response);
@@ -230,7 +247,7 @@ function getToWS(wsId, ms, cb) {
   cb();
 }
 
-var loop = function(ms, key, wsgcode) {
+var loop = function(ms, key) {
   if (loopStates[path] === true) {
     _getDelta(ms, key, function(b) {
       app.ioServer.emit('nc:delta', JSON.parse(b));

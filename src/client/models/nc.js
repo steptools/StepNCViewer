@@ -9,7 +9,6 @@ import Annotation          from './annotation';
 import DataLoader from './data_loader'
 import Shell from './shell'
 
-
 /*************************************************************************/
 
 export default class NC extends THREE.EventDispatcher {
@@ -22,25 +21,9 @@ export default class NC extends THREE.EventDispatcher {
         this._loader = loader;
         this._objects = {};
         this.type = 'nc';
-
-        this.traceNum = 0;
-        var trace = new THREE.BufferGeometry();
-        this.tracePoint = new Float32Array(this.traceNum * 3);
-        trace.addAttribute('position', new THREE.BufferAttribute(this.tracePoint, 3));
-        this.traceLine = new THREE.Line(trace, new THREE.LineBasicMaterial({
-            color: 0xffa07a,
-            linewidth: 20
-        }));
-				this.traceLine.visible = true;
-
-
         this.raycaster = new THREE.Raycaster();
         this._object3D = new THREE.Object3D();
         this._overlay3D = new THREE.Object3D();
-				this._object3D.add(this.traceLine);
-				this._overlay3D.add(this.traceLine);
-
-
         this._annotation3D = new THREE.Object3D();
         this.state = {
             selected:       false,
@@ -51,16 +34,6 @@ export default class NC extends THREE.EventDispatcher {
             collapsed:      false
         }
     }
-
-    getPathTrace(x, y, z) {
-        var self = this;
-        self.traceLine.geometry.attributes.position[self.traceNum * 3 + 0] = x;
-        self.traceLine.geometry.attributes.position[self.traceNum * 3 + 1] = y;
-        self.traceLine.geometry.attributes.position[self.traceNum * 3 + 2] = z;
-        self.traceNum++;
-        self.traceLine.geometry.attributes.position.needsUpdate = true;
-    }
-
 
     addModel(model, usage, type, id, transform, bbox) {
         // console.log('Add Model(' + usage + '): ' + id);
@@ -100,11 +73,11 @@ export default class NC extends THREE.EventDispatcher {
                 //This is where the shell gets sent when its loaded so that the full mesh can be added to the 3D objects
                 let material = new THREE.ShaderMaterial(new THREE.VelvetyShader());
                 let mesh = new THREE.Mesh(event.shell.getGeometry(), material, false);
-                
+
                 if (obj.bbox.isEmpty()) {
                     obj.bbox = event.shell.getBoundingBox();
                 }
-                
+
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
                 mesh.userData = obj;
@@ -132,10 +105,24 @@ export default class NC extends THREE.EventDispatcher {
                 }
             });
             model.addEventListener("annotationMakeVisible", (event)=>{
-              this._annotation3D.add(obj.annotation3D);
+              _.each(model._addedGeometry, (line)=>{
+                obj.annotation3D.add(line);
+              });
             });
+
+            let removeAnno = () => {
+                model.removeEventListener('annotationEndLoad', removeAnno);
+                _.each(model._addedGeometry, (line)=>{
+                    obj.annotation3D.remove(line);
+                });
+            };
+
             model.addEventListener("annotationMakeNonVisible", (event)=>{
-                this._annotation3D.remove(obj.annotation3D);
+              if (!model._addedGeometry || model._addedGeometry.length === 0) {
+                  model.addEventListener('annotationEndLoad', removeAnno);
+              } else {
+                  removeAnno();
+              }
             });
         }
     }
@@ -210,7 +197,7 @@ export default class NC extends THREE.EventDispatcher {
         mouse.x = (mouseX / window.innerWidth) * 2 - 1;
         mouse.y = -(mouseY / window.innerHeight) * 2 + 1;
         this.raycaster.setFromCamera(mouse, camera);
-        
+
         let objs = _.map(_.values(this._objects), (obj) => obj.object3D);
         let intersections = this.raycaster.intersectObjects(objs, true);
         // Did we hit anything?
@@ -235,32 +222,33 @@ export default class NC extends THREE.EventDispatcher {
         let alter = false;
         //Two types of changes- Keyframe and delta.
         //Keyframe doesn't have a 'prev' property.
-        //console.log(delta.next);
-        if (delta.next) {
+        if (!delta.hasOwnProperty('prev')){
             //For keyframes, we need to remove current toolpaths, cutters,
             // As-Is, and To-Be geometry (Collectively, "Stuff") and load new ones.
+            // console.log("Keyframe recieved");
             // this._loader.annotations = {};
 
             // Delete existing Stuff.
             var oldgeom = _.filter(_.values(this._objects), (geom) => (
-                geom.usage =="cutter" || geom.usage =="tobe" || 
+                geom.usage =="cutter" || geom.usage =="tobe" ||
                 geom.usage =="asis"|| geom.usage=="machine" || geom.usage=="fixture")
             );
             _.each(oldgeom,(geom)=> {
-                this._object3D.remove(geom.object3D);
-                this._overlay3D.remove(geom.object3D);
+                //this._object3D.remove(geom.object3D);
+                //this._overlay3D.remove(geom.object3D);
                 geom.rendered = false;
+                geom.object3D.visible = false;
             });
 
-            var oldannotations = this._loader._annotations;
-            _.each(_.values(this._loader._annotations), (anno) => {
-                anno.removeFromScene();
+            var oldannotations =_.values(this._loader._annotations);
+            _.each(oldannotations, (oldannotation) => {
+                oldannotation.removeFromScene();
             });
 
             //Load new Stuff.
             var toolpaths = _.filter(delta.geom, (geom) => geom.usage == 'toolpath' || (_.has(geom, 'polyline') && geom.usage =="tobe"));
             var geoms = _.filter(delta.geom, (geom) => (
-                geom.usage =='cutter' || (geom.usage =='tobe' && _.has(geom, 'shell')) || 
+                geom.usage =='cutter' || (geom.usage =='tobe' && _.has(geom, 'shell')) ||
                 geom.usage =="asis"||geom.usage=='machine' || geom.usage=="fixture")
             );
             _.each(toolpaths, (geomData) => {
@@ -290,8 +278,9 @@ export default class NC extends THREE.EventDispatcher {
                 if(this._objects[name]) {
                     let obj = this._objects[name];
                     if (!obj.rendered) {
-                        this._overlay3D.add(obj.object3D);
+                        //this._overlay3D.add(obj.object3D);
                         obj.rendered = true;
+                        obj.visible = true;
                         obj.setVisible();
                         this._objects[name] = obj;
                     }
@@ -317,7 +306,7 @@ export default class NC extends THREE.EventDispatcher {
 
             this._loader.runLoadQueue();
             alter = true;
-            this.app.actionManager.emit('change-workingstep',delta.workingstep);
+            this.app.actionManager.emit('change-workingstep', delta.workingstep);
             //  let lineGeometries = event.annotation.getGeometry();
         }
         else {
@@ -330,11 +319,7 @@ export default class NC extends THREE.EventDispatcher {
                 }
                 let obj = this._objects[geom.id];
                 if(obj !== undefined) {
-                        this._object3D.add(this.traceLine);
-                        this._overlay3D.add(this.traceLine);
-                        this.getPathTrace(delta.mtcoords.x, delta.mtcoords.y, delta.mtcoords.z);
-                        //console.log(self.traceLine);
-                    if (obj.rendered !== false && obj.usage == "cutter") {
+                    if (obj.rendered !== false) {
                         let transform = new THREE.Matrix4();
                         if (!geom.xform) return;
                         transform.fromArray(geom.xform);
@@ -342,59 +327,15 @@ export default class NC extends THREE.EventDispatcher {
                         let quaternion = new THREE.Quaternion();
                         let scale = new THREE.Vector3();
                         transform.decompose(position, quaternion, scale);
-
-                        let mtposition = new THREE.Vector3(delta.mtcoords.x, delta.mtcoords.y, delta.mtcoords.z);
-                        let mtoffset = new THREE.Vector3(delta.offset[0], delta.offset[1], delta.offset[2]);
-                        mtposition.sub(mtoffset);
-
-                        let xvec = new THREE.Vector3(delta.offset[6], delta.offset[7], delta.offset[8]);
-                        let zvec = new THREE.Vector3(delta.offset[3], delta.offset[4], delta.offset[5]);
-
-                        let yvec = new THREE.Vector3();
-                        yvec.crossVectors(zvec, xvec);
-
-                        let trans = new THREE.Matrix3();
-
-                        trans.set(
-                          xvec.getComponent(0), xvec.getComponent(1), xvec.getComponent(2),
-                          yvec.getComponent(0), yvec.getComponent(1), yvec.getComponent(2),
-                          zvec.getComponent(0), zvec.getComponent(1), zvec.getComponent(2)
-                        );
-
-												mtposition.applyMatrix3(trans);
-
-                        obj.object3D.position.copy(mtposition);
-                        obj.object3D.quaternion.copy(quaternion);
-                        //console.log(obj.object3D.position);
-
                         // we need to update all 3D properties so that
                         // annotations, overlays and objects are all updated
-                        obj.object3D.position.copy(mtposition);
+                        obj.object3D.position.copy(position);
                         obj.object3D.quaternion.copy(quaternion);
-                        obj.annotation3D.position.copy(mtposition);
+                        obj.annotation3D.position.copy(position);
                         obj.annotation3D.quaternion.copy(quaternion);
-                        obj.overlay3D.position.copy(mtposition);
+                        obj.overlay3D.position.copy(position);
                         obj.overlay3D.quaternion.copy(quaternion);
                         alter = true;
-                    } else if (obj.rendered !== false) {
-                      let transform = new THREE.Matrix4();
-                      if (!geom.xform) {
-                        return;
-                      }
-                      transform.fromArray(geom.xform);
-
-                      let position = new THREE.Vector3();
-                      let quaternion = new THREE.Quaternion();
-                      let scale = new THREE.Vector3();
-                      transform.decompose(position, quaternion, scale);
-
-                      obj.object3D.position.copy(position);
-                      obj.object3D.quaternion.copy(quaternion);
-                      obj.annotation3D.position.copy(position);
-                      obj.annotation3D.quaternion.copy(quaternion);
-                      obj.overlay3D.position.copy(position);
-                      obj.overlay3D.quaternion.copy(quaternion);
-                      alter = true;
                     }
                 }
             });
@@ -403,9 +344,9 @@ export default class NC extends THREE.EventDispatcher {
         return alter;
     }
 
-    getSelected() { 
-       if(this.state.selected) 
-        return [this]; 
+    getSelected() {
+       if(this.state.selected)
+        return [this];
         else
             return [];
     }

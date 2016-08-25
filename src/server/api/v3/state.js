@@ -226,9 +226,7 @@ var _getDelta = function(ms, key, cb) {
     holder.gcode = res.currentGcodeNumber;
     holder.feed = res.feedrate;
 
-    let response = JSON.stringify(holder);
-    //app.logger.debug('got ' + response);
-    cb(response);
+    cb(holder);
   });
 };
 
@@ -250,7 +248,7 @@ function getToWS(wsId, ms, cb) {
 var loop = function(ms, key) {
   if (loopStates[path] === true) {
     _getDelta(ms, key, function(b) {
-      app.ioServer.emit('nc:delta', JSON.parse(b));
+      app.ioServer.emit('nc:delta', b);
       app.ioServer.emit('nc:mtc', MTCHold);
       if (playbackSpeed > 0) {
         if (loopTimer !== undefined) {

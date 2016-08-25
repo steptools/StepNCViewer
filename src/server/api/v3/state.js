@@ -30,36 +30,36 @@ var MTCHold = {};
 let currentMachine = 0;
 
 let feedUnits ="";
-let resolverRunning=false;
+let feedUnitResolver = null;
 let resolveFeedUnits = ()=>{
-  return new Promise(function(resolve) {
+  if(feedUnitResolver) return feedUnitResolver;
+  feedUnitResolver = new Promise(function(resolve) {
     if(feedUnits!=="") {
       //We already set feedUnits. Don't go get it again.
+      feedUnitResolver = null;
       resolve(feedUnits);
     }
-    else if (resolverRunning) {
-      //Somebody's looking for feedUnits but we're still trying to get it. Wait.
-      while(feedUnits===""){};
-      resolve(feedUnits);
-    }
-    else resolverRunning=true;
-    let addr = 'http://' + app.config.machineList[currentMachine].address + '/';
-    request.get(addr)
-        .then(function (res,err) {
-          parseXMLString.parseString(res.text, function (error, result) {
-            let ret = result['MTConnectDevices']['Devices'][0]['Device'][0]['Components'][0]['Controller'][0]['Components'][0]['Path'][0]['DataItems'][0]['DataItem'];
-            let feedrateUnits = _.find(ret, function (dataitem) {
-              if (dataitem['$'].type === 'PATH_FEEDRATE') {
-                return true;
-              } else {
-                return false;
-              }
+    else {
+      let addr = 'http://' + app.config.machineList[currentMachine].address + '/';
+      request.get(addr)
+          .then(function (res, err) {
+            parseXMLString.parseString(res.text, function (error, result) {
+              let ret = result['MTConnectDevices']['Devices'][0]['Device'][0]['Components'][0]['Controller'][0]['Components'][0]['Path'][0]['DataItems'][0]['DataItem'];
+              let feedrateUnits = _.find(ret, function (dataitem) {
+                if (dataitem['$'].type === 'PATH_FEEDRATE') {
+                  return true;
+                } else {
+                  return false;
+                }
+              });
+              feedUnits = feedrateUnits['$']['units'];
+              feedUnitResolver = null;
+              resolve(feedUnits);
             });
-            feedUnits = feedrateUnits['$']['units'];
-            resolve(feedUnits);
           });
-        });
+    }
   });
+  return feedUnitResolver;
 };
 /****************************** Helper Functions ******************************/
 

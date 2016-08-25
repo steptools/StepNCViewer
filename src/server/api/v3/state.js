@@ -196,7 +196,7 @@ var _getDelta = function(ms, key, cb) {
     let offset = [0, 0, 0, 0, 0, 1, 1, 0, 0];
     let workplansetup = 0;
     let curws = ms.GetWSID();
-    if (findWS(res.currentGcondeNumber)) {
+    if (findWS(res.currentGcodeNumber)) {
       workplansetup = step.getSetupFromId(WSArray[WSGCodeIndex]);
     } else {
       workplansetup = step.getSetupFromId(curws);

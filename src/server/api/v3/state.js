@@ -260,18 +260,17 @@ var loop = function(ms, key) {
   }
 };
 
-var parseGCodes = function() {
-  let GCodeFile = app.project.substring(0, app.project.length - 5) + 'min';
-  let MTCfile = app.project.substring(0, app.project.length - 5) + 'mtc';
-  let lineNumber = 0;
-
-  let fileRead = new Promise(function(resolve) {
-    var MTCcontent = [];
-    var GCcontent = [];
+let mtcFile = null;
+var makeMTC = function(fname){
+  return new Promise((resolve)=>{let GCodeFile = fname+".min";
     fs.readFile(GCodeFile, function(err, res) {
+      let MTCcontent = [];
+      let GCcontent = [];
+      let MTCFname = fname+".mtc";
+      let lineNumber = 0;
       var GCodes = null;
       if (res) {
-        GCodes = res.toString().split('\n');
+        GCodes = res.toString().split('\r\n');
       }
       _.each(GCodes, function(line) {
         if (line[0] === '(') {
@@ -279,41 +278,50 @@ var parseGCodes = function() {
             MTCcontent.push(lineNumber);
           }
         } else {
-					if (line.substring(0,2) != 'IF') {
-	          GCcontent.push(line);
-	          lineNumber++;
-					}
-
+          if (line.substring(0,2) != 'IF') {
+            GCcontent.push(line);
+            lineNumber++;
+          }
         }
       });
-      resolve([MTCcontent, GCcontent]);
+      MTCcontent[0]=0; //First WS can include pre-setup info
+      let rtn = {'worksteps':MTCcontent,'GCode':GCcontent};
+      fs.writeFile(MTCFname,
+          JSON.stringify(rtn,null,1),
+          (err)=>{
+            if(err) console.log(err);
+            resolve(rtn);
+          });
     });
   });
-
-  fileRead.then(function(res) {
-    res[0].shift();
-
-    var JSONContent = '{\"worksteps\" : [\n0,\n';
-    _.each(res[0], function(code) {
-      JSONContent = JSONContent + code.toString() + ',\n';
+};
+var parsePromise = null; //For preventing race conditions
+var parseGCodes = function(fname) {
+  let MTCFname = fname+'.mtc';
+  if(!parsePromise) {
+    parsePromise = new Promise(function (resolve) {
+      if (mtcFile){
+        parsePromise = null;
+        resolve(mtcFile);
+      }
+      fs.readFile(MTCFname, function (err, res) {
+        if (err) { //No MTC File, make it.
+          makeMTC(fname)
+          .then((rtn)=> {
+            mtcFile = rtn;
+            parsePromise = null;
+            resolve(rtn);
+          });
+        }
+        else { //Read from MTC File.
+          mtcFile = JSON.parse(res.toString());
+          parsePromise = null;
+          resolve(mtcFile);
+        }
+      });
     });
-    JSONContent = JSONContent.substring(0, JSONContent.length - 2)  + '\n],';
-
-    fs.writeFile(MTCfile, JSONContent, (err) => {
-      console.log(err);
-    });
-
-    JSONContent = JSONContent + '\n\n\"GCode\" : [\n';
-    _.each(res[1], function(code) {
-      JSONContent = JSONContent + '\"' + code.toString().substring(0, code.toString().length - 1) + '\",\n';
-    });
-    JSONContent = JSONContent.substring(0, JSONContent.length - 2)  + '\n]}';
-
-    fs.writeFile(MTCfile, JSONContent, {flag: "w+"}, (err) => {
-      console.log(err);
-    });
-    MTCHold.gcode = WSGCode['GCode'][MTCHold.gcode];
-  });
+  }
+  return parsePromise;
 };
 
 /***************************** Endpoint Functions *****************************/
@@ -326,16 +334,9 @@ var _loopInit = function(req, res) {
     workingstepsArrayDriver();
   }
 
-  fs.readFile(MTCfile, function(err, data) {
-    if (err) {
-      WSGCode = parseGCodes();
-    } else {
-      if (data) {
-        WSGCode = JSON.parse(data.toString());
-        MTCHold.gcode = WSGCode['GCode'][MTCHold.gcode];
-      }
-    }
-
+  parseGCodes(app.project.substring(0,app.project.length-6))
+  .then((parsed)=>{
+    WSGCode = parsed;
     if (req.params.loopstate === undefined) {
       if (loopStates[path] === true) {
         res

@@ -363,7 +363,7 @@ var _loopInit = function(req, res) {
           loopStates[path] = true;
           res.status(200).send('OK');
           update('play');
-          loop(ms, false, JSON.parse(data.toString()));
+          loop(ms, false);
           break;
         case 'stop':
           if (loopStates[path] === false) {

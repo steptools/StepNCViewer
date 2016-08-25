@@ -196,7 +196,9 @@ var _getDelta = function(ms, key, cb) {
     let offset = [0, 0, 0, 0, 0, 1, 1, 0, 0];
     let workplansetup = 0;
     let curws = ms.GetWSID();
+    let switchWS = false;
     if (findWS(res.currentGcodeNumber)) {
+      switchWS = true;
       workplansetup = step.getSetupFromId(WSArray[WSGCodeIndex]);
     } else {
       workplansetup = step.getSetupFromId(curws);
@@ -214,7 +216,7 @@ var _getDelta = function(ms, key, cb) {
     offset.b = offset[7];
     offset.c = offset[8];
     ms.SetToolPosition(res.coords.x-offset.x,res.coords.y-offset.y,res.coords.z-offset.z,0,0,1);
-    if (findWS(res.currentGcodeNumber) ) {
+    if (switchWS) {
       ms.GoToWS(WSArray[WSGCodeIndex]);
       holder = JSON.parse(ms.GetKeystateJSON());
       holder.next = true;

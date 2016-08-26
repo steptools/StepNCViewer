@@ -193,7 +193,7 @@ var _getDelta = function(ms, key, cb) {
     MTCHold.gcode = WSGCode['GCode'][res.currentGcodeNumber];
     MTCHold.live = res.isLive;
     MTCHold.realgcode = res.currentGcode;
-    let offset = [0, 0, 0, 0, 0, 1, 1, 0, 0];
+    let offset = [0, 0, 0, 0, 0, 1, 1, 0, 0]; //xyz ijk abc
     let workplansetup = 0;
     let curws = ms.GetWSID();
     let switchWS = false;
@@ -215,7 +215,7 @@ var _getDelta = function(ms, key, cb) {
     offset.a = offset[6];
     offset.b = offset[7];
     offset.c = offset[8];
-    ms.SetToolPosition(res.coords.x-offset.x,res.coords.y-offset.y,res.coords.z-offset.z,0,0,1);
+    ms.SetToolPosition(res.coords.x,res.coords.y,res.coords.z,0,0,1);
     if (switchWS) {
       ms.GoToWS(WSArray[WSGCodeIndex]);
       holder = JSON.parse(ms.GetKeystateJSON());

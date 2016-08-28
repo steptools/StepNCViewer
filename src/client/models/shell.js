@@ -38,7 +38,11 @@ export default class Shell extends THREE.EventDispatcher {
         return this._geometry;
     }
 
-    addGeometry(position, normals, colors, faces) {
+    setGeometry(geom) {
+        this._geometry = geom;
+    }
+
+    addGeometry(position, normals, colors, values, faces) {
         this.dispatchEvent({type: "shellStartLoad", shell: this});
         // Create the geometry to hold the data
         // Can also create a new buffergeometry per face and then geometry will be an array of buffergeom
@@ -47,6 +51,7 @@ export default class Shell extends THREE.EventDispatcher {
         this._geometry.addAttribute('position', new THREE.BufferAttribute(this._size * 3, 3));
         this._geometry.addAttribute('normal',   new THREE.BufferAttribute(this._size * 3, 3));
         this._geometry.addAttribute('color',    new THREE.BufferAttribute(this._size * 3, 3));
+        this._geometry.addAttribute('values',   new THREE.BufferAttribute(values, 1));
         this._geometry.addAttribute('faces',    new THREE.BufferAttribute(this._size * 3, 3));
 
         // Now load the rest of the data

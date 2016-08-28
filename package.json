@@ -1,5 +1,5 @@
 {
-  "name": "nodejs",
+  "name": "nc.js",
   "version": "2.0.0",
   "description": "CAD visualization for the web",
   "main": "src/server/api_server.js",

@@ -6,8 +6,9 @@
 
 import Assembly from './assembly';
 import Annotation          from './annotation';
-import DataLoader from './data_loader'
-import Shell from './shell'
+import DataLoader from './data_loader';
+import Shell from './shell';
+import {makeGeometry, processKeyframe, processDelta} from './nc_delta';
 
 /*************************************************************************/
 
@@ -82,6 +83,7 @@ export default class NC extends THREE.EventDispatcher {
                 mesh.receiveShadow = true;
                 mesh.userData = obj;
                 obj.object3D.add(mesh);
+                obj.version = 0;
                 if (usage === 'asis') {
                     // TODO: add selector for displaying asis geometry or not
                     obj.rendered = false;
@@ -219,129 +221,198 @@ export default class NC extends THREE.EventDispatcher {
     }
 
     applyDelta(delta) {
+        let self = this;
         let alter = false;
-        //Two types of changes- Keyframe and delta.
-        //Keyframe doesn't have a 'prev' property.
-        if (!delta.hasOwnProperty('prev')){
-            //For keyframes, we need to remove current toolpaths, cutters,
-            // As-Is, and To-Be geometry (Collectively, "Stuff") and load new ones.
-            // console.log("Keyframe recieved");
-            // this._loader.annotations = {};
-
-            // Delete existing Stuff.
-            var oldgeom = _.filter(_.values(this._objects), (geom) => (
-                geom.usage =="cutter" || geom.usage =="tobe" ||
-                geom.usage =="asis"|| geom.usage=="machine" || geom.usage=="fixture")
-            );
-            _.each(oldgeom,(geom)=> {
-                //this._object3D.remove(geom.object3D);
-                //this._overlay3D.remove(geom.object3D);
-                geom.rendered = false;
-                geom.object3D.visible = false;
-            });
-
-            var oldannotations =_.values(this._loader._annotations);
-            _.each(oldannotations, (oldannotation) => {
-                oldannotation.removeFromScene();
-            });
-
-            //Load new Stuff.
-            var toolpaths = _.filter(delta.geom, (geom) => geom.usage == 'toolpath' || (_.has(geom, 'polyline') && geom.usage =="tobe"));
-            var geoms = _.filter(delta.geom, (geom) => (
-                geom.usage =='cutter' || (geom.usage =='tobe' && _.has(geom, 'shell')) ||
-                geom.usage =="asis"||geom.usage=='machine' || geom.usage=="fixture")
-            );
-            _.each(toolpaths, (geomData) => {
-                let name = geomData.polyline.split('.')[0];
-                if (!this._loader._annotations[name]){
-                    let annotation = new Annotation(geomData.id, this, this);
-                    let transform = DataLoader.parseXform(geomData.xform, true);
-                    this.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
-                    // Push the annotation for later completion
-                    this._loader._annotations[name] = annotation;
-                    var url = '/v3/nc/';
-                    this._loader.addRequest({
-                        path: name,
-                        baseURL: url,
-                        type: 'annotation'
+        // Handle each geom update in the delta
+        _.each(delta.geom, function(geom) {
+            // Two types of changes: Keyframe and delta.
+            // Keyframe has version property and doesn't have prev_version
+            if (geom.hasOwnProperty('version') && !geom.hasOwnProperty('prev_version')) {
+                //console.log(geom.version + ' - Keyframe');
+                let obj = self._objects[geom.id];
+                if (obj !== undefined) {
+                    // Process new geometry
+                    let geometry = makeGeometry(processKeyframe(geom));
+                    // Remove all old geometry -- mesh's only
+                    obj.object3D.traverse(function(child) {
+                        if (child.type === "Mesh") {
+                            obj.object3D.remove(child);
+                        }
                     });
+                    // Add in new geometry
+                    let material = new THREE.ShaderMaterial(new THREE.VelvetyShader());
+                    let mesh = new THREE.Mesh(geometry, material);
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+                    mesh.userData = obj;
+                    obj.object3D.add(mesh);
+                    // Make sure to update the model geometry
+                    obj.model.setGeometry(geometry);
+                    obj.version = geom.version;
+                    obj.precision = geom.precision;
+                }
+                alter = true;
+                // Delta changes have prev_version and not version fields
+            } else if (geom.hasOwnProperty('prev_version') && geom.hasOwnProperty('base_version')) {
+                //console.log(geom.version + ' - Delta');
+                // Are we moving the geometry or modifying it
+                if (!geom.hasOwnProperty('remove')) {
+                    console.log('Delta: just moving things');
                 } else {
-                    this._loader._annotations[name].addToScene();
-                }
-            });
-
-
-            _.each(geoms, (geomData)=>{
-                let name = geomData.id;
-                if(geomData.usage =='asis' || (this.app.services.machine === null && geomData.usage == 'fixture')) return;
-
-                if(this._objects[name]) {
-                    let obj = this._objects[name];
-                    if (!obj.rendered) {
-                        //this._overlay3D.add(obj.object3D);
-                        obj.rendered = true;
-                        obj.visible = true;
-                        obj.setVisible();
-                        this._objects[name] = obj;
+                    let obj = self._objects[geom.id];
+                    if (obj !== undefined) {
+                        // Process new data
+                        let geometry = makeGeometry(processDelta(geom, obj));
+                        // Remove all old geometry -- mesh's only
+                        obj.object3D.traverse(function (child) {
+                            if (child.type === "Mesh") {
+                                obj.object3D.remove(child);
+                            }
+                        });
+                        // Create new modified geometry and add to obj
+                        let material = new THREE.ShaderMaterial(new THREE.VelvetyShader());
+                        let mesh = new THREE.Mesh(geometry, material);
+                        mesh.castShadow = true;
+                        mesh.receiveShadow = true;
+                        mesh.userData = obj;
+                        obj.object3D.add(mesh);
+                        // Make sure to update the model geometry
+                        obj.model.setGeometry(geometry);
                     }
                 }
-                else {
-                    let color = DataLoader.parseColor("7d7d7d");
-                    if(geomData.usage =="cutter"){
-                        color = DataLoader.parseColor("FF530D");
-                    }
-                    let transform = DataLoader.parseXform(geomData.xform,true);
-                    let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
-                    let shell = new Shell(geomData.id,this,this,geomData.size,color,boundingBox);
-                    this.addModel(shell,geomData.usage,'shell',geomData.id,transform,boundingBox);
-                    this._loader._shells[geomData.shell]=shell;
-                    var url = "/v3/nc/";
-                    this._loader.addRequest({
-                        path: name,
-                        baseURL: url,
-                        type: "shell"
-                    })
-                }
-            });
-
-            this._loader.runLoadQueue();
-            alter = true;
-            this.app.actionManager.emit('change-workingstep', delta.workingstep);
-            //  let lineGeometries = event.annotation.getGeometry();
-        }
-        else {
-            // Handle each geom update in the delta
-            // This is usually just a tool movement.
-            _.each(delta.geom, (geom) => {
-                if (!window.geom || window.geom.length < 100){
-                    window.geom = window.geom || [];
-                    window.geom.push(geom);
-                }
-                let obj = this._objects[geom.id];
-                if(obj !== undefined) {
-                    if (obj.rendered !== false) {
-                        let transform = new THREE.Matrix4();
-                        if (!geom.xform) return;
-                        transform.fromArray(geom.xform);
-                        let position = new THREE.Vector3();
-                        let quaternion = new THREE.Quaternion();
-                        let scale = new THREE.Vector3();
-                        transform.decompose(position, quaternion, scale);
-                        // we need to update all 3D properties so that
-                        // annotations, overlays and objects are all updated
-                        obj.object3D.position.copy(position);
-                        obj.object3D.quaternion.copy(quaternion);
-                        obj.annotation3D.position.copy(position);
-                        obj.annotation3D.quaternion.copy(quaternion);
-                        obj.overlay3D.position.copy(position);
-                        obj.overlay3D.quaternion.copy(quaternion);
-                        alter = true;
-                    }
-                }
-            });
-        }
+                alter = true;
+                // Don't know what kind of update this is
+            } else {
+                console.log(geom);
+            }
+        });
         return alter;
     }
+
+    // applyDelta(delta) {
+    //     let alter = false;
+    //     //Two types of changes- Keyframe and delta.
+    //     //Keyframe doesn't have a 'prev' property.
+    //     if (!delta.hasOwnProperty('prev')){
+    //         //For keyframes, we need to remove current toolpaths, cutters,
+    //         // As-Is, and To-Be geometry (Collectively, "Stuff") and load new ones.
+    //         // console.log("Keyframe recieved");
+    //         // this._loader.annotations = {};
+    //
+    //         // Delete existing Stuff.
+    //         var oldgeom = _.filter(_.values(this._objects), (geom) => (
+    //             geom.usage =="cutter" || geom.usage =="tobe" ||
+    //             geom.usage =="asis"|| geom.usage=="machine" || geom.usage=="fixture")
+    //         );
+    //         _.each(oldgeom,(geom)=> {
+    //             //this._object3D.remove(geom.object3D);
+    //             //this._overlay3D.remove(geom.object3D);
+    //             geom.rendered = false;
+    //             geom.object3D.visible = false;
+    //         });
+    //
+    //         var oldannotations =_.values(this._loader._annotations);
+    //         _.each(oldannotations, (oldannotation) => {
+    //             oldannotation.removeFromScene();
+    //         });
+    //
+    //         //Load new Stuff.
+    //         var toolpaths = _.filter(delta.geom, (geom) => geom.usage == 'toolpath' || (_.has(geom, 'polyline') && geom.usage =="tobe"));
+    //         var geoms = _.filter(delta.geom, (geom) => (
+    //             geom.usage =='cutter' || (geom.usage =='tobe' && _.has(geom, 'shell')) ||
+    //             geom.usage =="asis"||geom.usage=='machine' || geom.usage=="fixture")
+    //         );
+    //         _.each(toolpaths, (geomData) => {
+    //             let name = geomData.polyline.split('.')[0];
+    //             if (!this._loader._annotations[name]){
+    //                 let annotation = new Annotation(geomData.id, this, this);
+    //                 let transform = DataLoader.parseXform(geomData.xform, true);
+    //                 this.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
+    //                 // Push the annotation for later completion
+    //                 this._loader._annotations[name] = annotation;
+    //                 var url = '/v3/nc/';
+    //                 this._loader.addRequest({
+    //                     path: name,
+    //                     baseURL: url,
+    //                     type: 'annotation'
+    //                 });
+    //             } else {
+    //                 this._loader._annotations[name].addToScene();
+    //             }
+    //         });
+    //
+    //
+    //         _.each(geoms, (geomData)=>{
+    //             let name = geomData.id;
+    //             if(geomData.usage =='asis' || (this.app.services.machine === null && geomData.usage == 'fixture')) return;
+    //
+    //             if(this._objects[name]) {
+    //                 let obj = this._objects[name];
+    //                 if (!obj.rendered) {
+    //                     //this._overlay3D.add(obj.object3D);
+    //                     obj.rendered = true;
+    //                     obj.visible = true;
+    //                     obj.setVisible();
+    //                     this._objects[name] = obj;
+    //                 }
+    //             }
+    //             else {
+    //                 let color = DataLoader.parseColor("7d7d7d");
+    //                 if(geomData.usage =="cutter"){
+    //                     color = DataLoader.parseColor("FF530D");
+    //                 }
+    //                 let transform = DataLoader.parseXform(geomData.xform,true);
+    //                 let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
+    //                 let shell = new Shell(geomData.id,this,this,geomData.size,color,boundingBox);
+    //                 this.addModel(shell,geomData.usage,'shell',geomData.id,transform,boundingBox);
+    //                 this._loader._shells[geomData.shell]=shell;
+    //                 var url = "/v3/nc/";
+    //                 this._loader.addRequest({
+    //                     path: name,
+    //                     baseURL: url,
+    //                     type: "shell"
+    //                 })
+    //             }
+    //         });
+    //
+    //         this._loader.runLoadQueue();
+    //         alter = true;
+    //         this.app.actionManager.emit('change-workingstep', delta.workingstep);
+    //         //  let lineGeometries = event.annotation.getGeometry();
+    //     }
+    //     else {
+    //         // Handle each geom update in the delta
+    //         // This is usually just a tool movement.
+    //         _.each(delta.geom, (geom) => {
+    //             if (!window.geom || window.geom.length < 100){
+    //                 window.geom = window.geom || [];
+    //                 window.geom.push(geom);
+    //             }
+    //             let obj = this._objects[geom.id];
+    //             if(obj !== undefined) {
+    //                 if (obj.rendered !== false) {
+    //                     let transform = new THREE.Matrix4();
+    //                     if (!geom.xform) return;
+    //                     transform.fromArray(geom.xform);
+    //                     let position = new THREE.Vector3();
+    //                     let quaternion = new THREE.Quaternion();
+    //                     let scale = new THREE.Vector3();
+    //                     transform.decompose(position, quaternion, scale);
+    //                     // we need to update all 3D properties so that
+    //                     // annotations, overlays and objects are all updated
+    //                     obj.object3D.position.copy(position);
+    //                     obj.object3D.quaternion.copy(quaternion);
+    //                     obj.annotation3D.position.copy(position);
+    //                     obj.annotation3D.quaternion.copy(quaternion);
+    //                     obj.overlay3D.position.copy(position);
+    //                     obj.overlay3D.quaternion.copy(quaternion);
+    //                     alter = true;
+    //                 }
+    //             }
+    //         });
+    //     }
+    //     return alter;
+    // }
 
     getSelected() {
        if(this.state.selected)

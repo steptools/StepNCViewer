@@ -217,7 +217,7 @@ export default class DataLoader extends THREE.EventDispatcher {
                     delete this._shells[event.data.id+".json"];
 
                     //Data.color is passed from the buffers.color from webworker.js 695
-                    shell.addGeometry(data.position, data.normals, data.color, data.faces);
+                    shell.addGeometry(data.position, data.normals, data.color, data.values, data.faces);
                     this.dispatchEvent({ type: "shellLoad", file: event.data.file });
                 }
                 break;

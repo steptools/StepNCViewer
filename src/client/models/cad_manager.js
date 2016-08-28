@@ -3,6 +3,7 @@
  */
 "use strict";
 
+let _           = require('lodash');
 import DataLoader  from './data_loader';
 
 /*************************************************************************/
@@ -153,9 +154,7 @@ export default class CADManager extends THREE.EventDispatcher {
           window.deltas = window.deltas || [];
           window.deltas.push(delta);
         }
-        let keys = _.keys(this._models);
-        _.each(keys, (key) => {
-            let model = this._models[key];
+        _.each(this._models, function(model) {
             if (model.project === delta.project) {
                 if (model.applyDelta(delta)) {
                     model.calcBoundingBox();

@@ -18,7 +18,7 @@ function responseParser(chunk,cb){
 			cb(body);
 			contentLength = 0;
 			if(chunk.length>0){
-			       	responseparser(chunk,cb);
+			       	responseParser(chunk,cb);
 			}
 		}
 	}
@@ -32,7 +32,7 @@ function responseParser(chunk,cb){
 		{
 			body=chunk.substring(0,contentLength);
 			cb(body);
-			responseparser(chunk,cb);
+			responseParser(chunk,cb);
 		}
 		body=chunk;
 	}

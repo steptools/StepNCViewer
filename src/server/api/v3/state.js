@@ -218,10 +218,10 @@ var _getDelta = function(ms, key, cb) {
     ms.SetToolPosition(res.coords.x,res.coords.y,res.coords.z,0,0,1);
     if (switchWS) {
       ms.GoToWS(WSArray[WSGCodeIndex]);
-      holder = JSON.parse(ms.GetKeystateJSON());
+      holder = JSON.parse(ms.GetKeyStateJSON());
       holder.next = true;
     } else {
-      holder = JSON.parse(ms.GetDeltaJSON());
+      holder = JSON.parse(ms.GetDeltaStateJSON());
       holder.next = false;
     }
     holder.mtcoords = res.coords;
@@ -329,8 +329,7 @@ var parseGCodes = function(fname) {
 /***************************** Endpoint Functions *****************************/
 
 var _loopInit = function(req, res) {
-  // app.logger.debug('loopstate is ' + req.params.loopstate);
-  let MTCfile = app.project.substring(0, app.project.length - 5) + 'mtc';
+
   if(!init){
     init = true;
     workingstepsArrayDriver();
@@ -514,7 +513,7 @@ var _getKeyState = function (req, res) {
     res.status(404).send('Machine state could not be found');
     return;
   }
-  res.status(200).send(ms.GetKeystateJSON());
+  res.status(200).send(ms.GetKeyStateJSON());
 };
 
 var _getDeltaState = function (req, res) {
@@ -523,7 +522,7 @@ var _getDeltaState = function (req, res) {
     res.status(404).send('Machine state could not be found');
     return;
   }
-  res.status(200).send(ms.GetDeltaJSON());
+  res.status(200).send(ms.GetDeltaStateJSON());
 };
 
 var _getMTCHold = function (req, res) {

@@ -127,9 +127,9 @@ var MTListen = function() {
       });
 
       let coords = {};
-      coords.x = parseInt(resCoords[0]);
-      coords.y = parseInt(resCoords[1]);
-      coords.z = parseInt(resCoords[2]);
+      coords.x = Number(resCoords[0]);
+      coords.y = Number(resCoords[1]);
+      coords.z = Number(resCoords[2]);
       if(feedUnits==="")
       {
         resolveFeedUnits().then(function(res) {

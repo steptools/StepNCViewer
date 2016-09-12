@@ -102,7 +102,8 @@ var MTListen = function() {
     let mtc = request.get(addr);
     mtc.end(function (err, res) {
       if (err || !res.ok) {
-        return;
+	      MTListen().then(function(res){resolve(res);});
+	      return;
       }
       parseXMLString.parseString(res.text, function (error, result) {
         let find = result['MTConnectStreams']['Streams'][0];

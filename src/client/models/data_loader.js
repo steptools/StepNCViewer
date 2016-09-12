@@ -217,7 +217,7 @@ export default class DataLoader extends THREE.EventDispatcher {
                     delete this._shells[event.data.id+".json"];
 
                     //Data.color is passed from the buffers.color from webworker.js 695
-                    shell.addGeometry(data.position, data.normals, data.color, data.faces);
+                    shell.addGeometry(data.position, data.normals, data.color,data.values, data.faces);
                     this.dispatchEvent({ type: "shellLoad", file: event.data.file });
                 }
                 break;
@@ -367,11 +367,10 @@ export default class DataLoader extends THREE.EventDispatcher {
             let transform = DataLoader.parseXform(geomData.xform, true);
             // Is this a shell
             if (_.has(geomData, 'shell')) {
-                if(geomData.usage === 'cutter')
-                {
+                if (geomData.usage === 'cutter') {
                     color = DataLoader.parseColor("FF530D");
                 }
-                if(geomData.usage === 'fixture' && this._app.services.machine === null){
+                if (geomData.usage === 'fixture' && this._app.services.machine === null) {
                     return;
                 }
                 let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
@@ -384,7 +383,7 @@ export default class DataLoader extends THREE.EventDispatcher {
                     baseURL: req.base,
                     type: 'shell'
                 });
-            // Is this a polyline
+                // Is this a polyline
             } else if (_.has(geomData, 'polyline')) {
                 let annotation = new Annotation(geomData.id, nc, nc);
                 nc.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
@@ -397,6 +396,8 @@ export default class DataLoader extends THREE.EventDispatcher {
                     baseURL: req.base,
                     type: 'annotation'
                 });
+            } else if (_.has(geomData, 'dynamicshell')) {
+                nc.handleDynamicGeom(geomData,()=>{});
             } else {
                 console.log('No idea what we found: ' + geomData);
             }

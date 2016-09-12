@@ -181,85 +181,94 @@ var findWS = function(current) {
 };
 
 //TODO: Get rid of this function and consolidate with endpoint functions
-var _getDelta = function(ms, key, cb) {
-  let holder = '';
+var _getDelta = function(ms, key) {
   let theQuestion = MTListen();
 
-  theQuestion.then(function(res) {
-    MTCHold.feedrate = 'Not defined';
-    MTCHold.gcode = 'Not defined';
-    MTCHold.spindleSpeed = 'Not defined';
-    MTCHold.feedrate = res.feedrate;
-    MTCHold.feedrateUnits = res.feedUnits;
-    MTCHold.gcode = WSGCode['GCode'][res.currentGcodeNumber];
-    MTCHold.live = res.isLive;
-    MTCHold.realgcode = res.currentGcode;
-    let offset = [0, 0, 0, 0, 0, 1, 1, 0, 0]; //xyz ijk abc
-    let workplansetup = 0;
-    let curws = ms.GetWSID();
+  return new Promise((resolve)=>{
+    let result = {};
     let switchWS = false;
-    if (findWS(res.currentGcodeNumber)) {
-      switchWS = true;
-      workplansetup = step.getSetupFromId(WSArray[WSGCodeIndex]);
-    } else {
-      workplansetup = step.getSetupFromId(curws);
-    }
-    if (workplansetup !== 0) {
-      offset = apt.GetWorkplanSetup(workplansetup);
-    }
-    offset.x = offset[0];
-    offset.y = offset[1];
-    offset.z = offset[2];
-    offset.i = offset[3];
-    offset.j = offset[4];
-    offset.k = offset[5];
-    offset.a = offset[6];
-    offset.b = offset[7];
-    offset.c = offset[8];
-    ms.SetToolPosition(res.coords.x,res.coords.y,res.coords.z,0,0,1);
-    if (switchWS) {
-      ms.GoToWS(WSArray[WSGCodeIndex]);
-      holder = JSON.parse(ms.GetKeyStateJSON());
-      holder.next = true;
-    } else {
-      holder = JSON.parse(ms.GetDeltaStateJSON());
-      holder.next = false;
-    }
-    holder.mtcoords = res.coords;
-    holder.gcode = res.currentGcodeNumber;
-    holder.feed = res.feedrate;
+    theQuestion
+        .then(function (res) {
+          result = res;
+          MTCHold.feedrate = 'Not defined';
+          MTCHold.gcode = 'Not defined';
+          MTCHold.spindleSpeed = 'Not defined';
+          MTCHold.feedrate = res.feedrate;
+          MTCHold.feedrateUnits = res.feedUnits;
+          MTCHold.gcode = WSGCode['GCode'][res.currentGcodeNumber];
+          MTCHold.live = res.isLive;
+          MTCHold.realgcode = res.currentGcode;
 
-    cb(holder);
+          return ms.GetWSID()
+        })
+        .then((curws)=> {
+          if (findWS(result.currentGcodeNumber)) {
+            switchWS = true;
+          }
+          return ms.SetToolPosition(result.coords.x, result.coords.y, result.coords.z, 0, 0, 1)
+        })
+        .then(()=> {
+          let handleWSSwitch = (switchws)=> {
+            let holder = {};
+            return new Promise((resolve)=> {
+              if (switchws) {
+                ms.GoToWS(WSArray[WSGCodeIndex]).then(()=> {
+                  return ms.GetKeyStateJSON();
+                }).then((r)=> {
+                  holder = JSON.parse(r);
+                  holder.next = true;
+                  resolve(holder);
+                });
+              } else {
+                ms.GetDeltaStateJSON().then((r)=> {
+                  holder = JSON.parse(r);
+                  holder.next = false;
+                  resolve(holder);
+                });
+              }
+            });
+          };
+          return handleWSSwitch(switchWS);
+        })
+        .then((holder)=> {
+          holder.mtcoords = result.coords;
+          holder.gcode = result.currentGcodeNumber;
+          holder.feed = result.feedrate;
+          resolve(holder);
+        });
   });
-};
-
-function getNext(ms, cb) {
-  ms.NextWS();
-  cb();
 }
 
-function getPrev(ms, cb) {
-  ms.PrevWS();
-  cb();
+function getNext(ms) {
+  return ms.NextWS();
 }
 
-function getToWS(wsId, ms, cb) {
-  ms.GoToWS(wsId);
-  cb();
+function getPrev(ms) {
+  return ms.PrevWS();
+}
+
+function getToWS(wsId, ms) {
+  return ms.GoToWS(wsId);
 }
 
 var loop = function(ms, key) {
+  var host = app.config.machineList[currentMachine].address.split(':')[0];
+  var port = app.config.machineList[currentMachine].address.split(':')[1];
+  //getMultipartRequest({'host':host,'port':port,'path':'/sample?interval=0&heartbeat=100'},(res)=>{
+   // console.log(res);
+  //});
   if (loopStates[path] === true) {
-    _getDelta(ms, key, function(b) {
-      app.ioServer.emit('nc:delta', b);
-      app.ioServer.emit('nc:mtc', MTCHold);
-      if (playbackSpeed > 0) {
-        if (loopTimer !== undefined) {
-          clearTimeout(loopTimer);
-        }
-        loopTimer = setTimeout(() => loop(ms, false), 50/(playbackSpeed/200));
-      }
-    });
+    _getDelta(ms, key)
+        .then((b)=> {
+          app.ioServer.emit('nc:delta', b);
+          app.ioServer.emit('nc:mtc', MTCHold);
+          if (playbackSpeed > 0) {
+            if (loopTimer !== undefined) {
+              clearTimeout(loopTimer);
+            }
+            loopTimer = setTimeout(() => loop(ms, false), 50/(playbackSpeed/200));
+          }
+        });
   }
 };
 
@@ -420,12 +429,12 @@ var _wsInit = function(req, res) {
         var temp = loopStates[path];
         loopStates[path] = true;
         if (temp) {
-          getNext(ms, function() {
+          getNext(ms).then(()=>{
             loop(ms, true);
           });
         } else {
           loop(ms,false);
-          getNext(ms, function() {
+          getNext(ms).then(()=>{
             loop(ms, true);
           });
           loopStates[path] = false;
@@ -437,12 +446,12 @@ var _wsInit = function(req, res) {
         var temp = loopStates[path];
         loopStates[path] = true;
         if (temp) {
-          getPrev(ms, function() {
+          getPrev(ms).then(()=>{
             loop(ms, true);
           });
         } else {
           loop(ms,false);
-          getPrev(ms, function() {
+          getPrev(ms).then(()=>{
             loop(ms, true);
           });
           loopStates[path] = false;
@@ -456,14 +465,14 @@ var _wsInit = function(req, res) {
           temp = loopStates[path];
           loopStates[path] = true;
           if (temp) {
-            getToWS(ws, ms, function() {
+            getToWS(ws, ms).then(()=>{
               loop(ms, true);
             });
             loopStates[path] = false;
             update('pause');
           } else {
             loop(ms,false);
-            getToWS(ws, ms, function() {
+            getToWS(ws, ms).then(()=>{
               loop(ms, true);
             });
             loopStates[path] = false;
@@ -472,7 +481,7 @@ var _wsInit = function(req, res) {
           res.status(200).send('OK');
         }
     }
-    _getDelta(ms, false, function(b) {
+    _getDelta(ms, false).then((b)=>{
       app.ioServer.emit('nc:delta', JSON.parse(b));
       app.ioServer.emit('nc:mtc', MTCHold);
       if (playbackSpeed > 0) {
@@ -485,7 +494,7 @@ var _wsInit = function(req, res) {
   		}
 		});
 	}
-}
+};
 
 var _wsInit = function(req, res) {
   let temp = false;
@@ -498,7 +507,7 @@ var _wsInit = function(req, res) {
 
   handleWSInit(req.params.command, res);
 
-  getDelta(file.ms, false, function(b) {
+  getDelta(file.ms, false).then((b)=>{
     app.ioServer.emit('nc:delta', JSON.parse(b));
     if (playbackSpeed > 0) {
       if (loopTimer !== undefined) {
@@ -514,7 +523,10 @@ var _getKeyState = function (req, res) {
     res.status(404).send('Machine state could not be found');
     return;
   }
-  res.status(200).send(ms.GetKeyStateJSON());
+  ms.GetKeyStateJSON()
+      .then((r)=>{
+        res.status(200).send(r);
+      });
 };
 
 var _getDeltaState = function (req, res) {
@@ -523,7 +535,10 @@ var _getDeltaState = function (req, res) {
     res.status(404).send('Machine state could not be found');
     return;
   }
-  res.status(200).send(ms.GetDeltaStateJSON());
+  ms.GetDeltaStateJSON()
+      .then((r)=>{
+        res.status(200).send(r);
+      });
 };
 
 var _getMTCHold = function (req, res) {

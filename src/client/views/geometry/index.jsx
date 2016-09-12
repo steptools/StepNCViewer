@@ -1,6 +1,5 @@
 'use strict';
 
-import React from 'react';
 import ViewerControls   from './viewer_controls';
 import CompassView      from '../compass/compass';
 
@@ -126,15 +125,29 @@ export default class GeometryView extends React.Component {
   }
 
   componentWillUpdate(nextProps) {
-    let highlightColor = {
-      r: 1.0,
-      g: 0,
-      b: 1.0,
+    let highlightColors = {
+      'default': {r: 1.0, g: 0, b: 1.0}, // pink
+      'A': {r: 1.0, g: 0.6, b: 0.0}, // orange
+      'B': {r: 0.0, g: 1.0, b: 0.0}, // green
+      'C': {r: 0.6, g: 0.0, b: 0.6}, // purple
+      'D': {r: 0.0, g: 0.0, b: 1.0}, // blue
+      'E': {r: 1.0, g: 1.0, b: 0.0}, // yellow
+      'F': {r: 0.0, g: 1.0, b: 1.0}, // cyan
+      'G': {r: 1.0, g: 0.0, b: 0.0}, // red
     };
-    
+
     let rootModelName = 'state/key';
     if (this.props.viewType === 'preview') {
-      rootModelName = this.props.selectedEntity.id;
+      rootModelName = this.props.previewEntity.id;
+    }
+
+    if (this.props.viewType === 'preview') {
+      // unhighlight old faces first if we're switching entities
+      this.highlightFaces(
+        this.props.selectedEntity.faces,
+        this.props.manager.getRootModel(rootModelName),
+        true
+      );
     }
 
     // unhighlight old faces
@@ -143,49 +156,69 @@ export default class GeometryView extends React.Component {
       let tolerance = this.props.toleranceCache[tol];
       faces = faces.concat(tolerance.faces);
     });
-    this.highlightFaces(faces, nextProps.manager.getRootModel(rootModelName), true);
+    let rootModel = this.props.manager.getRootModel(rootModelName);
+    this.highlightFaces(faces, rootModel, true);
 
     if (this.props.viewType === 'preview') {
-      rootModelName = nextProps.selectedEntity.id;
+      rootModelName = nextProps.previewEntity.id;
     }
 
-    // now highlight tolerances selected
-    faces = [];
-    _.each(nextProps.highlightedTolerances, (tol) => {
-      let tolerance = nextProps.toleranceCache[tol];
-      faces = faces.concat(tolerance.faces);
-    });
- 
-    this.highlightFaces(
-      faces,
-      nextProps.manager.getRootModel(rootModelName),
-      false,
-      highlightColor
-    );
+    // now highlight new faces
+    if (nextProps.viewType !== 'preview' ||
+        nextProps.selectedEntity.type !== 'tolerance') {
+      // now highlight tolerances selected
+      _.each(nextProps.highlightedTolerances, (tol) => {
 
-    if (this.props.viewType === 'preview') {
+        let tolerance = nextProps.toleranceCache[tol];
 
-      // unhighlight old faces first if we're switching entities
-      if (this.props.selectedEntity &&
-          this.props.selectedEntity.type === 'tolerance' &&
-          this.props.selectedEntity !== nextProps.selectedEntity) {
-        
+        let color = highlightColors[tolerance.name];
+        if (!color) {
+          color = highlightColors['default'];
+        }
+
         this.highlightFaces(
-          this.props.selectedEntity.faces,
-          this.props.manager.getRootModel(this.props.selectedEntity.workpiece),
-          true
+          tolerance.faces,
+          nextProps.manager.getRootModel(rootModelName),
+          false,
+          color
         );
-      }
-      
-      // then highlight new faces
-      if (nextProps.selectedEntity &&
-        nextProps.selectedEntity.type === 'tolerance') {
+      });
+    } else if (nextProps.viewType === 'preview' &&
+               nextProps.selectedEntity.type === 'tolerance') {
+      _.each(nextProps.highlightedTolerances, (tol) => {
+
+        let tolerance = nextProps.toleranceCache[tol];
+        if (tolerance.type === 'datum' &&
+            _.find(nextProps.selectedEntity.children, (child) => child.id === tol)) {
+          let color = highlightColors[tolerance.name];
+          if (!color) {
+            color = highlightColors['default'];
+          }
+
+          this.highlightFaces(
+            tolerance.faces,
+            nextProps.manager.getRootModel(rootModelName),
+            false,
+            color
+          );
+        }
+      });
+    }
+
+    // for previewing a tolerance, highlight its faces
+    if (nextProps.viewType === 'preview') {
+      if (nextProps.selectedEntity && nextProps.selectedEntity.type === 'tolerance') {
+
+        let color = highlightColors[nextProps.selectedEntity.name];
+        if (!color) {
+          color = highlightColors['default'];
+        }
 
         this.highlightFaces(
           nextProps.selectedEntity.faces,
           nextProps.manager.getRootModel(nextProps.selectedEntity.workpiece),
           false,
-          highlightColor
+          color
         );
       }
     }

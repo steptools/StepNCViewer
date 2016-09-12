@@ -59,11 +59,15 @@ module.exports = {
     },
     plugins: [
         new webpack.ProvidePlugin({
+	    "React":	"react",
             "_":        "lodash",
             "$":        "jquery",
             "jQuery":   "jquery",
             "Backbone": "backbone",
-            "THREE":    "three"
+            "THREE":    "three",
+	    "request":  "superagent",
+	    "ReactDOM": "react-dom",
+	    "io":	"socket.io-client"
         })
         ,new ExtractTextPlugin("[name].css")
     ],

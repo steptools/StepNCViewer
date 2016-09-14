@@ -433,7 +433,7 @@ export default class NC extends THREE.EventDispatcher {
         else {
             // Handle each geom update in the delta
             // This is usually just a tool movement (and volume removal update).
-            var dyn = _.remove(delta.geom,['usage','inprocess'])[0];
+            var dyn = _.filter(delta.geom,['usage','inprocess'])[0];
             this.handleDynamicGeom(dyn,()=> {
                 _.each(delta.geom, (geom) => {
                     if (!window.geom || window.geom.length < 100) {

@@ -263,6 +263,7 @@ export default class NC extends THREE.EventDispatcher {
 
 
     handleDynamicGeom(geom,cb,cbdata){
+        if(!geom)return cb(cbdata);
         let parseDynamicFull = (geom,obj)=>{
             let geometry = makeGeometry(processKeyframe(geom));
             // Remove all old geometry -- mesh's only
@@ -434,7 +435,8 @@ export default class NC extends THREE.EventDispatcher {
             // Handle each geom update in the delta
             // This is usually just a tool movement (and volume removal update).
             var dyn = _.filter(delta.geom,['usage','inprocess'])[0];
-            this.handleDynamicGeom(dyn,()=> {
+            alter = this.handleDynamicGeom(dyn,()=> {
+                let rtn = false;
                 _.each(delta.geom, (geom) => {
                     if (!window.geom || window.geom.length < 100) {
                         window.geom = window.geom || [];
@@ -458,10 +460,11 @@ export default class NC extends THREE.EventDispatcher {
                             obj.annotation3D.quaternion.copy(quaternion);
                             obj.overlay3D.position.copy(position);
                             obj.overlay3D.quaternion.copy(quaternion);
-                            alter = true;
+                            rtn = true;
                         }
                     }
                 });
+                return rtn;
             });
         }
         return alter;

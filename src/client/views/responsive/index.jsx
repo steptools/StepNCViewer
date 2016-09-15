@@ -649,8 +649,8 @@ export default class ResponsiveView extends React.Component {
       live.removeClass('active');
       $('.header .info.live .value').html('Stopped');
     }
-    $('.header .info.gcode .value').html(mtc.realgcode);
-    this.populateSpindleSpeed(mtc.spindlespeed);
+    $('.header .info.gcode .value').html(mtc.currentGcode);
+    this.populateSpindleSpeed(mtc.spindleSpeed);
     this.populateFeedRate(mtc.feedrate, mtc.feedrateUnits);
   }
 

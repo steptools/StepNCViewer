@@ -3,19 +3,24 @@ var file = require('./file');
 var find = file.find;
 var apt = file.apt;
 var step = require('./step');
-var getMultipartRequest = require('./getmultipartrequest');
 
 var request = require('superagent');
 var parseXMLString = require('xml2js');
 var _ = require('lodash');
 var fs = require('fs');
 
+var Worker = require('tiny-worker');
+let worker = {};
+try{
+  worker = new Worker('./src/server/api/v3/parseupdatethread.js');
+} catch(e){console.log(e);};
+
+var Queue = require('promise-queue');
+var queue = new Queue(1,200);
+
 var app;
 var loopTimer;
 var loopStates = {};
-let playbackSpeed = 100;
-let spindleSpeed;
-let feedRate;
 let path = find.GetProjectName();
 let init = false;
 
@@ -25,42 +30,18 @@ var WSArray = [];
 let nextSequence = 0;
 let changed=false;
 
-var MTCHold = {};
+let MTCHold = {
+  'currentGcode':'Not defined',
+  'currentGcodeNumber':0,
+  'spindleSpeed':'Not defined',
+  'feedrate':0,
+  'feedrateUnits':"Millimeters/Second",
+  'live':true
+};
 
 let currentMachine = 0;
 
-let feedUnits ="";
-let feedUnitResolver = null;
-let resolveFeedUnits = ()=>{
-  if(feedUnitResolver) return feedUnitResolver;
-  feedUnitResolver = new Promise(function(resolve) {
-    if(feedUnits!=="") {
-      //We already set feedUnits. Don't go get it again.
-      feedUnitResolver = null;
-      resolve(feedUnits);
-    }
-    else {
-      let addr = 'http://' + app.config.machineList[currentMachine].address + '/';
-      request.get(addr)
-          .then(function (res, err) {
-            parseXMLString.parseString(res.text, function (error, result) {
-              let ret = result['MTConnectDevices']['Devices'][0]['Device'][0]['Components'][0]['Controller'][0]['Components'][0]['Path'][0]['DataItems'][0]['DataItem'];
-              let feedrateUnits = _.find(ret, function (dataitem) {
-                if (dataitem['$'].type === 'PATH_FEEDRATE') {
-                  return true;
-                } else {
-                  return false;
-                }
-              });
-              feedUnits = feedrateUnits['$']['units'];
-              feedUnitResolver = null;
-              resolve(feedUnits);
-            });
-          });
-    }
-  });
-  return feedUnitResolver;
-};
+
 /****************************** Helper Functions ******************************/
 
 function getWorkingstepsArray(id){
@@ -88,77 +69,16 @@ function updateSpeed(speed) {
   app.ioServer.emit('nc:speed', speed);
 }
 
-var MTListen = function() {
-  var resCoords = [];
-  var offset = {"x":0,"y":0,"z":0};
-  var currentgcode;
-  var feedrate;
-  var live = false;
-  var gcode;
+var mtcdump = 1;
+function updateMTC(){
+  if((mtcdump%10)>0) {
+    mtcdump++;
+    return;
+  }
+  mtcdump = 1;
+  app.ioServer.emit('nc:mtc',MTCHold);
+}
 
-  return new Promise(function(resolve) {
-    let addr = 'http://' + app.config.machineList[currentMachine].address + '/current';
-
-    let mtc = request.get(addr);
-    mtc.end(function (err, res) {
-      if (err || !res.ok) {
-	      MTListen().then(function(res){resolve(res);});
-	      return;
-      }
-      parseXMLString.parseString(res.text, function (error, result) {
-        let find = result['MTConnectStreams']['Streams'][0];
-        find = find['DeviceStream'][0]['ComponentStream'];
-        let pathtag = _.find(find, function(tag) {
-          if (tag['$']['name'] === 'path') {
-            return true;
-          } else {
-            return false;
-          }
-        });
-        resCoords = pathtag["Samples"][0]["PathPosition"][0]['_'].split(' ');
-        feedrate = pathtag["Samples"][0]['PathFeedrate'][1]['_'];
-        gcode = pathtag['Events'][0]['Block'][0]['_'];
-        currentgcode = pathtag['Events'][0]['e:BlockNumber'][0]['_'];
-        let header = result['MTConnectStreams']['Header'][0].$;
-        let next = header.nextSequence;
-        if (next !== nextSequence) {
-          nextSequence = next;
-          live = true;
-        }
-      });
-
-      let coords = {};
-      coords.x = Number(resCoords[0]);
-      coords.y = Number(resCoords[1]);
-      coords.z = Number(resCoords[2]);
-      if(feedUnits==="")
-      {
-        resolveFeedUnits().then(function(res) {
-          resolve({
-            "coords": coords,
-            "offset": offset,
-            "currentGcodeNumber": currentgcode,
-            "currentGcode": gcode,
-            "feedrate": feedrate,
-            "feedUnits": res,
-            "isLive": live
-          });
-        });
-      }
-      else {
-        resolve({
-          "coords": coords,
-          "offset": offset,
-          "currentGcodeNumber": currentgcode,
-          "currentGcode": gcode,
-          "feedrate": feedrate,
-          "feedUnits": feedUnits,
-          "isLive": live
-        });
-      }
-    });
-  });
-};
 
 var findWS = function(current) {
   var change = false;
@@ -180,64 +100,33 @@ var findWS = function(current) {
   return change;
 };
 
-//TODO: Get rid of this function and consolidate with endpoint functions
-var _getDelta = function(ms, key) {
-  let theQuestion = MTListen();
-
-  return new Promise((resolve)=>{
-    let result = {};
-    let switchWS = false;
-    theQuestion
-        .then(function (res) {
-          result = res;
-          MTCHold.feedrate = 'Not defined';
-          MTCHold.gcode = 'Not defined';
-          MTCHold.spindleSpeed = 'Not defined';
-          MTCHold.feedrate = res.feedrate;
-          MTCHold.feedrateUnits = res.feedUnits;
-          MTCHold.gcode = WSGCode['GCode'][res.currentGcodeNumber];
-          MTCHold.live = res.isLive;
-          MTCHold.realgcode = res.currentGcode;
-
-          return ms.GetWSID()
-        })
-        .then((curws)=> {
-          if (findWS(result.currentGcodeNumber)) {
-            switchWS = true;
-          }
-          return ms.SetToolPosition(result.coords.x, result.coords.y, result.coords.z, 0, 0, 1)
-        })
-        .then(()=> {
-          let handleWSSwitch = (switchws)=> {
-            let holder = {};
-            return new Promise((resolve)=> {
-              if (switchws) {
-                ms.GoToWS(WSArray[WSGCodeIndex]).then(()=> {
-                  return ms.GetKeyStateJSON();
-                }).then((r)=> {
-                  holder = JSON.parse(r);
-                  holder.next = true;
-                  resolve(holder);
-                });
-              } else {
-                ms.GetDeltaStateJSON().then((r)=> {
-                  holder = JSON.parse(r);
-                  holder.next = false;
-                  resolve(holder);
-                });
-              }
-            });
-          };
-          return handleWSSwitch(switchWS);
-        })
-        .then((holder)=> {
-          holder.mtcoords = result.coords;
-          holder.gcode = result.currentGcodeNumber;
-          holder.feed = result.feedrate;
-          resolve(holder);
+var loadMTCHold = (addr,port)=>{
+  return request
+      .get(addr+":"+port+"/current")
+      .then((res)=>{
+        parseXMLString.parseString((res.text),(err,result)=>{
+          let find = result.MTConnectStreams.Streams[0].DeviceStream[0].ComponentStream;
+          let spindletag = _.find(find,(tag)=>{
+            if(tag.$.name ==='C' && tag.$.component ==='Rotary'){
+              return true;
+            } else {
+              return false;
+            }
+          });
+          let pathtag = _.find(find,(tag)=>{
+            if(tag.$.name === 'path') {
+              return true;
+            } else {
+              return false;
+            }
+          });
+          MTCHold.spindleSpeed = spindletag.Samples[0].RotaryVelocity[1]._;
+          MTCHold.feedrate = pathtag.Samples[0].PathFeedrate[1]._;
+          MTCHold.currentGcodeNumber = pathtag.Events[0]['e:BlockNumber'][0]._;
+          MTCHold.currentGcode = pathtag.Events[0].Block[0]._;
         });
-  });
-}
+      }).catch((err)=>console.log(err));
+};
 
 function getNext(ms) {
   return ms.NextWS();
@@ -251,26 +140,95 @@ function getToWS(wsId, ms) {
   return ms.GoToWS(wsId);
 }
 
-var loop = function(ms, key) {
-  var host = app.config.machineList[currentMachine].address.split(':')[0];
-  var port = app.config.machineList[currentMachine].address.split(':')[1];
-  //getMultipartRequest({'host':host,'port':port,'path':'/sample?interval=0&heartbeat=100'},(res)=>{
-   // console.log(res);
-  //});
-  if (loopStates[path] === true) {
-    _getDelta(ms, key)
-        .then((b)=> {
-          app.ioServer.emit('nc:delta', b);
-          app.ioServer.emit('nc:mtc', MTCHold);
-          if (playbackSpeed > 0) {
-            if (loopTimer !== undefined) {
-              clearTimeout(loopTimer);
-            }
-            loopTimer = setTimeout(() => loop(ms, false), 50/(playbackSpeed/200));
-          }
-        });
+//==========STATE UPDATERS==============
+//Handle Mp1BlockNumber, Mp1Block
+var blockUpdate=function(number,block){
+  let change = false;
+  if(number!=undefined && number!==MTCHold.currentGcodeNumber){
+    MTCHold.currentGcodeNumber = number;
+    change = true;
+  }
+  if(block!==undefined && block !=="" && block!=MTCHold.currentGcode){
+    MTCHold.currentGcode = block;
+    change = true;
+  }
+  if(change) {
+    if(findWS(MTCHold.currentGcodeNumber)){
+      file.ms.GoToWS(WSArray[WSGCodeIndex])
+          .then(()=> {
+            return file.ms.GetKeyStateJSON();
+          })
+          .then((r)=>{
+            app.ioServer.emit('nc:delta',r);
+          });
+    }
+    updateMTC();
   }
 };
+//Handle MS1speed
+var spindleUpdate=function(speed){
+  if(speed!= MTCHold.spindleSpeed){
+    MTCHold.spindleSpeed = speed;
+    updateMTC();
+  }
+};
+//Handle Mp1LPathPos
+var pathUpdate=function(position){
+  return new Promise((resolve)=>{
+    if(position===undefined) resolve();
+    let incoords = position.split(' ');
+    let coords = {};
+    coords.x = Number(incoords[0]);
+    coords.y = Number(incoords[1]);
+    coords.z = Number(incoords[2]);
+    file.ms.SetToolPosition(coords.x, coords.y, coords.z, 0, 0, 1)
+        .then(()=> {
+          return file.ms.GetDeltaStateJSON()
+        })
+        .then((d)=> {
+          app.ioServer.emit('nc:delta', JSON.parse(d));
+          updateMTC();
+          resolve();
+        });
+  });
+};
+//Handle Mp1Fact
+var feedUpdate=function(feedrate){
+  if(feedrate!=MTCHold.feedrate) {
+    MTCHold.feedrate = feedrate;
+      updateMTC();
+  }
+};
+//==========END STATE UPDATERS==========
+//==========WORKER THREAD PROCESSOR=====
+let dump = 1;
+worker.onmessage = (ev)=>{
+  _.forIn(ev.data,(val,key)=>{
+    switch(key){
+      case "pathUpdate":
+        if(dump%10>0){
+          dump++;
+          break;
+        }
+        dump=1;
+        queue.add(pathUpdate(val));
+        break;
+      case "feedUpdate":
+        feedUpdate(val);
+        break;
+      case "speedUpdate":
+        spindleUpdate(val);
+        break;
+      case "blockUpdate":
+        blockUpdate(undefined,val);
+        break;
+      case "blockNumberUpdate":
+        blockUpdate(val);
+        break;
+    }
+  });
+}
+//==========END PROCESSOR===============
 
 let mtcFile = null;
 var makeMTC = function(fname){
@@ -338,6 +296,7 @@ var parseGCodes = function(fname) {
 
 /***************************** Endpoint Functions *****************************/
 
+
 var _loopInit = function(req, res) {
 
   if(!init){
@@ -345,176 +304,81 @@ var _loopInit = function(req, res) {
     workingstepsArrayDriver();
   }
 
-  parseGCodes(app.project.substring(0,app.project.length-6))
-  .then((parsed)=>{
-    WSGCode = parsed;
-    if (req.params.loopstate === undefined) {
-      if (loopStates[path] === true) {
-        res
-          .status(200)
-          .send(JSON.stringify({'state': 'play', 'speed': playbackSpeed}));
-      } else {
-        res
-          .status(200)
-          .send(JSON.stringify({'state': 'pause', 'speed': playbackSpeed}));
-      }
-    } else {
-      let loopstate = req.params.loopstate;
-      var ms = file.ms;
-      if (typeof loopStates[path] === 'undefined') {
-        loopStates[path] = false;
-      }
-
-      switch (loopstate) {
-        case 'start':
+  let machineAddress = app.config.machineList[0].address.split(':')[0];
+  let machinePort = app.config.machineList[0].address.split(':')[1];
+  loadMTCHold(machineAddress,machinePort)
+      .then(()=>{
+        return parseGCodes(app.project.substring(0,app.project.length-6));
+      })
+      .then((parsed)=>{
+        WSGCode = parsed;
+        if (req.params.loopstate === undefined) {
           if (loopStates[path] === true) {
-            res.status(200).send('Already running');
-            return;
-          }
-          // app.logger.debug('Looping ' + path);
-          loopStates[path] = true;
-          res.status(200).send('OK');
-          update('play');
-          loop(ms, false);
-          break;
-        case 'stop':
-          if (loopStates[path] === false) {
-            res.status(200).send('Already stopped');
-            return;
-          }
-          loopStates[path] = false;
-          update('pause');
-          res.status(200).send('OK');
-          break;
-        default:
-          if (!isNaN(parseFloat(loopstate)) && isFinite(loopstate)) {
-            let newSpeed = Number(loopstate);
-            if (Number(playbackSpeed) !== newSpeed) {
-              playbackSpeed = newSpeed;
-              // app.logger.debug('Changing speed to ' + newSpeed);
-            }
-            if (loopStates[path] === true) {
-              loop(ms, false, JSON.parse(data.toString()));
-              res
+            res
                 .status(200)
-                .send(JSON.stringify({
-                  'state': 'play',
-                  'speed': playbackSpeed,
-                }));
-            } else {
-              res
-                .status(200)
-                .send(JSON.stringify({
-                  'state': 'pause',
-                  'speed': playbackSpeed,
-                }));
-            }
-            updateSpeed(playbackSpeed);
-          }
-      }
-    }
-  });
-};
-
-var _wsInit = function(req, res) {
-  if (req.params.command) {
-    let command = req.params.command;
-    var ms = file.ms;
-    if (typeof loopStates[path] === 'undefined') {
-      loopStates[path] = false;
-    }
-
-    switch (command) {
-      case 'next':
-        var temp = loopStates[path];
-        loopStates[path] = true;
-        if (temp) {
-          getNext(ms).then(()=>{
-            loop(ms, true);
-          });
-        } else {
-          loop(ms,false);
-          getNext(ms).then(()=>{
-            loop(ms, true);
-          });
-          loopStates[path] = false;
-          update('pause');
-        }
-        res.status(200).send('OK');
-        break;
-      case 'prev':
-        var temp = loopStates[path];
-        loopStates[path] = true;
-        if (temp) {
-          getPrev(ms).then(()=>{
-            loop(ms, true);
-          });
-        } else {
-          loop(ms,false);
-          getPrev(ms).then(()=>{
-            loop(ms, true);
-          });
-          loopStates[path] = false;
-          update('pause');
-        }
-        res.status(200).send('OK');
-        break;
-      default:
-        if (!isNaN(parseFloat(command)) && isFinite(command)) {
-          let ws = Number(command);
-          temp = loopStates[path];
-          loopStates[path] = true;
-          if (temp) {
-            getToWS(ws, ms).then(()=>{
-              loop(ms, true);
-            });
-            loopStates[path] = false;
-            update('pause');
+                .send(JSON.stringify({'state': 'play', 'speed': playbackSpeed}));
           } else {
-            loop(ms,false);
-            getToWS(ws, ms).then(()=>{
-              loop(ms, true);
-            });
-            loopStates[path] = false;
-            update('pause');
+            res
+                .status(200)
+                .send(JSON.stringify({'state': 'pause', 'speed': playbackSpeed}));
           }
-          res.status(200).send('OK');
+        } else {
+          let loopstate = req.params.loopstate;
+          var ms = file.ms;
+          if (typeof loopStates[path] === 'undefined') {
+            loopStates[path] = false;
+          }
+
+          switch (loopstate) {
+            case 'start':
+              if (loopStates[path] === true) {
+                res.status(200).send('Already running');
+                return;
+              }
+              // app.logger.debug('Looping ' + path);
+              loopStates[path] = true;
+              res.status(200).send('OK');
+              update('play');
+              console.log('starting...');
+              worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort});
+              break;
+            case 'stop':
+              if (loopStates[path] === false) {
+                res.status(200).send('Already stopped');
+                return;
+              }
+              loopStates[path] = false;
+              update('pause');
+              res.status(200).send('OK');
+              break;
+            default:
+              if (!isNaN(parseFloat(loopstate)) && isFinite(loopstate)) {
+                let newSpeed = Number(loopstate);
+                if (Number(playbackSpeed) !== newSpeed) {
+                  playbackSpeed = newSpeed;
+                  // app.logger.debug('Changing speed to ' + newSpeed);
+                }
+                if (loopStates[path] === true) {
+                  loop(ms, false, JSON.parse(data.toString()));
+                  res
+                      .status(200)
+                      .send(JSON.stringify({
+                        'state': 'play',
+                        'speed': playbackSpeed,
+                      }));
+                } else {
+                  res
+                      .status(200)
+                      .send(JSON.stringify({
+                        'state': 'pause',
+                        'speed': playbackSpeed,
+                      }));
+                }
+                updateSpeed(playbackSpeed);
+              }
+          }
         }
-    }
-    _getDelta(ms, false).then((b)=>{
-      app.ioServer.emit('nc:delta', JSON.parse(b));
-      app.ioServer.emit('nc:mtc', MTCHold);
-      if (playbackSpeed > 0) {
-        if (loopTimer !== undefined) {
-          clearTimeout(loopTimer);
-        }
-        loopTimer = setTimeout(() => loop(ms, false), 50/(playbackSpeed/200));
-      } else {
-        // app.logger.debug('playback speed is zero, no timeout set');
-  		}
-		});
-	}
-};
-
-var _wsInit = function(req, res) {
-  let temp = false;
-  if (!req.params.command) {
-    return;
-  }
-  if (typeof loopStates[path] === 'undefined') {
-    loopStates[path] = false;
-  }
-
-  handleWSInit(req.params.command, res);
-
-  getDelta(file.ms, false).then((b)=>{
-    app.ioServer.emit('nc:delta', JSON.parse(b));
-    if (playbackSpeed > 0) {
-      if (loopTimer !== undefined) {
-        clearTimeout(loopTimer);
-      }
-    }
-  });
+      });
 };
 
 var _getKeyState = function (req, res) {
@@ -564,7 +428,6 @@ module.exports = function(globalApp, cb) {
   app.router.get('/v3/nc/state/delta', _getDeltaState);
   app.router.get('/v3/nc/state/loop/:loopstate', _loopInit);
   app.router.get('/v3/nc/state/loop/', _loopInit);
-  app.router.get('/v3/nc/state/ws/:command', _wsInit);
   app.router.get('/v3/nc/state/mtc', _getMTCHold);
   app.router.get('/v3/nc/state/machine/:id', _machineInfo);
   app.router.get('/v3/nc/state/machine', _machineInfo);

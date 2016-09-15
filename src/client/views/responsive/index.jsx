@@ -592,64 +592,16 @@ export default class ResponsiveView extends React.Component {
   }
 
   populateSpindleSpeed(ss) {
-    let e = $('.header .item.spindlespeed .value');
-    let icon = $('.header .item.spindlespeed .icon');
-    if (!isNaN(ss)) {
-      ss = Math.abs(ss) + ' ' + 'units';
-      if (ss > 0) {
-        ss += ' (CCW)';
-        if (icon.hasClass('glyphicons-rotate-left') === false) {
-          icon.removeClass();
-          icon.addClass('icon glyphicons glyphicons-rotate-left');
-        }
-      } else {
-        ss += ' (CW)';
-        if (icon.hasClass('glyphicons-rotate-right') === false) {
-          icon.removeClass();
-          icon.addClass('icon glyphicons glyphicons-rotate-right');
-        }
-      }
-    } else {
-      if (icon.hasClass('glyphicons-refresh') === false) {
-        icon.removeClass();
-        icon.addClass('icon glyphicons glyphicons-refresh');
-      }
-    }
-    e.html(ss);
+    this.setState({'spindleSpeed':ss});
   }
 
   populateFeedRate(fr, units) {
-    let e = $('.header .item.feedrate .value');
-    if (!isNaN(fr)) {
-      fr = Math.round(fr * 100) / 100;
-      e.html(fr + ' ' + units);
-      if (this.state.live === false) {
-        $('.header .info.live').addClass('active');
-        $('.header .info.live .value').html('Live');
-        this.setState({live: true});
-      }
-    } else {
-      e.html(fr);
-      if (this.state.live === true) {
-        $('.header .info.live.active').removeClass('active');
-        $('.header .info.live .value').html('Stopped');
-        this.setState({live: false});
-      }
-    }
+   this.setState({'feedRate':fr,'feedUnit':units});
   }
 
   updateMTC(MTC) {
     let mtc = MTC;
-    // populate the header
-    let live = $('.header .info.live');
-    if (mtc.live === true && !live.hasClass('active')) {
-      live.addClass('active');
-      $('.header .info.live .value').html('Live');
-    } else if (mtc.live === false && live.hasClass('active')) {
-      live.removeClass('active');
-      $('.header .info.live .value').html('Stopped');
-    }
-    $('.header .info.gcode .value').html(mtc.currentGcode);
+    this.setState({'live':mtc.live,'currentGcode':mtc.currentGcode});
     this.populateSpindleSpeed(mtc.spindleSpeed);
     this.populateFeedRate(mtc.feedrate, mtc.feedrateUnits);
   }
@@ -749,13 +701,10 @@ export default class ResponsiveView extends React.Component {
           ws={this.state.ws}
           workingstepCache={this.state.workingstepCache}
           feedRate={this.state.feedRate}
+          feedRateUnits={this.state.feedUnit}
           spindleSpeed={this.state.spindleSpeed}
-          spindleUpdateCb={
-            (newSpindleSpeed) => this.setState({spindleSpeed: newSpindleSpeed})
-          }
-          feedUpdateCb={
-            (newFeedRate) => this.setState({feedRate: newFeedRate})
-          }
+          live={this.state.live}
+          currentGcode={this.state.currentGcode}
           machineList={this.state.machineList}
           changeMachine={this.changeMachine}
           selectedMachine={this.state.selectedMachine}

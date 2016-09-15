@@ -66,6 +66,50 @@ class Button extends React.Component {
     );
   }
 }
+class LiveBtn extends React.Component {
+  constructor(props){
+    super(props);
+  };
+  render(){
+    let cname = 'info live';
+    if(this.props.live) cname +=' active';
+    return (
+      <MenuItem {...this.props} key='live' className={cname}>
+          <div className='item'>
+            <div className={getIcon('live')}/>
+            <div className='text'>
+              <div className='value'>{this.props.live?"Live":"Stopped"}</div>
+            </div>
+          </div>
+        </MenuItem>)};
+}
+
+class FeedSpeed extends React.Component {
+  constructor(props){
+    super(props);
+  }
+  render(){return (        <MenuItem {...this.props} key='feed-speed' className='info feed-speed'>
+    <div className='item'>
+      <div className={getIcon('feedrate')}/>
+      <div className='text'>
+        <div className='title'>Feed rate:</div>
+        <div className='value'>{this.props.feed}</div>
+      </div>
+    </div>
+    <div className='item'>
+      <div className={this.props.rotation}/>
+      <div className='text'>
+        <div className='title'>Spindle speed:</div>
+        <div className='value'>{this.props.speed}</div>
+      </div>
+    </div>
+  </MenuItem>)}
+}
+FeedSpeed.propTypes = {
+  feed: React.PropTypes.number.isRequired,
+  speed: React.PropTypes.number.isRequired,
+  rotation: React.PropTypes.string.isRequired
+}
 
 export default class HeaderView extends React.Component {
   constructor(props) {
@@ -74,8 +118,6 @@ export default class HeaderView extends React.Component {
     this.simulateMenuItemClicked = this.simulateMenuItemClicked.bind(this);
     this.updateSpeed = this.updateSpeed.bind(this);
     this.getFeedSpeedInfo = this.getFeedSpeedInfo.bind(this);
-    this.updateSpindleSpeed = this.updateSpindleSpeed.bind(this);
-    this.updateFeedrate = this.updateFeedrate.bind(this);
     this.renderMachineButton = this.renderMachineButton.bind(this);
   }
 
@@ -114,13 +156,13 @@ export default class HeaderView extends React.Component {
     let ss = 'Not defined';
     let ssIcon = null;
     if (this.props.feedRate !== undefined) {
-      fr = this.props.feedRate.toFixed(1) + ' ' + 'mm/min'//this.props.feedRateUnits;
+      fr = Number(this.props.feedRate).toFixed(1) + ' ' + this.props.feedRateUnits;
     }
     if (this.props.spindleSpeed !== 0) {
       ss = Math.abs(this.props.spindleSpeed) + ' rev/min';
       if (this.props.spindleSpeed > 0) {
         ss += ' (CCW)';
-        ssIcom = getIcon('spindlespeed', 'CCW');
+        ssIcon = getIcon('spindlespeed', 'CCW');
       } else {
         ss += ' (CW)';
         ssIcon = getIcon('spindlespeed', 'CW');
@@ -133,14 +175,6 @@ export default class HeaderView extends React.Component {
 
   updateSpeed(info) {
     this.props.actionManager.emit('simulate-setspeed', info);
-  }
-
-  updateSpindleSpeed(info) {
-    this.props.spindleUpdateCb(info.speed);
-  }
-
-  updateFeedrate(info){
-    this.props.feedUpdateCb(info.feed);
   }
 
   simulateMenuItemClicked(info) {
@@ -164,6 +198,7 @@ export default class HeaderView extends React.Component {
   }
 
   render() {
+    let feedSpeedInfo = this.getFeedSpeedInfo();
     const headerMenu = (
       <Menu
         mode='horizontal'
@@ -172,36 +207,14 @@ export default class HeaderView extends React.Component {
         openSubMenuOnMouseEnter={false}
       >
         <MenuItem disabled key='mtc' className='info mtc'/>
-        <MenuItem disabled key='live' className='info live'>
-          <div className='item'>
-            <div className={getIcon('live')}/>
-            <div className='text'>
-              <div className='value'>Stopped</div>
-            </div>
-          </div>
-        </MenuItem>
-        <MenuItem disabled key='feed-speed' className='info feed-speed'>
-          <div className='item feedrate'>
-            <div className={getIcon('feedrate')}/>
-            <div className='text'>
-              <div className='title'>Feed rate:</div>
-              <div className='value'>Not defined</div>
-            </div>
-          </div>
-          <div className='item spindlespeed'>
-            <div className={getIcon('spindlespeed')}/>
-            <div className='text'>
-              <div className='title'>Spindle speed:</div>
-              <div className='value'>1200 RPM</div>
-            </div>
-          </div>
-        </MenuItem>
+        <LiveBtn disabled live={this.props.live}/>
+          <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]}/>
         <MenuItem disabled key='gcode' className='info gcode'>
           <div className='item'>
             <div className={getIcon('gcode')}/>
             <div className='text'>
               <div className='title'>Current GCode:</div>
-              <div className='value'>Not defined</div>
+              <div className='value'>{this.props.currentGcode}</div>
             </div>
           </div>
         </MenuItem>
@@ -246,4 +259,6 @@ HeaderView.propTypes = {
   cadManager: React.PropTypes.object.isRequired,
   cbPPButton: React.PropTypes.func.isRequired,
   ppbutton: React.PropTypes.string.isRequired,
+  currentGcode: React.PropTypes.string.isRequired,
+  live: React.PropTypes.bool.isRequired
 };

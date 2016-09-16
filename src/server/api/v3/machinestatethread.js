@@ -10,15 +10,19 @@ onmessage = (f)=>{
   } else if(f.msg==='getMachine') {
     let out;
     if(!f.hasOwnProperty('args') || Object.keys(f.args).length <0) {
-      out = ms[f.fun]();
+        Promise.resolve(ms[f.fun]()).then((r)=> {
+          postMessage({'cb': f.callback, 'val': r});
+        });
     } else {
       if(!f.args.hasOwnProperty('length')){
         f.args.length = Object.keys(f.args).length;
       }
       //Node Native Module calls need to invoke apply with the relevant object.
       //This next line is hairy, but it basically invokes the function our caller wants with the arguments array we have
-      out = ms[f.fun].apply(ms,Array.prototype.slice.call(f.args));
+        Promise.resolve(ms[f.fun].apply(ms,Array.prototype.slice.call(f.args)))
+          .then((r)=>{
+            postMessage({'cb': f.callback, 'val': r});
+          });
     }
-    postMessage({'cb':f.callback,'val':out});
   }
 };

@@ -43,6 +43,8 @@ function getIcon(type, data) {
       return 'icon glyphicons glyphicons-chevron-right';
     case 'machine':
       return 'icon glyphicons glyphicons-settings';
+    case 'reset':
+      return 'icon glyphicons glyphicons-recycle';
     default:
       return 'icon glyphicons glyphicons-question-sign';
   }
@@ -58,9 +60,11 @@ class Button extends React.Component {
     if (this.props.icon) {
       icon = getIcon(this.props.icon);
     }
+    let iid='';
+    if(this.props.iid) iid=this.props.iid;
     return (
       <MenuItem {...this.props} className='button'>
-        <div className={icon}/>
+        <div className={icon} id={iid}/>
         {this.props.children}
       </MenuItem>
     );
@@ -240,6 +244,9 @@ export default class HeaderView extends React.Component {
         >
           {_.map(_.values(this.props.machineList),this.renderMachineButton)}
         </SubMenu>
+        <Button key='reset' iid='removal' icon='reset'>
+          <div className='text'>Reset<br />Removal</div>
+        </Button>
         <Button key='changelog' id='logbutton'>
           <div className='version' id='logbutton'>v1.1.0</div>
         </Button>

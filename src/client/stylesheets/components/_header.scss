@@ -39,6 +39,10 @@
 }
 
 .header .button {
+
+    #removal {
+        padding-bottom: 0px;
+    }
     .icon {
         padding-bottom: 11px;
         padding-top: 15px;
@@ -84,10 +88,6 @@
         }
     }
     
-    &.machine {
-        border-right: none;
-    }
-
     .machine-button {
         padding: 7px;
     }

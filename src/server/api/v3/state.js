@@ -30,14 +30,7 @@ var WSArray = [];
 let nextSequence = 0;
 let changed=false;
 
-let MTCHold = {
-  'currentGcode':'Not defined',
-  'currentGcodeNumber':0,
-  'spindleSpeed':'Not defined',
-  'feedrate':0,
-  'feedrateUnits':"Millimeters/Second",
-  'live':true
-};
+let MTCHold = {'feedrateUnits':'Millimeters/Second'};
 
 let currentMachine = 0;
 
@@ -304,12 +297,7 @@ var _loopInit = function(req, res) {
     workingstepsArrayDriver();
   }
 
-  let machineAddress = app.config.machineList[0].address.split(':')[0];
-  let machinePort = app.config.machineList[0].address.split(':')[1];
-  loadMTCHold(machineAddress,machinePort)
-      .then(()=>{
-        return parseGCodes(app.project.substring(0,app.project.length-6));
-      })
+  parseGCodes(app.project.substring(0,app.project.length-6))
       .then((parsed)=>{
         WSGCode = parsed;
         if (req.params.loopstate === undefined) {
@@ -340,7 +328,10 @@ var _loopInit = function(req, res) {
               res.status(200).send('OK');
               update('play');
               console.log('starting...');
-              worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort});
+              let machineAddress = app.config.machineList[0].address.split(':')[0];
+              let machinePort = app.config.machineList[0].address.split(':')[1];
+              loadMTCHold(machineAddress,machinePort)
+                  .then(worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort}));
               break;
             case 'stop':
               if (loopStates[path] === false) {

@@ -346,28 +346,19 @@ var _loopInit = function(req, res) {
               break;
             default:
               if (!isNaN(parseFloat(loopstate)) && isFinite(loopstate)) {
-                let newSpeed = Number(loopstate);
-                if (Number(playbackSpeed) !== newSpeed) {
-                  playbackSpeed = newSpeed;
-                  // app.logger.debug('Changing speed to ' + newSpeed);
-                }
                 if (loopStates[path] === true) {
-                  loop(ms, false, JSON.parse(data.toString()));
                   res
                       .status(200)
                       .send(JSON.stringify({
                         'state': 'play',
-                        'speed': playbackSpeed,
                       }));
                 } else {
                   res
                       .status(200)
                       .send(JSON.stringify({
                         'state': 'pause',
-                        'speed': playbackSpeed,
                       }));
                 }
-                updateSpeed(playbackSpeed);
               }
           }
         }

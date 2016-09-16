@@ -159,8 +159,10 @@ var blockUpdate=function(number,block){
   }
 };
 //Handle MS1speed
+var spindump=1;
 var spindleUpdate=function(speed){
-  if(speed!= MTCHold.spindleSpeed){
+  if(speed!= MTCHold.spindleSpeed && !(spindump++ % 100)){
+    spindump=1;
     MTCHold.spindleSpeed = speed;
     updateMTC();
   }

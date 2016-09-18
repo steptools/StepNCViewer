@@ -51,6 +51,7 @@
     "STEPNode": ">=2.0.0",
     "superagent": "^2.0.0",
     "three": "^0.78.0",
+    "tiny-worker": "^1.1.5",
     "webpack-sources": "^0.1.0",
     "winston": "^2.2.0",
     "xml2js": "latest"

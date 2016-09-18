@@ -115,6 +115,9 @@ FeedSpeed.propTypes = {
   rotation: React.PropTypes.string.isRequired
 }
 
+let resetProcessVolume = function(){
+  request.get("/v3/nc/geometry/delta/reset").end();
+}
 export default class HeaderView extends React.Component {
   constructor(props) {
     super(props);
@@ -192,6 +195,9 @@ export default class HeaderView extends React.Component {
           changelog.className = 'changelog';
           this.props.cbLogstate(false);
         }
+        break;
+      case 'reset':
+        resetProcessVolume();
         break;
       default:
         if (info.key.indexOf('machine') >= 0) {

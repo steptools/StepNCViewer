@@ -10,13 +10,20 @@ function _getDelta(req,res){
     });
 }
 
+function _resetDelta(res){
+  file.ms.ResetDeltaGeometry().then(res.status(200).send());
+}
 function _getGeometry(req, res) {
   let ms = file.ms;
   let find = file.find;
   //Route the /geometry/delta/:current endpoint first.
   if(req.params.id === 'delta') {
-    req.params.current = req.params.type;
-    _getDelta(req, res);
+    if(req.params.type ==='reset'){
+      _resetDelta(res);
+    } else {
+      req.params.current = req.params.type;
+      _getDelta(req, res);
+    }
     return;
   }
   if (req.params.type === 'shell') {

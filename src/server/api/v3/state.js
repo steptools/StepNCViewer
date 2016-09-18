@@ -108,6 +108,7 @@ var loadMTCHold = (addr,port)=>{
           MTCHold.feedrate = pathtag.Samples[0].PathFeedrate[1]._;
           MTCHold.currentGcodeNumber = pathtag.Events[0]['e:BlockNumber'][0]._;
           MTCHold.currentGcode = pathtag.Events[0].Block[0]._;
+          MTCHold.live=true;
         });
       }).catch((err)=>console.log(err));
 };

@@ -62,13 +62,7 @@ function updateSpeed(speed) {
   app.ioServer.emit('nc:speed', speed);
 }
 
-var mtcdump = 1;
 function updateMTC(){
-  if((mtcdump%10)>0) {
-    mtcdump++;
-    return;
-  }
-  mtcdump = 1;
   app.ioServer.emit('nc:mtc',MTCHold);
 }
 
@@ -159,10 +153,8 @@ var blockUpdate=function(number,block){
   }
 };
 //Handle MS1speed
-var spindump=1;
 var spindleUpdate=function(speed){
-  if(speed!= MTCHold.spindleSpeed && !(spindump++ % 100)){
-    spindump=1;
+  if(speed!= MTCHold.spindleSpeed){
     MTCHold.spindleSpeed = speed;
     updateMTC();
   }
@@ -196,16 +188,10 @@ var feedUpdate=function(feedrate){
 };
 //==========END STATE UPDATERS==========
 //==========WORKER THREAD PROCESSOR=====
-let dump = 1;
 worker.onmessage = (ev)=>{
   _.forIn(ev.data,(val,key)=>{
     switch(key){
       case "pathUpdate":
-        if(dump%10>0){
-          dump++;
-          break;
-        }
-        dump=1;
         queue.add(pathUpdate(val));
         break;
       case "feedUpdate":

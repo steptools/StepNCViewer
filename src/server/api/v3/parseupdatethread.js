@@ -2,7 +2,14 @@ var xml2js = require('xml2js');
 var getMultipartRequest = require(process.cwd()+'/src/server/api/v3/getmultipartrequest.js');
 var _ = require('lodash');
 
+var dump=1;
+
 var updateLoop = function(data){
+    if(dump%10) {
+        dump++;
+        return;
+    }
+    dump=1;
     xml2js.parseString(data,(err,res)=>{
         if(err){
             console.log(err);

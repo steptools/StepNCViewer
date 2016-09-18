@@ -15,9 +15,6 @@ try{
   worker = new Worker('./src/server/api/v3/parseupdatethread.js');
 } catch(e){console.log(e);};
 
-var Queue = require('promise-queue');
-var queue = new Queue(1,200);
-
 var app;
 var loopTimer;
 var loopStates = {};
@@ -192,7 +189,7 @@ worker.onmessage = (ev)=>{
   _.forIn(ev.data,(val,key)=>{
     switch(key){
       case "pathUpdate":
-        queue.add(pathUpdate(val));
+        pathUpdate(val);
         break;
       case "feedUpdate":
         feedUpdate(val);

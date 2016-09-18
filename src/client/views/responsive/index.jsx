@@ -239,8 +239,6 @@ export default class ResponsiveView extends React.Component {
     this.toggleHighlight = this.toggleHighlight.bind(this);
 
     this.updateMTC = this.updateMTC.bind(this);
-    this.populateFeedRate = this.populateFeedRate.bind(this);
-    this.populateSpindleSpeed = this.populateSpindleSpeed.bind(this);
 
     this.changeMachine = this.changeMachine.bind(this);
   }
@@ -591,19 +589,16 @@ export default class ResponsiveView extends React.Component {
     this.setState({'highlightedTolerances': newTols});
   }
 
-  populateSpindleSpeed(ss) {
-    this.setState({'spindleSpeed':ss});
-  }
-
-  populateFeedRate(fr, units) {
-   this.setState({'feedRate':fr,'feedUnit':units});
-  }
-
   updateMTC(MTC) {
     let mtc = MTC;
-    this.setState({'live':mtc.live,'currentGcode':mtc.currentGcode});
-    this.populateSpindleSpeed(mtc.spindleSpeed);
-    this.populateFeedRate(mtc.feedrate, mtc.feedrateUnits);
+    let stateup = {};
+    if(this.state.live !=mtc.live) stateup.live = mtc.live;
+    if(this.state.spindleSpeed !=mtc.spindleSpeed) stateup.spindleSpeed = mtc.spindleSpeed;
+    if(this.state.feedRate != mtc.feedrate) stateup.feedRate = mtc.feedrate;
+    if(this.state.feedUnit!=mtc.feedrateUnits) stateup.feedUnit = mtc.feedrateUnits;
+    if(this.state.currentGcode != mtc.currentGcode) stateup.currentGcode = mtc.currentGcode;
+    if(!_.isEmpty(stateup))
+      this.setState(stateup);
   }
 
   playpause() {

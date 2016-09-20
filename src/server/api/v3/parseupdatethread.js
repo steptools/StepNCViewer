@@ -3,13 +3,9 @@ var getMultipartRequest = require(process.cwd()+'/src/server/api/v3/getmultipart
 var _ = require('lodash');
 
 var dump=1;
-
+var sdump=1;
+var fdump=1;
 var updateLoop = function(data){
-    if(dump%10) {
-        dump++;
-        return;
-    }
-    dump=1;
     xml2js.parseString(data,(err,res)=>{
         if(err){
             console.log(err);
@@ -31,12 +27,18 @@ var updateLoop = function(data){
                             _.each(val,(g)=>{
                                 switch(g.$.dataItemId){
                                     case "MS1speed":
+                                        if(sdump++%100) break;
+                                        sdump=1;
                                         postMessage({'speedUpdate':g._});
                                         break;
                                     case "Mp1Fact":
+                                        if(fdump++%100) break;
+                                        fdump=1;
                                         postMessage({'feedUpdate':g._});
                                         break;
                                     case "Mp1LPathPos":
+                                        if(dump++%10) break;
+                                        dump=1;
                                         postMessage({'pathUpdate':g._});
                                         break;
                                 }

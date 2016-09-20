@@ -84,12 +84,14 @@ var findWS = function(current) {
   return change;
 };
 
+let startSequence = "";
 var loadMTCHold = (addr,port)=>{
   return new Promise((resolve)=>{
     request
     .get(addr+":"+port+"/current")
     .then((res)=>{
     parseXMLString.parseString((res.text),(err,result)=>{
+    startSequence = result.MTConnectStreams.Header[0]['$'].nextSequence;
   let find = result.MTConnectStreams.Streams[0].DeviceStream[0].ComponentStream;
   let spindletag = _.find(find,(tag)=>{
       if(tag.$.name ==='C' && tag.$.component ==='Rotary'){
@@ -324,7 +326,7 @@ var _loopInit = function(req, res) {
               let machineAddress = app.config.machineList[0].address.split(':')[0];
               let machinePort = app.config.machineList[0].address.split(':')[1];
               loadMTCHold(machineAddress,machinePort)
-                  .then(worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort}));
+                  .then(()=>{worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort,'startSequence':startSequence});});
               break;
             case 'stop':
               if (loopStates[path] === false) {

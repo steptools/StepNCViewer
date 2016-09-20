@@ -67,6 +67,6 @@ var updateLoop = function(data){
 onmessage =function(f){
     f=f.data;
     if(f.msg==='start'){
-        getMultipartRequest({'hostname':f.machineAddress,'port':f.machinePort,'path':'/sample?interval=0&heartbeat=1000'},(r)=>{updateLoop(r);});
+        getMultipartRequest({'hostname':f.machineAddress,'port':f.machinePort,'path':'/sample?from='+f.startSequence+'&interval=0&heartbeat=1000'},(r)=>{updateLoop(r);});
     }
 };

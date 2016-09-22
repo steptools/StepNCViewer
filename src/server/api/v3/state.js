@@ -84,33 +84,42 @@ var findWS = function(current) {
   return change;
 };
 
+let startSequence = "";
 var loadMTCHold = (addr,port)=>{
-  return request
-      .get(addr+":"+port+"/current")
-      .then((res)=>{
-        parseXMLString.parseString((res.text),(err,result)=>{
-          let find = result.MTConnectStreams.Streams[0].DeviceStream[0].ComponentStream;
-          let spindletag = _.find(find,(tag)=>{
-            if(tag.$.name ==='C' && tag.$.component ==='Rotary'){
-              return true;
-            } else {
-              return false;
-            }
-          });
-          let pathtag = _.find(find,(tag)=>{
-            if(tag.$.name === 'path') {
-              return true;
-            } else {
-              return false;
-            }
-          });
-          MTCHold.spindleSpeed = spindletag.Samples[0].RotaryVelocity[1]._;
-          MTCHold.feedrate = pathtag.Samples[0].PathFeedrate[1]._;
-          MTCHold.currentGcodeNumber = pathtag.Events[0]['e:BlockNumber'][0]._;
-          MTCHold.currentGcode = pathtag.Events[0].Block[0]._;
-          MTCHold.live=true;
-        });
-      }).catch((err)=>console.log(err));
+  return new Promise((resolve)=>{
+    request
+    .get(addr+":"+port+"/current")
+    .then((res)=>{
+    parseXMLString.parseString((res.text),(err,result)=>{
+    startSequence = result.MTConnectStreams.Header[0]['$'].nextSequence;
+  let find = result.MTConnectStreams.Streams[0].DeviceStream[0].ComponentStream;
+  let spindletag = _.find(find,(tag)=>{
+      if(tag.$.name ==='C' && tag.$.component ==='Rotary'){
+    return true;
+  } else {
+    return false;
+  }
+});
+  let pathtag = _.find(find,(tag)=>{
+      if(tag.$.name === 'path') {
+    return true;
+  } else {
+    return false;
+  }
+});
+  MTCHold.spindleSpeed = spindletag.Samples[0].RotaryVelocity[1]._;
+  MTCHold.feedrate = pathtag.Samples[0].PathFeedrate[1]._;
+  MTCHold.currentGcodeNumber = pathtag.Events[0]['e:BlockNumber'][0]._;
+  MTCHold.currentGcode = pathtag.Events[0].Block[0]._;
+  MTCHold.live=true;
+  resolve();
+});
+})
+.catch((err)=>{
+    console.log(err);
+  resolve();
+});
+});
 };
 
 function getNext(ms) {
@@ -317,7 +326,7 @@ var _loopInit = function(req, res) {
               let machineAddress = app.config.machineList[0].address.split(':')[0];
               let machinePort = app.config.machineList[0].address.split(':')[1];
               loadMTCHold(machineAddress,machinePort)
-                  .then(worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort}));
+                  .then(()=>{worker.postMessage({'msg':'start','machineAddress':machineAddress,'machinePort':machinePort,'startSequence':startSequence});});
               break;
             case 'stop':
               if (loopStates[path] === false) {

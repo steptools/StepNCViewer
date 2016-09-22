@@ -196,6 +196,12 @@ export default class HeaderView extends React.Component {
           this.props.cbLogstate(false);
         }
         break;
+      case 'asisvis':
+      case 'removalvis':
+      case 'tobevis':
+      case 'pathvis':
+        this.props.actionManager.emit('SetVisibleMenu',info.key);
+        break;
       case 'reset':
         resetProcessVolume();
         break;
@@ -250,6 +256,12 @@ export default class HeaderView extends React.Component {
         >
           {_.map(_.values(this.props.machineList),this.renderMachineButton)}
         </SubMenu>
+        {/*<SubMenu title = "Visible" onClick={this.simulateMenuItemClicked}>
+          <Button key='asisvis'>As-Is</Button>
+          <Button key='tobevis'>To-Be</Button>
+          <Button key='removalvis'>Removal</Button>
+          <Button key='pathvis'>Toolpath</Button>
+        </SubMenu>*/}
         <Button key='reset' iid='removal' icon='reset'>
           <div className='text'>Reset<br />Removal</div>
         </Button>

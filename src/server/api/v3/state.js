@@ -153,7 +153,7 @@ var blockUpdate=function(number,block){
             return file.ms.GetKeyStateJSON();
           })
           .then((r)=>{
-            app.ioServer.emit('nc:delta',r);
+            app.ioServer.emit('nc:delta',JSON.parse(r));
           });
     }
     updateMTC();

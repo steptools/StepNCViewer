@@ -52,7 +52,7 @@ var updateLoop = function(data){
                                     case "Mp1BlockNumber":
                                         postMessage({'blockNumberUpdate':g._});
                                         break;
-                                    case "Mp1Block":
+                                    case "Mp1block":
                                         postMessage({'blockUpdate':g._});
                                         break;
                                 }

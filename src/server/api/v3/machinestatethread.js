@@ -5,6 +5,7 @@ onmessage = (f)=>{
   f=f.data;
   if(f.msg==='setMachineState') {
     ms = new StepNC.machineState(f.path, f.sim);
+    ms.WorkingstepTransitionDisableToolMove();
     if (f.hasOwnProperty('tool'))
       ms.LoadMachine(f.tool);
   } else if(f.msg==='getMachine') {

@@ -107,11 +107,11 @@ var loadMTCHold = (addr,port)=>{
     return false;
   }
 });
-  MTCHold.spindleSpeed = spindletag.Samples[0].RotaryVelocity[1]._;
-  MTCHold.feedrate = pathtag.Samples[0].PathFeedrate[1]._;
-  MTCHold.currentGcodeNumber = pathtag.Events[0]['e:BlockNumber'][0]._;
-  MTCHold.currentGcode = pathtag.Events[0].Block[0]._;
   MTCHold.live=true;
+  spindleUpdate(spindletag.Samples[0].RotaryVelocity[1]._);
+  feedUpdate(pathtag.Samples[0].PathFeedrate[1]._);
+  blockUpdate(pathtag.Events[0]['e:BlockNumber'][0]._,pathtag.Events[0].Block[0]._);
+  pathUpdate(pathtag.Samples[0].PathPosition[0]._);
   resolve();
 });
 })

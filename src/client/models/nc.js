@@ -289,6 +289,7 @@ export default class NC extends THREE.EventDispatcher {
             if(!geom.hasOwnProperty('prev_version')){
                 return parseDynamicFull(geom,obj);
             }
+            if(geom.version < obj.version) return;
             let geometry = makeGeometry(processDelta(geom, obj));
             // Remove all old geometry -- mesh's only
             obj.object3D.traverse(function (child) {

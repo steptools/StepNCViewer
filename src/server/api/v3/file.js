@@ -38,6 +38,7 @@ function init(path, machinetool) {
         resolves[msid] = (d)=> {
           delete resolves[msid];
           resolve(d);
+          d=null;
         };
         let mas = "(data)=>{resolves[" + msid + "](data);};";
         let msg = {'msg': 'getMachine', 'fun': key, 'callback': mas};

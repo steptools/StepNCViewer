@@ -9,6 +9,7 @@ let resolves = {};
 worker.onmessage = (ev)=>{
   let cb = eval(ev.data.cb);
   cb(ev.data.val);
+  cb = null;
 };
 let msid = 0;
 
@@ -36,6 +37,7 @@ function init(path, machinetool) {
     this.ms[key] = function () {
       return new Promise((resolve)=> {
         resolves[msid] = (d)=> {
+          resolves[msid] = null;
           delete resolves[msid];
           resolve(d);
           d=null;

@@ -7,6 +7,7 @@ function _getDelta(req,res){
   file.ms.GetDeltaGeometryJSON(Number(req.params.current))
     .then((rtn)=>{
       res.status(200).send(rtn);
+      rtn=null;
     });
 }
 

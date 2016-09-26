@@ -31,12 +31,14 @@ function _getGeometry(req, res) {
     ms.GetGeometryJSON(req.params.id , 'MESH')
       .then((out)=>{
         res.status(200).send(out);
+        out=null;
       });
     return;
   } else if (req.params.type === 'annotation') {
     ms.GetGeometryJSON(req.params.id , 'POLYLINE')
       .then((out)=>{
         res.status(200).send(out);
+        out=null;
       });
     return;
   } else if (req.params.type === 'tool') {
@@ -54,6 +56,7 @@ function _getGeometry(req, res) {
   ms.GetGeometryJSON()
     .then((out)=>{
       res.status(200).send(out);
+      out=null;
     });
   return;
 }

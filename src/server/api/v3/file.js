@@ -33,12 +33,14 @@ function init(path, machinetool) {
   //It's kinda like black magic.
   _.forIn(StepNC.machineState.prototype,(val,key)=>{
 
-    this.ms[key] = function(){
-      return new Promise((resolve)=>{
-        resolves[msid] = (d)=>{resolve(d)};
-        let mas="(data)=>{resolves["+msid+"](data);};";
-        let msg = {'msg':'getMachine','fun':key,'callback':mas};
-        if(arguments.length>0) msg['args']=arguments;
+    this.ms[key] = function () {
+      return new Promise((resolve)=> {
+        resolves[msid] = (d)=> {
+          resolve(d);
+        };
+        let mas = "(data)=>{resolves[" + msid + "](data);};";
+        let msg = {'msg': 'getMachine', 'fun': key, 'callback': mas};
+        if (arguments.length > 0) msg['args'] = arguments;
         worker.postMessage(msg);
         msid++
       });

@@ -36,6 +36,7 @@ function init(path, machinetool) {
     this.ms[key] = function () {
       return new Promise((resolve)=> {
         resolves[msid] = (d)=> {
+          delete resolves[msid];
           resolve(d);
         };
         let mas = "(data)=>{resolves[" + msid + "](data);};";

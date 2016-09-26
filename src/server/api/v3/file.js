@@ -42,7 +42,7 @@ function init(path, machinetool) {
           resolve(d);
           d=null;
         };
-        let mas = "(data)=>{resolves[" + msid + "](data);};";
+        let mas = "(data)=>{resolves[" + msid + "](data);data = null;};";
         let msg = {'msg': 'getMachine', 'fun': key, 'callback': mas};
         if (arguments.length > 0) msg['args'] = arguments;
         worker.postMessage(msg);

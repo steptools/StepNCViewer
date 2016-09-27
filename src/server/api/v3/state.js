@@ -162,7 +162,7 @@ var blockUpdate=function(number,block){
 };
 //Handle MS1speed
 var spindleUpdate=function(speed){
-  if(speed!= MTCHold.spindleSpeed){
+  if(speed!== MTCHold.spindleSpeed){
     MTCHold.spindleSpeed = speed;
     updateMTC();
   }
@@ -182,14 +182,13 @@ var pathUpdate=function(position){
         })
         .then((d)=> {
           app.ioServer.emit('nc:delta', JSON.parse(d));
-          updateMTC();
           resolve();
         });
   });
 };
 //Handle Mp1Fact
 var feedUpdate=function(feedrate){
-  if(feedrate!=MTCHold.feedrate) {
+  if(feedrate!==MTCHold.feedrate) {
     MTCHold.feedrate = feedrate;
       updateMTC();
   }

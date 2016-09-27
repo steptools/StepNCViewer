@@ -35,7 +35,8 @@ let currentMachine = 0;
 /****************************** Helper Functions ******************************/
 
 function getWorkingstepsArray(id){
-  if(find.IsWorkingstep(id) && find.IsEnabled(id)){
+  if(!find.IsEnabled(id)) return;
+  if(find.IsWorkingstep(id)){
     WSArray.push(id);
   }
   if (!find.IsWorkingstep(id)) {

@@ -43,6 +43,8 @@ function getIcon(type, data) {
       return 'icon glyphicons glyphicons-chevron-right';
     case 'machine':
       return 'icon glyphicons glyphicons-settings';
+    case 'geometry':
+      return 'icon glyphicons glyphicons-cube-empty';
     case 'reset':
       return 'icon glyphicons glyphicons-recycle';
     default:
@@ -113,6 +115,34 @@ FeedSpeed.propTypes = {
   feed: React.PropTypes.number.isRequired,
   speed: React.PropTypes.number.isRequired,
   rotation: React.PropTypes.string.isRequired
+}
+
+class GeomMenu extends React.Component {
+  constructor(props){
+    super(props);
+    this.itemClicked = this.itemClicked.bind(this);
+  }
+  itemClicked(info){
+    this.props.actionManager.emit('changeVis',info.key);
+  }
+  render(){ return(
+      <SubMenu {...this.props} title={
+        <div className='item'>
+          <div className={getIcon('geometry')} />
+          <div className='text'>
+            <div className='title'>Geometry</div>
+          </div>
+        </div>
+      }
+               onClick={this.itemClicked} class="GeomMenu">
+        <Button key='asisvis'>As-Is</Button>
+        <Button key='tobevis'>To-Be</Button>
+        <Button key='cuttervis'>Tool</Button>
+        <Button key='machinevis'>Machine</Button>
+        <Button key='removalvis'>Removal</Button>
+        <Button key='pathvis'>Toolpath</Button>
+      </SubMenu>
+  )}
 }
 
 let resetProcessVolume = function(){
@@ -196,12 +226,6 @@ export default class HeaderView extends React.Component {
           this.props.cbLogstate(false);
         }
         break;
-      case 'asisvis':
-      case 'removalvis':
-      case 'tobevis':
-      case 'pathvis':
-        this.props.actionManager.emit('SetVisibleMenu',info.key);
-        break;
       case 'reset':
         resetProcessVolume();
         break;
@@ -223,17 +247,11 @@ export default class HeaderView extends React.Component {
         openSubMenuOnMouseEnter={false}
       >
         <MenuItem disabled key='mtc' className='info mtc'/>
-        <LiveBtn disabled live={this.props.live}/>
-          <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]}/>
-        <MenuItem disabled key='gcode' className='info gcode'>
-          <div className='item'>
-            <div className={getIcon('gcode')}/>
-            <div className='text'>
-              <div className='title'>Current GCode:</div>
-              <div className='value'>{this.props.currentGcode}</div>
-            </div>
-          </div>
-        </MenuItem>
+        <GeomMenu actionManager = {this.props.actionManager} />
+        <Button key='reset' iid='removal' icon='reset'>
+          <div className='text'>Reset<br />Removal</div>
+        </Button>
+        <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]}/>
         <SubMenu
           disabled  // TODO: figure out server-side functionality for switching machines
           title={
@@ -256,15 +274,16 @@ export default class HeaderView extends React.Component {
         >
           {_.map(_.values(this.props.machineList),this.renderMachineButton)}
         </SubMenu>
-        {/*<SubMenu title = "Visible" onClick={this.simulateMenuItemClicked}>
-          <Button key='asisvis'>As-Is</Button>
-          <Button key='tobevis'>To-Be</Button>
-          <Button key='removalvis'>Removal</Button>
-          <Button key='pathvis'>Toolpath</Button>
-        </SubMenu>*/}
-        <Button key='reset' iid='removal' icon='reset'>
-          <div className='text'>Reset<br />Removal</div>
-        </Button>
+        <LiveBtn disabled live={this.props.live}/>
+        <MenuItem disabled key='gcode' className='info gcode'>
+          <div className='item'>
+            <div className={getIcon('gcode')}/>
+            <div className='text'>
+              <div className='title'>Current GCode:</div>
+              <div className='value'>{this.props.currentGcode}</div>
+            </div>
+          </div>
+        </MenuItem>
         <Button key='changelog' id='logbutton'>
           <div className='version' id='logbutton'>v1.1.0</div>
         </Button>

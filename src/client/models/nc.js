@@ -39,8 +39,37 @@ export default class NC extends THREE.EventDispatcher {
             explodeDistance: 0,
             collapsed:      false
         }
+        this.vis = this.vis.bind(this);
+        this.app.actionManager.on('changeVis',this.vis);
     }
 
+    vis(arg){
+        let changes = {};
+        switch(arg){
+            case 'asisvis':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='asis' && obj.model.live});
+                break;
+            case 'tobevis':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='tobe' && obj.model.live});
+                break;
+            case 'machinevis':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='machine' && obj.model.live});
+                break;
+            case 'cuttervis':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='cutter' && obj.model.live});
+                break;
+            case 'removalvis':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='inprocess' && obj.model.live});
+                break;
+            case 'pathvis':
+                changes = _.filter(this._loader._annotations,(anno)=>{return anno.live});
+                _.each(changes,(anno)=>{anno.toggleScene();});
+                return;
+            default:
+                break;
+        }
+        _.each(changes,(obj)=>{obj.toggleVisibility();});
+    }
     addModel(model, usage, type, id, transform, bbox) {
         // console.log('Add Model(' + usage + '): ' + id);
         // Setup 3D object holder

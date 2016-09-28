@@ -336,14 +336,14 @@ export default class NC extends THREE.EventDispatcher {
         // Don't know what kind of update this is
     }
 
-    applyDelta(delta) {
+    applyDelta(delta,force) {
         let alter = false;
         //There are two types of 'State' that we get- KeyState or DeltaState.
 
         //If we get a KeyState, we need to re-render the scene.
         //If we get a DeltaState, we need to update the scene.
         //First we handle KeyState.
-        if (!delta.hasOwnProperty('prev')){
+        if (force || !delta.hasOwnProperty('prev')){
             //For keystates, we need to hide the currently drawn but unused geometry,
             //Unhide anything we have that is needed but hidden,
             //And load and display any new things we don't have.

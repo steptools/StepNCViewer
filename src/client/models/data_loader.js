@@ -362,46 +362,7 @@ export default class DataLoader extends THREE.EventDispatcher {
         let doc = JSON.parse(jsonText);
         //console.log('Process NC: ' + doc.project);
         let nc = new NC(doc.project, doc.workingstep, doc.time_in_workingstep, this);
-        _.each(doc.geom, (geomData) => {
-            let color = DataLoader.parseColor('7d7d7d');
-            let transform = DataLoader.parseXform(geomData.xform, true);
-            // Is this a shell
-            if (_.has(geomData, 'shell')) {
-                if (geomData.usage === 'cutter') {
-                    color = DataLoader.parseColor("FF530D");
-                }
-                if (geomData.usage === 'fixture' && this._app.services.machine === null) {
-                    return;
-                }
-                let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
-                let shell = new Shell(geomData.id, nc, nc, geomData.size, color, boundingBox);
-                nc.addModel(shell, geomData.usage, 'shell', geomData.id, transform, boundingBox);
-                // Push the shell for later completion
-                this._shells[geomData.shell] = shell;
-                this.addRequest({
-                    path: geomData.shell.split('.')[0],
-                    baseURL: req.base,
-                    type: 'shell'
-                });
-                // Is this a polyline
-            } else if (_.has(geomData, 'polyline')) {
-                let annotation = new Annotation(geomData.id, nc, nc);
-                nc.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
-                // Push the annotation for later completion
-                let name = geomData.polyline.split('.')[0];
-                this._annotations[name] = annotation;
-                // console.log("ASDASD", req.base);
-                this.addRequest({
-                    path: name,
-                    baseURL: req.base,
-                    type: 'annotation'
-                });
-            } else if (_.has(geomData, 'dynamicshell')) {
-                nc.handleDynamicGeom(geomData,()=>{});
-            } else {
-                console.log('No idea what we found: ' + geomData);
-            }
-        });
+        nc.applyDelta(doc,true);
         if (doc.workingstep) {
             this._app.actionManager.emit('change-workingstep', doc.workingstep);
         }

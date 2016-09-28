@@ -5,11 +5,12 @@
 /********************************* Annotation Class ********************************/
 
 export default class Annotation extends THREE.EventDispatcher {
-    constructor(id, model) {
+    constructor(id, model,isLive) {
         super();
         this._id = id;
         this._model = model;
         this._geometry = undefined;
+        this.live = isLive;
         return this;
     }
 

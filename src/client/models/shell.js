@@ -7,7 +7,7 @@
 /********************************* Helper Functions ********************************/
 
 export default class Shell extends THREE.EventDispatcher {
-    constructor(id, assembly, parent, size, defaultColor, boundingBox) {
+    constructor(id, assembly, parent, size, defaultColor, boundingBox,isLive) {
         super();
         this._id = id;
         this._assembly = assembly;
@@ -15,6 +15,7 @@ export default class Shell extends THREE.EventDispatcher {
         this._size = size;
         this._color = defaultColor;
         this._boundingBox = boundingBox;
+        this.live = isLive;
         if (this._boundingBox.isEmpty()) {
             console.log("Found empty bounding box: " + this._id);
         }

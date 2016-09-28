@@ -355,12 +355,14 @@ export default class NC extends THREE.EventDispatcher {
                 //this._object3D.remove(geom.object3D);
                 //this._overlay3D.remove(geom.object3D);
                 geom.rendered = false;
+                geom.live = false;
                 geom.object3D.visible = false;
             });
 
             var oldannotations =_.values(this._loader._annotations);
             _.each(oldannotations, (oldannotation) => {
                 oldannotation.removeFromScene();
+                oldannotation.live = false;
             });
 
             //Load new Stuff.
@@ -374,7 +376,7 @@ export default class NC extends THREE.EventDispatcher {
                 _.each(toolpaths, (geomData) => {
                     let name = geomData.polyline.split('.')[0];
                     if (!this._loader._annotations[name]){
-                        let annotation = new Annotation(geomData.id, this, this);
+                        let annotation = new Annotation(geomData.id, this, true);
                         let transform = DataLoader.parseXform(geomData.xform, true);
                         this.addModel(annotation, geomData.usage, 'polyline', geomData.id, transform, undefined);
                         // Push the annotation for later completion
@@ -404,6 +406,7 @@ export default class NC extends THREE.EventDispatcher {
                             obj.rendered = true;
                             obj.visible = true;
                             obj.setVisible();
+                            obj.model.live = true;
                             this._objects[name] = obj;
                         }
                     }
@@ -414,7 +417,7 @@ export default class NC extends THREE.EventDispatcher {
                         }
                         let transform = DataLoader.parseXform(geomData.xform,true);
                         let boundingBox = DataLoader.parseBoundingBox(geomData.bbox);
-                        let shell = new Shell(geomData.id,this,this,geomData.size,color,boundingBox);
+                        let shell = new Shell(geomData.id,this,this,geomData.size,color,boundingBox,true);
                         this.addModel(shell,geomData.usage,'shell',geomData.id,transform,boundingBox);
                         this._loader._shells[geomData.shell]=shell;
                         var url = "/v3/nc/";
@@ -445,6 +448,7 @@ export default class NC extends THREE.EventDispatcher {
                     }
                     let obj = this._objects[geom.id];
                     if (obj !== undefined) {
+                        obj.model.live = true;
                         if (obj.rendered !== false) {
                             let transform = new THREE.Matrix4();
                             if (!geom.xform) return;

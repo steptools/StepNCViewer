@@ -7,6 +7,7 @@ var io = require('socket.io');
 var ioSession = require('socket.io-express-session');
 var expSession = require('express-session');
 var express = require('express');
+var compression = require('compression');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var jade = require('jade');
@@ -69,6 +70,7 @@ APIServer.prototype._setExpress = function() {
     (path.join(__dirname, '/../../public'))
   );
   this.express.use(require('morgan')('tiny'));
+  this.express.use(require('compression')());
   this.express.engine('jade', jade.__express);
   this.express.set('views', path.join(__dirname, '/views'));
   // Create the core router

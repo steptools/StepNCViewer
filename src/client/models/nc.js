@@ -318,7 +318,7 @@ export default class NC extends THREE.EventDispatcher {
             if(!geom.hasOwnProperty('prev_version')){
                 return parseDynamicFull(geom,obj);
             }
-            if(geom.version < obj.version) return;
+            if(geom.version <= obj.version) return;
             let geometry = makeGeometry(processDelta(geom, obj));
             // Remove all old geometry -- mesh's only
             obj.object3D.traverse(function (child) {
@@ -400,7 +400,7 @@ export default class NC extends THREE.EventDispatcher {
                 geom.usage =='cutter' || (geom.usage =='tobe' && _.has(geom, 'shell')) ||
                 geom.usage =="asis"||geom.usage=='machine' || geom.usage=="fixture")
             );
-            let inproc = _.remove(delta.geom, ['usage','inprocess'])[0];
+            let inproc = _.filter(delta.geom, ['usage','inprocess'])[0];
             this.handleDynamicGeom(inproc,()=>{
                 _.each(toolpaths, (geomData) => {
                     let name = geomData.polyline.split('.')[0];
@@ -424,9 +424,9 @@ export default class NC extends THREE.EventDispatcher {
 
                 _.each(geoms, (geomData)=>{
                     let name = geomData.id;
-                    if(geomData.usage !=='cutter') return;
+                    //if(geomData.usage !=='cutter') return;
                     //Don't show as-is geom of fixture
-                    if(geomData.usage =='asis' || (this.app.services.machine === null && geomData.usage == 'fixture')) return;
+                    //if(geomData.usage =='asis' || (this.app.services.machine === null && geomData.usage == 'fixture')) return;
 
                     if(this._objects[name]) {
                         let obj = this._objects[name];

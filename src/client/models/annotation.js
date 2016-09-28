@@ -11,7 +11,9 @@ export default class Annotation extends THREE.EventDispatcher {
         this._model = model;
         this._geometry = undefined;
         this.live = isLive;
+        this.visible = true;
         return this;
+        this.toggleScene = this.toggleScene.bind(this);
     }
 
     getID() {
@@ -67,11 +69,18 @@ export default class Annotation extends THREE.EventDispatcher {
         this.dispatchEvent({ type: "annotationEndLoad", annotation: this });
     }
 
+    toggleScene(){
+        if(this.visible) this.removeFromScene();
+        else this.addToScene();
+    }
+
     addToScene(){
       this.dispatchEvent({ type: "annotationMakeVisible", annotation: this });
+        this.visible=true;
     }
     removeFromScene(){
       this.dispatchEvent({ type: "annotationMakeNonVisible", annotation: this });
+        this.visible=false;
     }
 
     getGeometry() {

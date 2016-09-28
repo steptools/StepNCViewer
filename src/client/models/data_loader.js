@@ -22,7 +22,7 @@ export default class DataLoader extends THREE.EventDispatcher {
         this._maxWorkers = config.maxWorkers ? config.maxWorkers : 4;
         this._freeWorkers = [];
         this._shells = [];
-        this._annotations = [];
+        this._annotations = {};
 
         this._workers = [];     // List of workers
         while (this._workers.length < this._maxWorkers) {

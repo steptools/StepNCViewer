@@ -43,6 +43,80 @@ export default class NC extends THREE.EventDispatcher {
         this.app.actionManager.on('changeVis',this.vis);
     }
 
+    //gist.github.com/paulkaplan/6513707
+
+    // Given a THREE.Geometry, create a STL binary
+    geometryToDataView(geometry){
+        var writeFloat = (dataview, offset, float, isLittleEndian)=>{
+            dataview.setFloat32(offset, float, isLittleEndian);
+            return offset + 4;
+        };
+        var writeVector = (dataview, offset, vector, isLittleEndian)=>{
+            offset = writeFloat(dataview, offset, vector.x, isLittleEndian);
+            offset = writeFloat(dataview, offset, vector.y, isLittleEndian);
+            return writeFloat(dataview, offset, vector.z, isLittleEndian);
+        };
+        let compareVertex = (v1,v2)=>{
+            return ((v1.x === v2.x) && (v1.y === v2.y) && (v1.z === v2.z));
+        }
+
+        let tris = geometry.faces;
+        let verts = geometry.vertices;
+
+        let isLittleEndian = true; // STL files assume little endian, see wikipedia page
+        tris = _.filter(tris,(t)=>{ //Remove degenerates. 2016 election joke- Trump would like to do this.
+            return !(compareVertex(verts[t.a],verts[t.b]) && compareVertex(verts[t.b],verts[t.c]));
+        });
+
+        let bufferSize = 84 + (50 * tris.length);
+        let buffer = new ArrayBuffer(bufferSize);
+        let dv = new DataView(buffer);
+        let offset = 0;
+
+        offset += 80; // Header is empty
+
+        dv.setUint32(offset, tris.length, isLittleEndian);
+        offset += 4;
+
+        for(let n = 0; n < tris.length; n++) {
+            offset = writeVector(dv, offset, tris[n].normal, isLittleEndian);
+            offset = writeVector(dv, offset, verts[tris[n].a], isLittleEndian);
+            offset = writeVector(dv, offset, verts[tris[n].b], isLittleEndian);
+            offset = writeVector(dv, offset, verts[tris[n].c], isLittleEndian);
+            offset += 2; // unused 'attribute byte count' is a Uint16
+        }
+
+        return dv;
+    };
+
+    save(arg){
+        let changes = {};
+        switch(arg){
+            case 'asis':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='asis' && obj.model.live});
+                break;
+            case 'tobe':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='tobe' && obj.model.live});
+                break;
+            case 'machine':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='machine' && obj.model.live});
+                break;
+            case 'cutter':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='cutter' && obj.model.live});
+                break;
+            case 'removal':
+                changes = _.filter(this._objects,(obj)=>{return obj.usage==='inprocess' && obj.model.live});
+                break;
+            default:
+                break;
+        }
+        for(let i=0;i<changes.length;i++) {
+            let outgeom = new THREE.Geometry().fromBufferGeometry(changes[i].model._geometry);
+            let dv = this.geometryToDataView(outgeom);
+            let blob = new Blob([dv], {type: 'application/octet-binary'});
+            FileSaver.saveAs(blob, "model" + i + ".stl");
+        }
+    }
     vis(arg){
         let changes = {};
         switch(arg){

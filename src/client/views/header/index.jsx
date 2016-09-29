@@ -45,6 +45,12 @@ function getIcon(type, data) {
       return 'icon glyphicons glyphicons-settings';
     case 'geometry':
       return 'icon glyphicons glyphicons-cube-empty';
+    case 'download':
+      return 'icon glyphicons glyphicons-cloud-download';
+    case 'view':
+      return 'icon glyphicons glyphicons-eye-open';
+    case 'noview':
+      return 'icon glyphicons glyphicons-eye-close';
     case 'reset':
       return 'icon glyphicons glyphicons-recycle';
     default:

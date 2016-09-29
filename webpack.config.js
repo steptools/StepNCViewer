@@ -65,6 +65,7 @@ module.exports = {
             "jQuery":   "jquery",
             "Backbone": "backbone",
             "THREE":    "three",
+	    "FileSaver": "file-saver",
 	    "request":  "superagent",
 	    "ReactDOM": "react-dom",
 	    "io":	"socket.io-client"

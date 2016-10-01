@@ -121,22 +121,22 @@ export default class NC extends THREE.EventDispatcher {
     vis(arg){
         let changes = {};
         switch(arg){
-            case 'asisvis':
+            case 'asis':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='asis' && obj.model.live});
                 break;
-            case 'tobevis':
+            case 'tobe':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='tobe' && obj.model.live});
                 break;
-            case 'machinevis':
+            case 'machine':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='machine' && obj.model.live});
                 break;
-            case 'cuttervis':
+            case 'cutter':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='cutter' && obj.model.live});
                 break;
-            case 'removalvis':
+            case 'removal':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='inprocess' && obj.model.live});
                 break;
-            case 'pathvis':
+            case 'path':
                 changes = _.filter(this._loader._annotations,(anno)=>{return anno.live});
                 _.each(changes,(anno)=>{anno.toggleScene();});
                 return;

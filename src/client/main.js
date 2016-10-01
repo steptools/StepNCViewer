@@ -31,11 +31,12 @@ class CADApp extends THREE.EventDispatcher {
         console.log('Socket client connected');
       });
     }
-    // Create data manager
-    this.cadManager = new CADManager(this.config, this.socket,this);
-
+    
     // Create application-level action manager
     this.actionManager = actionManager;
+    
+    // Create data manager
+    this.cadManager = new CADManager(this.config, this.socket,this);
 
     // Initialize views
     $body.toggleClass('non-initialized');

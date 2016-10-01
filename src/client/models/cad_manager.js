@@ -82,6 +82,10 @@ export default class CADManager extends THREE.EventDispatcher {
         if (this.config.socket && this.socket) {
             this.socket.on('nc:delta', this.onDelta);
         }
+        
+        //Handle geometry menu viz press
+        this.onVis = this.onVis.bind(this);
+        this.app.actionManager.on('changeVis',this.onVis);
     }
 
     clear() {
@@ -161,6 +165,13 @@ export default class CADManager extends THREE.EventDispatcher {
                     this.dispatchEvent({ type: 'invalidate', 'boundingBox': true, 'model': model});
                 }
             }
+        });
+    }
+    onVis(vis){
+        _.each(this._models,(model)=>{
+            model.vis(vis);
+            model.calcBoundingBox();
+            this.dispatchEvent({ type: 'invalidate', 'boundingBox': true, 'model': model});
         });
     }
 }

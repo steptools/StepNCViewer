@@ -40,7 +40,6 @@ export default class NC extends THREE.EventDispatcher {
             collapsed:      false
         }
         this.vis = this.vis.bind(this);
-        this.app.actionManager.on('changeVis',this.vis);
     }
 
     //gist.github.com/paulkaplan/6513707

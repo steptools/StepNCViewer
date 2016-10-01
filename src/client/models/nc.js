@@ -388,6 +388,7 @@ export default class NC extends THREE.EventDispatcher {
             obj.model.setGeometry(geometry);
             obj.model.live = true;
             obj.version = geom.version;
+            obj.baseVersion= geom.base_version;
             obj.precision = geom.precision;
             return true;
         };
@@ -396,6 +397,8 @@ export default class NC extends THREE.EventDispatcher {
                 return parseDynamicFull(geom,obj);
             }
             if(geom.version <= obj.version) return;
+            if(obj.baseVersion !== geom.base_version) return;
+            if(obj.version !== geom.prev_version) return;
             let geometry = makeGeometry(processDelta(geom, obj));
             // Remove all old geometry -- mesh's only
             obj.object3D.traverse(function (child) {

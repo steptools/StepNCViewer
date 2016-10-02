@@ -38,8 +38,16 @@ export default class NC extends THREE.EventDispatcher {
             opacity:        1.0,
             explodeDistance: 0,
             collapsed:      false
+            asis:       false,
+            tobe:       false,
+            machine:    true,
+            cutter:     true,
+            inprocess:  true,
+            toolpath:   true,
+            fixture:    true
         }
         this.vis = this.vis.bind(this);
+        this.getVis = this.getVis.bind(this);
         this.save = this.save.bind(this);
         this.app.actionManager.on('STLDL',this.save);
     }
@@ -123,27 +131,36 @@ export default class NC extends THREE.EventDispatcher {
         switch(arg){
             case 'asis':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='asis' && obj.model.live});
+                this.state.asis= !this.state.asis;
                 break;
             case 'tobe':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='tobe' && obj.model.live});
+                this.state.tobe= !this.state.tobe;
                 break;
             case 'machine':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='machine' && obj.model.live});
+                this.state.machine = !this.state.machine;
                 break;
             case 'cutter':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='cutter' && obj.model.live});
+                this.state.cutter=!this.state.cutter;
                 break;
             case 'removal':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='inprocess' && obj.model.live});
+              this.state.inprocess = !this.state.inprocess;
                 break;
             case 'path':
                 changes = _.filter(this._loader._annotations,(anno)=>{return anno.live});
                 _.each(changes,(anno)=>{anno.toggleScene();});
+                this.state.toolpath=!this.state.toolpath;
                 return;
             default:
                 break;
         }
         _.each(changes,(obj)=>{obj.toggleVisibility();});
+    }
+    getVis(usage){
+        return this.state[usage];
     }
     addModel(model, usage, type, id, transform, bbox) {
         // console.log('Add Model(' + usage + '): ' + id);
@@ -193,9 +210,8 @@ export default class NC extends THREE.EventDispatcher {
                 mesh.userData = obj;
                 obj.object3D.add(mesh);
                 obj.version = 0;
-                if (usage === 'asis') {
-                    // TODO: add selector for displaying asis geometry or not
-                    obj.rendered = false;
+                if (!this.state[usage]) {
+                    //obj.rendered = false;
                     obj.setInvisible();
                 }
             });
@@ -465,7 +481,7 @@ export default class NC extends THREE.EventDispatcher {
                 //this._object3D.remove(geom.object3D);
                 //this._overlay3D.remove(geom.object3D);
                 geom.rendered = false;
-                geom.live = false;
+                geom.model.live = false;
                 geom.object3D.visible = false;
             });
 
@@ -499,6 +515,7 @@ export default class NC extends THREE.EventDispatcher {
                         });
                     } else {
                         this._loader._annotations[name].addToScene();
+                        this._loader._annotations[name].live = true;
                     }
                 });
 
@@ -518,6 +535,7 @@ export default class NC extends THREE.EventDispatcher {
                             obj.setVisible();
                             obj.model.live = true;
                             this._objects[name] = obj;
+                            obj.usage = geomData.usage;
                         }
                     }
                     else {

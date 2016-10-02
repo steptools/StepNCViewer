@@ -92,7 +92,7 @@ class GeomBtn extends React.Component {
     this.props.actionManager.emit('changeVis',this.props.type);
   }
   render() {
-    let icon = getIcon('view');
+    let icon = getIcon(this.props.view);
     let iid='';
     if(this.props.iid) iid=this.props.iid;
     return (
@@ -155,12 +155,30 @@ class GeomMenu extends React.Component {
   constructor(props){
     super(props);
     this.pathClick = this.pathClick.bind(this);
+    this.state = {
+      path:'view',
+      asis:'noview',
+      tobe:'noview',
+      machine:'view',
+      removal:'view',
+      cutter:'view'
+    };
+    this.props.actionManager.on('changeVis',(arg)=>{
+      let l={}; 
+      if(this.state[arg]==='view')
+        l[arg]='noview'; 
+      else
+        l[arg]='view';
+      this.setState(l);
+    });
   }
+
   pathClick(info){
-    this.props.actionManager.emit('changeVis',info.key);
+    if(info.key==='path')
+      this.props.actionManager.emit('changeVis','path');
   }
   render(){ return(
-      <SubMenu {...this.props} className="geommenu" title={
+      <SubMenu {...this.props} onClick={this.pathClick} className="geommenu" title={
         <div className='item'>
           <div className={getIcon('geometry')} />
           <div className='text'>
@@ -168,12 +186,12 @@ class GeomMenu extends React.Component {
           </div>
         </div>
       } >
-        <GeomBtn actionManager = {this.props.actionManager} type='asis'>As-Is</GeomBtn>
-        <GeomBtn actionManager = {this.props.actionManager} type='tobe'>To-Be</GeomBtn>
-        <GeomBtn actionManager = {this.props.actionManager} type='cutter'>Tool</GeomBtn>
-        <GeomBtn actionManager = {this.props.actionManager} type='machine'>Machine</GeomBtn>
-        <GeomBtn actionManager = {this.props.actionManager} type='removal'>Removal</GeomBtn>
-        <Button icon='view' onClick = {this.pathClick}>Toolpath</Button>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.asis} type='asis'>As-Is</GeomBtn>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.tobe} type='tobe'>To-Be</GeomBtn>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.cutter} type='cutter'>Tool</GeomBtn>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.machine} type='machine'>Machine</GeomBtn>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.removal} type='removal'>Removal</GeomBtn>
+        <Button icon={this.state.path} key='path'>Toolpath</Button>
       </SubMenu>
   )}
 }

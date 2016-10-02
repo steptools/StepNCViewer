@@ -364,10 +364,10 @@ export default class NC extends THREE.EventDispatcher {
             else
                 return;
         };
-        request.get('/v3/nc/geometry/delta/'+dynqueuecur).timeout(1000)
+        request.get('/v3/nc/geometry/delta/-1').timeout(1000)
           .then((res)=>{
-              let dyn = {'version':dynqueuecur};
-              dyn = JSON.parse(res.text)
+              //let dyn = {'version':dynqueuecur};
+              let dyn = JSON.parse(res.text)
               try {
                   cb(dyn);
               }

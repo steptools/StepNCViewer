@@ -1,8 +1,5 @@
-import React from 'react';
 var md = require('node-markdown').Markdown;
 import Menu, {SubMenu, Item as MenuItem} from 'rc-menu';
-import _ from 'lodash';
-import request from 'superagent';
 let changetext='';
 
 function getIcon(type, data) {

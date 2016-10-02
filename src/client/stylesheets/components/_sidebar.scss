@@ -31,10 +31,6 @@ $icons: '../icons/';
                 margin: 0px 0px;
                 align-items: center;
                 
-                &:hover:not(.setup) {
-                    background-color: rgba(#2BAEE9, 0.5);
-                }
-                
                 &.setup {
                     cursor: default;
                     border-top: 2px solid #666666;
@@ -51,29 +47,23 @@ $icons: '../icons/';
                 margin: 0px auto;
             }
         }
+        
+        .disabled {
+            opacity: 0.5;
+        }
     }
 
     .running-node {
         background-color: #9BFA9B;
     }
 
-    .disabled {
-        opacity: 0.5;
-    }
-
-
-    .highlight-button {
+    .highlight-button,.icon.preview {
         font-size: 20px;
         margin-right: 5px;
         margin-left: 8px;
 
         &.inactive {
             opacity: 0.5;
-        }
-
-        &:hover {
-            opacity: 0.75;
-            color: #333333;
         }
     }
 }
@@ -105,20 +95,10 @@ $icons: '../icons/';
         &:disabled {
             opacity: 0.5;
         }
-
-        &:hover {
-            cursor: pointer;
-            color: #2BAEE9;
-            border-bottom-color: #2BAEE9;
-        }
     }
 
     .rc-menu-item-selected {
         background-color: #2BAEE9;
-
-        &:hover {
-            color: #FFFFFF;
-        }
     }
 
     .rc-menu-item:before {
@@ -242,11 +222,6 @@ $icons: '../icons/';
                 margin: 8px;
                 position: absolute;
                 color: #999999;
-
-                &:hover {
-                    cursor: pointer;
-                    color: #2BAEE9;
-                }
             }
 
             .geometry-container {
@@ -270,7 +245,7 @@ $icons: '../icons/';
             display: flex;
             align-items: center;
             padding: 5px;
-            border-bottom: 1px solid #DDDDDD;
+            border-bottom: 2px solid #333333;
             background-color: inherit;
 
             .title {
@@ -294,13 +269,6 @@ $icons: '../icons/';
                     #content {
                         position: relative;
                     }
-                }
-            }
-
-            .icon {
-                &:hover:not(.title-icon) {
-                    cursor: pointer;
-                    color: #2BAEE9;
                 }
             }
 
@@ -340,11 +308,6 @@ $icons: '../icons/';
                 color: #333333;
                 width: 100%;
                 white-space: normal;
-
-                &:hover:not(.rc-menu-item-disabled) {
-                    cursor: pointer;
-                    background-color: rgba(#2BAEE9, 0.5);
-                }
 
                 &.rc-menu-item-disabled {
                     -webkit-touch-callout: auto;
@@ -397,10 +360,6 @@ $icons: '../icons/';
                                 background-color: #333333;
                                 border-radius: 5px;
                                 text-align: center;
-                                
-                                &:hover {
-                                    color: #28AEE9;
-                                }
                             }
 
                             &.invalid {
@@ -422,11 +381,6 @@ $icons: '../icons/';
                             &.disabled {
                                 opacity: 0.5;
                             }
-
-                            &:hover:not(.is-active) {
-                                background-color: rgba(#2BAEE9, 0.5);
-                                opacity: 1;
-                            }
                         }
                     }
                 }
@@ -436,51 +390,53 @@ $icons: '../icons/';
                 }
             }
         }
-
+        
         .button-dock {
             z-index: 12;
-            height: 50px;
-            border-top: 1px solid #DDDDDD;
-            display: flex;
-            align-items: center;
             background-color: inherit;
+            border-top: 2px solid #333333;
+        }
+        
+        .button-dock .rc-menu {
+            min-height: 0px;
+            height: 46px;
+            display: flex;
+            align-items: stretch;
+            margin: 2px;
+            background-color: inherit;
+            border: 0px;
             
-            .rc-menu {
-                min-height: 0px;
-                width: 50%;
-                margin: auto;
-                border: none;
-                background-color: transparent;
+            .button {
+                flex-grow: 1;
+                flex-basis: 0;
+                height: 44px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #333333;
+                border-bottom: 2px solid #333333;
+                padding: 0px;
+                color: #F8F8F8;
+                cursor: pointer;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
                 
-                .button {
-                    float: none;
-                    padding: 10px 20px;
-                    text-align: center;
-                    background-color: #333333;
-                    border-bottom: 2px solid #333333;
-                    color: #F8F8F8;
-                    cursor: pointer;
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    -khtml-user-select: none;
-                    -moz-user-select: none;
-                    -ms-user-select: none;
-                    user-select: none;
+                .icon {
+                    font-size: 20px;
+                    margin-left: 5px;
+                    vertical-align: middle;
+                }
 
-                    &:hover:not(.rc-menu-item-disabled) {
-                        cursor: pointer;
-                        color: #2BAEE9;
-                        border-bottom-color: #2BAEE9;
-                    }
-
-                    &.rc-menu-item-disabled {
-                        opacity: 0.5;
-                    }
-                    
-                    .icon {
-                        font-size: 20px;
-                        margin-left: 5px;
-                    }
+                &.rc-menu-item-disabled {
+                    opacity: 0.5;
+                }
+                
+                &:first-child {
+                    margin-right: 2px;
                 }
             }
         }
@@ -539,11 +495,6 @@ $icons: '../icons/';
             left: 2.5px;
             top: 14px;
         }
-
-        &:hover {
-            color: #FFFFFF;
-            background-color: #2BAEE9;
-        }
     }
     
     .node .inner {
@@ -555,20 +506,10 @@ $icons: '../icons/';
         &:not(.divider) {
             padding: 0px 5px;
         }
-
-        &:hover:not(.divider) {
-            cursor: pointer;
-            background-color: rgba(#2BAEE9, 0.5);
-        }
     }
 
     .node .icon {
         margin-right: 8px;
-        font-size: 24px;
-        
-        &.custom.letter {
-            font-size: 14px;
-        }
     }
 
     .node .textbox {
@@ -579,7 +520,7 @@ $icons: '../icons/';
         background-color: #9BFA9B;
     }
 
-    .node .disabled {
+    .node .disabled span {
         opacity: 0.5;
     }
 }
@@ -598,6 +539,25 @@ $icons: '../icons/';
         text-align: center;
         height: 30px;
         width: 30px;
+        
+        &.letter {
+            width: auto;
+            min-width: 30px;
+            font-size: 14px;
+            line-height: 20px;
+            background-color: #333333;
+            color: #FFFFFF;
+        }    
+    }
+    
+    &.preview {
+        font-size: 20px;
+        padding: 3px;
+        color: #F8F8F8;
+        background-color: #333333;
+        border-radius: 5px;
+        vertical-align: middle;
+        text-align: center;
     }
 
     &.workpiece {
@@ -611,16 +571,33 @@ $icons: '../icons/';
     }
 
     &.datum {
-        background-image: url($icons + 'tolerance/datum.svg');
-    }
-    
-    &.letter {
-        min-width: 30px;
-        width: auto;
-        font-size: 14px;
-        line-height: 20px;
-        background-color: #333333;
-        color: #FFFFFF;
+        -webkit-mask-image: url($icons + 'tolerance/datum.svg');
+        -webkit-mask-size: cover;
+        mask-image: url($icons + 'tolerance/datum.svg');
+        mask-size: cover;
+        background-color: #000000;
+
+        &.A {
+            background-color: rgb(255,153,0);
+        }
+        &.B {
+            background-color: rgb(0,215,0);
+        }
+        &.C {
+            background-color: rgb(153,0,153);
+        }
+        &.D {
+            background-color: rgb(0,0,255);
+        }
+        &.E {
+            background-color: rgb(255,215,0);
+        }
+        &.F {
+            background-color: rgb(0,215,215);
+        }
+        &.G {
+            background-color: rgb(255, 0, 0);
+        }
     }
 
     &.angularity {
@@ -704,7 +681,33 @@ $icons: '../icons/';
     }
 
     &.datum {
-        background-image: url($icons + 'tolerance/datum.svg');
+        -webkit-mask-image: url($icons + 'tolerance/datum.svg');
+        -webkit-mask-size: cover;
+        mask-image: url($icons + 'tolerance/datum.svg');
+        mask-size: cover;
+        background-color: #000000;
+
+        &.A {
+            background-color: rgb(255,153,0);
+        }
+        &.B {
+            background-color: rgb(0,215,0);
+        }
+        &.C {
+            background-color: rgb(153,0,153);
+        }
+        &.D {
+            background-color: rgb(0,0,255);
+        }
+        &.E {
+            background-color: rgb(255,215,0);
+        }
+        &.F {
+            background-color: rgb(0,215,215);
+        }
+        &.G {
+            background-color: rgb(255, 0, 0);
+        }
     }
 
     &.datum-target {
@@ -716,13 +719,85 @@ $icons: '../icons/';
     }  
 }
 
-.mobile-sidebar {
-    .sidebar-menu-tabs {
-        border: none;
-        height: calc(#{$sidebarTabBarHeight} - 4px);
+// ALL hover events MUST go here so that they dont improperly activate on mobile
+.sidebar.notouch {
+    .m-tree .m-node .node:hover:not(.setup) {
+        background-color: rgba(#2BAEE9, 0.5);
     }
     
-    .properties-pane {
-        border-top-color: #AFAFAF;
+    .highlight-button, .icon.preview {
+        &:hover {
+            opacity: 0.75;
+            color: #333333;
+        }
+    }
+    
+    .sidebar-menu-tabs {
+        .rc-menu-item:hover {
+            cursor: pointer;
+            color: #2BAEE9;
+            border-bottom-color: #2BAEE9;
+        }
+        
+        .rc-menu-item-selected:hover {
+            color: #FFFFFF;
+        }
+    }
+    
+    .properties-pane-container {
+        .preview-exit.icon:hover {
+            cursor: pointer;
+            color: #2BAEE9;
+        }
+        
+        .titlebar .icon:hover:not(.title-icon) {
+            cursor: pointer;
+            color: #2BAEE9;
+        }
+        
+        .properties .property {
+            &:hover:not(.rc-menu-item-disabled) {
+                cursor: pointer;
+                background-color: rgba(#2BAEE9, 0.5);
+            }
+            
+            .children .list .node {
+                .icon.preview:hover {
+                    color: #2BAEE9;
+                }
+                
+                &:hover:not(.is-active) {
+                    background-color: rgba(#2BAEE9, 0.5);
+                    opacity: 1;
+                }
+            }
+        }
+        
+        .button-dock .button:hover:not(.rc-menu-item-disabled) {
+            cursor: pointer;
+            color: #2BAEE9;
+            border-bottom-color: #2BAEE9;
+        }
+    }   
+    
+    .treebeard {
+        .node .toggle:hover {
+            color: #FFFFFF;
+            background-color: #2BAEE9;
+        }
+        
+        .node .inner:hover:not(.divider) {
+            cursor: pointer;
+            background-color: rgba(#2BAEE9, 0.5);
+        }
+        
+        .node .disabled:hover:not(.divider) {
+            background-color: rgba(#2BAEE9, 0.25);
+        }
+    }
+    
+    .icon.preview:hover {
+        color: #2BAEE9;
+        opacity: 1 !important; // I know and I'm sorry
     }
 }

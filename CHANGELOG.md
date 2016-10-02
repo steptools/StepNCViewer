@@ -1,12 +1,27 @@
-Version 1.7.1
+Version 1.8.0
 
 Features:
+
 - Added previous tolerances to the tolerances tab
+- Added the ability to preview workingsteps and tolerances from tolerance list
+- Added datum highlighting and information on tolerances and workpieces
+
+Bugfixes:
+
+- Upcoming tolerances now lists tolerances for all upcoming workingsteps, not 5
+- Previews work in mobile view again
+- Previewing a tolerance opens that tolerance's properties pane
+- Optimized the backend of the user interface
+- Fixed a variety of bugs relating to controlling the mobile interface
+- Don't show duplicate tolerances in tolerance view on sidebar
+- Tools are no longer shown as enabled if they are not used in any active steps
+- Annotations are properly hidden if loaded all at once
+
+Version 1.7.1
 
 Bugfixes:
 
 - Tolerances can be examined in the properties pane again
-- Upcoming tolerances now lists tolerances for all upcoming workingsteps, not 5
 
 Version 1.7.0
 
@@ -25,6 +40,7 @@ Bugfixes:
 - Sidebar should scroll properly on initial load
 - Tool properties pane now shows/hides the correct workingsteps
 - Improved program flow
+- Improved touch controls on mobile
 
 Version 1.6.0
 
@@ -113,8 +129,6 @@ Features:
 - 404 error page improved 404%!
 - Styling overhaul of the sidebar and properties pane
 
-- Added lock to align view button
-
 Bugfixes:
 
 - Fixed workplan view not scrolling on tab switch
@@ -132,6 +146,8 @@ of the state of the child
 Reverted:
 
 - Workingstep list no longer supports property pane. Functionality reverted to v1.1.0
+
+Version 1.2.0
 
 Features:
 

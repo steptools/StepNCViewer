@@ -1,4 +1,3 @@
-import React from 'react';
 import {Treebeard} from 'react-treebeard';
 import ts from '../tree_style.jsx';
 
@@ -20,16 +19,15 @@ export default class ToleranceList extends React.Component {
 
     this.decorators = ts.decorators;
     this.decorators.propertyCb = this.props.propertyCb;
+    this.decorators.toleranceCache = this.props.toleranceCache;
+    this.decorators.openPreview = this.props.openPreview;
+    this.decorators.selectEntity = this.props.selectEntity;
     this.decorators.toggleHighlight = this.props.toggleHighlight;
     this.decorators.highlightedTolerances = this.props.highlightedTolerances;
   }
 
   componentDidMount() {
     $('.sidebar ul.sidebar-menu-tabs + ul').addClass('treebeard flat');
-  }
-
-  shouldComponentUpdate(nextProps) {
-    return typeof nextProps.ws === 'number';
   }
 
   componentWillReceiveProps(nextProps) {
@@ -98,25 +96,38 @@ export default class ToleranceList extends React.Component {
     let ws = this.props.ws;
     let curWSIndex = wsList.indexOf(ws);
     ws = this.props.workingstepCache[ws];
+    _.each(ws.children, (child) => {
+      child.openPreview = false;
+    });
     ws.leaf = true;
     ws.icon = <div className='icon custom letter'>{curWSIndex + 1}</div>;
-    tolList.push(ws);
+    let displayWS = _.extend({}, ws);
+    delete displayWS.children;
+    tolList.push(displayWS);
 
     if (!this.props.curWS.toBe || this.props.curWS.toBe <= 0) {
       return;
     }
     let wp = this.props.toleranceCache[this.props.curWS.toBe.id];
-    if (wp && wp.children && wp.children.length > 0) {
-      tolList.push({
-        name: 'Active Tolerances',
-        leaf: true,
-        type: 'divider',
-        id: -2,
-      });
-      Array.prototype.push.apply(tolList, wp.children);
+    if (wp) {
+      if ((wp.children && wp.children.length > 0)
+      || (wp.datums && wp.datums.length > 0)) {
+        tolList.push({
+          name: 'Active Tolerances / Datums',
+          leaf: true,
+          type: 'divider',
+          id: -2,
+        });
+      }
+      if (wp.children) {
+        Array.prototype.push.apply(tolList, wp.children);
+      }
+      if (wp.datums) {
+        Array.prototype.push.apply(tolList, wp.datums);
+      }
     } else {
       tolList.push({
-        name: 'No Active Tolerances',
+        name: 'No Active Tolerances / Datums',
         leaf: true,
         type: 'divider',
         id: -2,
@@ -159,6 +170,9 @@ export default class ToleranceList extends React.Component {
       }
       let ws = wsCache[wsList[i]];
       ws.children = tolerancesByWS[i];
+      _.each(ws.children, (child) => {
+        child.openPreview = true;
+      });
       ws.leaf = false;
       ws.icon = <div className='icon custom letter'>{i + 1}</div>;
       tolList.push(ws);
@@ -200,6 +214,9 @@ export default class ToleranceList extends React.Component {
       }
       let ws = wsCache[wsList[i]];
       ws.children = tolerancesByWS[i];
+      _.each(ws.children, (child) => {
+        child.openPreview = true;
+      });
       ws.leaf = false;
       ws.icon = <div className='icon custom letter'>{i + 1}</div>;
       tolList.push(ws);

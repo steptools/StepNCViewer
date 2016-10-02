@@ -4,11 +4,8 @@
 // Necessary modules
 require('./stylesheets/base.scss');
 require('bootstrap-webpack');
-let io = require('socket.io-client');
 let actionManager = require('./actionmanager');
 import CADManager from './models/cad_manager';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import ResponsiveView from './views/responsive';
 
 /*************************************************************************/

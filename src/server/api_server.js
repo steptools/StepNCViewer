@@ -131,7 +131,7 @@ APIServer.prototype._setSite = function() {
   // Serve the root client framework - customized as needed
   var _serveRoot = function (req, res) {
     var appConfig = {
-      title: 'Smart Machining Advisor',
+      title: 'NC.js',
       source: '/js/main.js',
       services: services,
       config: self.config.client

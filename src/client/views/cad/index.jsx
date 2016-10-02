@@ -4,7 +4,6 @@
 
 'use strict';
 
-import React from 'react';
 import LoadQueueView from '../load_queue';
 import GeometryView from '../geometry';
 

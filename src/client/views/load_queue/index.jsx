@@ -1,7 +1,6 @@
 /* Copyright G. Hemingway, 2015 - All rights reserved */
 'use strict';
 
-import React from 'react';
 require('../../stylesheets/components/load_queue.scss');
 
 /*************************************************************************/
@@ -82,8 +81,7 @@ export default class LoadQueueView extends React.Component {
     }
   }
 
-    render() {
-
+  render() {
     let items = this.state.queue.map(function(item, index) {
       return (
         <QueueItem key={index} name={item.name} loaded={item.loaded} />

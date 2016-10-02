@@ -1,7 +1,6 @@
 /* Copyright G. Hemingway, 2015 - All rights reserved */
 'use strict';
 
-import React from 'react';
 require('../../stylesheets/components/compass.scss');
 
 /*************************************************************************/

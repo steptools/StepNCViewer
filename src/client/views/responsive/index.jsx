@@ -1,6 +1,3 @@
-import React from 'react';
-import _ from 'lodash';
-import request from 'superagent';
 import CADView from '../cad';
 import HeaderView from '../header';
 import SidebarView from '../sidebar';
@@ -51,19 +48,23 @@ export default class ResponsiveView extends React.Component {
       spindleSpeed: 0,
       machineList: [],
       selectedMachine: 0,
+      previewEntity: null,
     };
 
     // get the workplan
     this.getWorkPlan = this.getWorkPlan.bind(this);
-    request.get('/v3/nc/workplan/').end(this.getWorkPlan);
+    this.getToolCache = this.getToolCache.bind(this);
+
+    request.get('/v3/nc/workplan/').end((req, res) => {
+      this.getWorkPlan(req, res);
+
+      // get the cache of tools, need workplan first
+      request.get('/v3/nc/tools/').end(this.getToolCache);
+    });
 
     // get the project loopstate
     this.getLoopState = this.getLoopState.bind(this);
     request.get('/v3/nc/state/loop/').end(this.getLoopState);
-
-    // get the cache of tools
-    this.getToolCache = this.getToolCache.bind(this);
-    request.get('/v3/nc/tools/').end(this.getToolCache);
 
     // get the current tool
     request.get('/v3/nc/tools/' + this.state.ws).end((err, res) => {
@@ -148,6 +149,13 @@ export default class ResponsiveView extends React.Component {
 
       _.each(json, (tool) => {
         tool.icon = <span className='icon custom tool' />;
+        tool.enabled = false;
+        _.each(tool.workingsteps, (step) => {
+          if (this.state.workingstepCache[step].enabled) {
+            tool.enabled = true;
+          }
+        });
+
         tools[tool.id] = tool;
       });
 
@@ -174,6 +182,10 @@ export default class ResponsiveView extends React.Component {
           node.leaf = true;
         }
 
+        if (node.datums && node.datums.length > 0) {
+          _.each(node.datums, nodeCheck);
+        }
+
         if (node.wpType) {
           ids.push(node.id);
         }
@@ -182,7 +194,7 @@ export default class ResponsiveView extends React.Component {
           let workingsteps = [];
           for (let i of json[node.workpiece].workingsteps) {
             let ws = this.state.workingstepCache[i];
-            if (node.workpiece === ws.toBe.id) {
+            if (ws && node.workpiece === ws.toBe.id) {
               workingsteps.push(i);
             }
           }
@@ -222,19 +234,19 @@ export default class ResponsiveView extends React.Component {
 
     this.updateWS = this.updateWorkingstep.bind(this);
 
+    this.handleResize = this.handleResize.bind(this);
     this.toggleMobileSidebar = this.toggleMobileSidebar.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleKeyup = this.handleKeyup.bind(this);
 
     this.cbWS = this.cbWS.bind(this);
 
-    this.handleResize = this.handleResize.bind(this);
-
     this.speedChanged = this.speedChanged.bind(this);
     this.changeSpeed = this.changeSpeed.bind(this);
 
     this.openProperties = this.openProperties.bind(this);
     this.openPreview = this.openPreview.bind(this);
+    this.selectEntity = this.selectEntity.bind(this);
 
     this.toggleHighlight = this.toggleHighlight.bind(this);
 
@@ -520,7 +532,7 @@ export default class ResponsiveView extends React.Component {
     this.setState({msGuiMode: newMode});
   }
 
-  openProperties(node, backtrack) {
+  openProperties(node, backtrack, cb) {
     let currEntity = this.state.selectedEntity;
     let prevEntities = this.state.previouslySelectedEntities;
     if (node === null) {
@@ -541,11 +553,57 @@ export default class ResponsiveView extends React.Component {
         selectedEntity: node,
       });
     }
+
+    if (cb) {
+      cb();
+    }
   }
 
   openPreview(state) {
     if (state === true || state === false && state !== this.state.preview) {
       this.setState({preview: state});
+    }
+  }
+
+  selectEntity(event, entity) {
+    if (event.key === 'goto') {
+      let url = '/v3/nc/state/ws/' + entity.id;
+      request.get(url).end();
+    } else if (event.key === 'tool') {
+      // open properties page for associated tool
+      this.openProperties(this.state.toolCache[entity.tool]);
+    } else if (event.key === 'preview') {
+
+      let prevId;
+      let prevEntity = entity;
+
+      if (entity.type === 'workingstep') {
+        prevId = entity.toBe.id;
+        prevEntity = this.state.toleranceCache[entity.toBe.id];
+      } else if (entity.type === 'tolerance' || entity.type === 'datum') {
+        prevId = entity.workpiece;
+        prevEntity = this.state.toleranceCache[entity.workpiece];
+      } else if (entity.type === 'tool') {
+        prevId = entity.id + '/tool';
+      } else {
+        prevId = entity.id;
+      }
+
+      if (this.state.previewEntity !== prevEntity || !this.state.preview) {
+        this.setState({'previewEntity': prevEntity});
+
+        let url = this.props.app.services.apiEndpoint
+          + this.props.app.services.version + '/nc';
+        this.props.app.cadManager.dispatchEvent({
+          type: 'setModel',
+          viewType: 'preview',
+          path: prevId.toString(),
+          baseURL: url,
+          modelType: 'previewShell',
+        });
+      }
+
+      this.openPreview(true);
     }
   }
 
@@ -558,16 +616,20 @@ export default class ResponsiveView extends React.Component {
           let workingstep = JSON.parse(response.text);
           let tols = [];
           let cache = this.state.toleranceCache[workingstep.toBe.id];
+          _.each(cache.datums, (t) => {
+            tols.push(t.id);
+          });
           _.each(cache.children, (t) => {
             tols.push(t.id);
           });
-          this.setState({
-            'ws': workingstep.id,
-            'wstext':workingstep.name.trim(),
-            'highlightedTolerances': tols,
-          });
-
-          this.setState({'curtool': workingstep.tool});
+          if (this.state.ws !== workingstep.id) {
+            this.setState({
+              'ws': workingstep.id,
+              'wstext':workingstep.name.trim(),
+              'highlightedTolerances': tols,
+              'curtool': workingstep.tool,
+            });
+          }
         } else {
           this.setState({'ws':ws,'wstxt':'Operation Unknown'});
         }
@@ -641,7 +703,11 @@ export default class ResponsiveView extends React.Component {
   }
 
   cbWS(newWS) {
-    this.setState({ws: newWS});
+    console.log('cbWS(' + newWS + ')');
+    newWS = parseInt(newWS, 10);
+    if (newWS !== this.state.ws) {
+      this.setState({ws: newWS});
+    }
   }
 
   speedChanged(speed) {
@@ -677,7 +743,7 @@ export default class ResponsiveView extends React.Component {
   }
 
   render() {
-    let HV, SV, FV;
+    let HV, SV, FV, cadviewStyle;
     if (this.state.guiMode === 0) {
       HV = (
         <HeaderView
@@ -740,8 +806,17 @@ export default class ResponsiveView extends React.Component {
           openPreview={this.openPreview}
           toggleHighlight={this.toggleHighlight}
           highlightedTolerances={this.state.highlightedTolerances}
+          selectEntity={this.selectEntity}
+          previewEntity={this.state.previewEntity}
+          previewEntityCb={(e) => {this.setState({'previewEntity': e})}}
         />
       );
+      cadviewStyle = {
+        'left': '390px',
+        'top': '90px',
+        'bottom': '0px',
+        'right': '0px',
+      };
     } else {
       FV = (
         <FooterView
@@ -757,7 +832,6 @@ export default class ResponsiveView extends React.Component {
           ppbutton={this.state.ppbutton}
           cbMobileSidebar={this.toggleMobileSidebar}
           msGuiMode={this.state.msGuiMode}
-          //
           app={this.props.app}
           mode={this.state.svmode}
           tree={this.state.svtree}
@@ -785,22 +859,11 @@ export default class ResponsiveView extends React.Component {
           openPreview={this.openPreview}
           toggleHighlight={this.toggleHighlight}
           highlightedTolerances={this.state.highlightedTolerances}
+          selectEntity={this.selectEntity}
+          previewEntity={this.state.previewEntity}
+          previewEntityCb={(e) => {this.setState({'previewEntity': e})}}
         />
       );
-    }
-
-    let cadviewStyle;
-
-    // squish the cad view down to appropriate size
-    if (this.state.guiMode === 0) {
-      cadviewStyle =
-      {
-        'left': '390px',
-        'top': '90px',
-        'bottom': '0px',
-        'right': '0px',
-      };
-    } else {
       let cadviewHeight = '80%';
       let fv = $('.Footer-container');
       let rv = $('.RespView');

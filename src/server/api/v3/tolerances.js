@@ -45,15 +45,17 @@ function getModIcon(mod){
 
 function getDatum(dat){
   let label = tol.GetDatumLabel(dat);
+  let faces = tol.GetDatumFaceAll(dat);
   let ret = {
     'type' : 'datum',
     'name' : label,
     'id' : dat,
+    'faces' : faces,
   }
   return ret;
 }
 
-function getTolerance(id) {
+function getTolerance(id, wp) {
   let name = apt.SetNameGet(id);
   let tolTypeName = tol.GetToleranceType(id);
   let unit = tol.GetToleranceUnit(id);
@@ -77,7 +79,7 @@ function getTolerance(id) {
     modName = mods.map((mod) => getModIcon(mod)).join(' ');
   }
   if (!range || range.flag === false) {
-    rangeName = '';
+    rangeName = '';  
   }
   else{
     if(Math.abs(range.upper) === Math.abs(range.lower)){
@@ -102,7 +104,6 @@ function getTolerance(id) {
     'rangeName': rangeName,
     'modifiers': mods,
     'modName': modName,
-    'datum' : datum,
     'children' : datumLabels,
   };
 }
@@ -111,12 +112,20 @@ function getWp(id, type) {
   let name = find.GetWorkpieceName(id);
   let steps = apt.GetWorkpieceExecutableAll(id);
   let tolerances = tol.GetWorkpieceToleranceAll(id);
+  let datums = tol.GetWorkpieceDatumAllAll(id);
+  let datumLabels = datums.map((dat) => {
+    let func = getDatum(dat);
+    func.workpiece = id;
+    return func;
+  });
+
   let ret = {
     'id': id,
     'name': name,
     'workingsteps': steps,
     'wpType': type,
     'tolerances': tolerances,
+    'datums' : datumLabels,
     'children': [],
     'subs': [],
   };
@@ -144,6 +153,7 @@ function getWsTols(wsId, wpId) {
   } else {  // we are looking for a tolerance
     let tol = getTolerance(Number(wsId));
     tol.workpiece = wpId;
+    _.each(tol.children, (datum) => {datum.workpiece = wpId})
     return tol;
   }
 }

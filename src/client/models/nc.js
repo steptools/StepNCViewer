@@ -385,7 +385,7 @@ export default class NC extends THREE.EventDispatcher {
 
 
     handleDynamicGeom(geom,cb,cbdata){
-        if(!geom)return cb(cbdata);
+        if(!geom) return cb(cbdata);
         let parseDynamicFull = (geom,obj)=>{
             let geometry = makeGeometry(processKeyframe(geom));
             // Remove all old geometry -- mesh's only

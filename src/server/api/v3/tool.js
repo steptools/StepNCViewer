@@ -54,25 +54,18 @@ function _getTools(req, res) {
       }
     }
     let workingsteps = getWorkstepsForTool(find.GetMainWorkplan(), id);
-    let enable = false;
     let d = find.GetToolDiameter(id);
     let dUnit = find.GetToolDiameterUnit(id);
     let rad = find.GetToolCornerRadius(id);
     let radUnit = find.GetToolCornerRadiusUnit(id);
     let length = find.GetToolLength(id);
     let lengthUnit = find.GetToolLengthUnit(id);
-    for (let ws of workingsteps) {
-      if (find.IsEnabled(ws)) {
-        enable = true;
-      }
-    }
     rtn.push({
       'id' : id,
       'name': name,
       'type': 'tool',
       'toolType': toolType,
       'workingsteps': workingsteps,
-      'enabled' : enable,
       'diameter' : d,
       'diameterUnit' : dUnit,
       'cornerRadius' : rad,

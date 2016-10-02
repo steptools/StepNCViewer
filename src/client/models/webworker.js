@@ -4,8 +4,6 @@
  * Extended by Gabor Pap to include TySON decoding
  */
 
-import request from 'superagent';
-
 /*********************************************************************
  *
  * TYSON decoder

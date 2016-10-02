@@ -3,4 +3,17 @@
     width: 100%;
     z-index: 98;
     position: absolute;
+    
+    .sidebar-menu-tabs {
+        border: none;
+        height: calc(#{$sidebarTabBarHeight} - 4px);
+    }
+    
+    .m-tree {
+        max-height: calc(100% - #{$sidebarTabBarHeight} - 4);
+    }
+    
+    .properties-pane {
+        border-top-color: #AFAFAF;
+    }
 }

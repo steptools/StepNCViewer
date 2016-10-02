@@ -71,4 +71,34 @@ NC is the housing component for all shell and annotation Three.js geometry.
 
 # Server Side
 ---
-api_server.js
+**api_server.js**
+
+- Used to set the API server:
+  * Setup the express server which is used for all routing of the application
+  * Setup the socket server for communication from server to client  
+  * Link to the core server using util.inherits
+  * Setup the static site that is served with each view
+  * Setup all routes within the applicaiton
+  * Run the application and being listening on the specified port in config.js
+
+**core_server.js**
+
+- Used to set the Core server:
+    + Commander package is used to deal with command line options and adding a .option(<path>, <description>) adds another command line option to the app
+    + config.js is loaded here as well to set all options and flags that are specified
+    + The file being used for the entire simulation is set through this.project
+    + The machine used for the entire project is set through this.machinetool
+    + file.init(this.project, this.machinetool) initializes the StepNC finder, machinestate, tolerance, and aptstepmaker objects for the entire application and can be accessed by requiring ('file') 
+        * file.ms = machineState
+        * file.tol = tolerance
+        * file.find = finder
+        * file.apt = aptstepmaker
+    + Winston logger is used throughout the app for debugging purposes
+
+**views/**
+
+Contains any server side views that will be rendered upon first starting the server. Base.jade is used to carry over the appConfig that is instantiated in API server.
+
+**api/**
+
+All api endpoints are stored in here and are thoroughly described in docs/API.md 

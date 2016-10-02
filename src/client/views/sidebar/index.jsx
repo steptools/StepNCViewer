@@ -1,4 +1,3 @@
-import React from 'react';
 import Menu, {Item as MenuItem} from 'rc-menu';
 import WorkingstepList from './workingstepslist';
 import WorkplanList from './workplanlist';
@@ -7,43 +6,45 @@ import ToleranceList from './tolerancelist';
 import PropertiesPane from './propertiespane';
 import cadManager from '../../models/cad_manager';
 
+var scrolled = false;
+
 export default class SidebarView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {scrolled: false};
-
     this.selectMenuItem = this.selectMenuItem.bind(this);
-
-    this.props.actionManager.on('change-workingstep', this.props.cbWS);
   }
 
   selectMenuItem(info) {
     this.props.cbMode(info.key);
-    this.setState({'scrolled': false});
+    scrolled = false;
   }
 
   componentDidUpdate() {
-    let update = (!this.state.scrolled) && (this.props.ws > -1);
-    update = update && (this.props.mode !== 'tolerance');
-    if (update) {
-      let node = $('.running-node');
-      if (node.length <= 0) {
-        return;
-      }
+    let shouldUpdate = !scrolled;
+    shouldUpdate = shouldUpdate && this.props.ws > -1;
+    shouldUpdate = shouldUpdate && this.props.mode !== 'tolerance';
+    shouldUpdate = shouldUpdate && !this.props.isMobile;
+    if (!shouldUpdate) {
+      return;
+    }
 
-      let tree = $('.m-tree,.treebeard');
-      let tOffset = tree.offset().top + tree.innerHeight();
-      let nOffset = node.offset().top + node.innerHeight();
-      let scroll = nOffset - tOffset;
-      if (scroll > 0) {
-        if (scroll >= node.innerHeight()) {
-          scroll += tree.innerHeight() / 2;
-          scroll -= node.innerHeight() / 2;
-        }
-        tree.animate({scrollTop: scroll}, 1000);
+    let tree = $('.m-tree,.treebeard');
+    let node = $('.running-node');
+    if (node.length <= 0) {
+      return;
+    }
+
+    let tOffset = tree.offset().top + tree.outerHeight();
+    let nOffset = node.offset().top + node.outerHeight();
+    let scroll = nOffset - tOffset;
+    if (scroll > 0) {
+      if (scroll >= node.outerHeight()) {
+        scroll += tree.outerHeight() / 2;
+        scroll -= node.outerHeight() / 2;
       }
-      this.setState({'scrolled': true});
+      tree.animate({scrollTop: scroll}, 1000);
+      scrolled = true;
     }
   }
 
@@ -66,6 +67,9 @@ export default class SidebarView extends React.Component {
       toggleHighlight={this.props.toggleHighlight}
       highlightedTolerances={this.props.highlightedTolerances}
       isMobile={this.props.isMobile}
+      selectEntity={this.props.selectEntity}
+      previewEntity={this.props.previewEntity}
+      previewEntityCb={this.props.previewEntityCb}
     />;
 
     const tabs = (
@@ -144,6 +148,8 @@ export default class SidebarView extends React.Component {
           toggleHighlight={this.props.toggleHighlight}
           isMobile={this.props.isMobile}
           ws={this.props.ws}
+          selectEntity={this.props.selectEntity}
+          openPreview={this.props.openPreview}
         />
       );
     } else if (this.props.mode === 'tools') {
@@ -164,12 +170,15 @@ export default class SidebarView extends React.Component {
     }
 
     let SVWidth;
+    let cName = 'sidebar';
     if (this.props.isMobile) {
       SVWidth = {'width': '100%'};
+    } else {
+      cName += ' notouch';
     }
 
     return (
-      <div className='sidebar' style={SVWidth}>
+      <div className={cName} style={SVWidth}>
         {properties}
         {tabs}
         {currentView}

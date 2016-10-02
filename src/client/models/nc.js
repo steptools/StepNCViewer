@@ -37,14 +37,16 @@ export default class NC extends THREE.EventDispatcher {
             visible:        true,
             opacity:        1.0,
             explodeDistance: 0,
-            collapsed:      false
-            asis:       false,
-            tobe:       false,
-            machine:    true,
-            cutter:     true,
-            inprocess:  true,
-            toolpath:   true,
-            fixture:    true
+            collapsed:      false,
+            usagevis: {
+                asis:       false,
+                tobe:       false,
+                machine:    true,
+                cutter:     true,
+                inprocess:  true,
+                toolpath:   true,
+                fixture:    true
+            }
         }
         this.vis = this.vis.bind(this);
         this.getVis = this.getVis.bind(this);
@@ -131,28 +133,28 @@ export default class NC extends THREE.EventDispatcher {
         switch(arg){
             case 'asis':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='asis' && obj.model.live});
-                this.state.asis= !this.state.asis;
+                this.state.usagevis.asis= !this.state.usagevis.asis;
                 break;
             case 'tobe':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='tobe' && obj.model.live});
-                this.state.tobe= !this.state.tobe;
+                this.state.usagevis.tobe= !this.state.usagevis.tobe;
                 break;
             case 'machine':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='machine' && obj.model.live});
-                this.state.machine = !this.state.machine;
+                this.state.usagevis.machine = !this.state.usagevis.machine;
                 break;
             case 'cutter':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='cutter' && obj.model.live});
-                this.state.cutter=!this.state.cutter;
+                this.state.usagevis.cutter=!this.state.usagevis.cutter;
                 break;
             case 'removal':
                 changes = _.filter(this._objects,(obj)=>{return obj.usage==='inprocess' && obj.model.live});
-              this.state.inprocess = !this.state.inprocess;
+              this.state.usagevis.inprocess = !this.state.usagevis.inprocess;
                 break;
             case 'path':
                 changes = _.filter(this._loader._annotations,(anno)=>{return anno.live});
                 _.each(changes,(anno)=>{anno.toggleScene();});
-                this.state.toolpath=!this.state.toolpath;
+                this.state.usagevis.toolpath=!this.state.usagevis.toolpath;
                 return;
             default:
                 break;
@@ -210,7 +212,7 @@ export default class NC extends THREE.EventDispatcher {
                 mesh.userData = obj;
                 obj.object3D.add(mesh);
                 obj.version = 0;
-                if (!this.state[usage]) {
+                if (!this.state.usagevis[usage]) {
                     //obj.rendered = false;
                     obj.setInvisible();
                 }
@@ -514,7 +516,9 @@ export default class NC extends THREE.EventDispatcher {
                             type: 'annotation'
                         });
                     } else {
-                        this._loader._annotations[name].addToScene();
+                        if(this.state.usagevis[geomData.usage]) {
+                            this._loader._annotations[name].addToScene();
+                        }
                         this._loader._annotations[name].live = true;
                     }
                 });
@@ -528,15 +532,17 @@ export default class NC extends THREE.EventDispatcher {
 
                     if(this._objects[name]) {
                         let obj = this._objects[name];
-                        if (!obj.rendered) {
+                        if (!obj.visible) {
                             //this._overlay3D.add(obj.object3D);
                             obj.rendered = true;
-                            obj.visible = true;
-                            obj.setVisible();
-                            obj.model.live = true;
-                            this._objects[name] = obj;
+                            if(this.state.usagevis[geomData.usage]) {
+                                obj.visible = true;
+                                obj.setVisible();
+                            }
                             obj.usage = geomData.usage;
+                            this._objects[name] = obj;
                         }
+                        obj.model.live = true;
                     }
                     else {
                         let color = DataLoader.parseColor("7d7d7d");

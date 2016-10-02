@@ -232,6 +232,7 @@ export default class GeometryView extends React.Component {
     this.props.manager.addEventListener('shellLoad', this.onShellLoad);
     this.props.manager.addEventListener('annotationLoad', this.invalidate);
     this.props.manager.addEventListener('invalidate', this.invalidate);
+    this.props.manager.app.actionManager.on('invalidate',this.invalidate);
   }
 
   componentWillUnmount() {
@@ -240,6 +241,7 @@ export default class GeometryView extends React.Component {
     this.props.manager.removeEventListener('shellLoad', this.onShellLoad);
     this.props.manager.removeEventListener('annotationLoad', this.invalidate);
     this.props.manager.removeEventListener('invalidate', this.invalidate);
+    this.props.manager.app.actionManager.removeListener('invalidate',this.invalidate);
   }
 
   componentDidUpdate() {

@@ -363,6 +363,7 @@ export default class DataLoader extends THREE.EventDispatcher {
         //console.log('Process NC: ' + doc.project);
         let nc = new NC(doc.project, doc.workingstep, doc.time_in_workingstep, this);
         nc.applyDelta(doc,true);
+        this._app.actionManager.emit('invalidate',{'boundingBox': true, 'model': nc});
         if (doc.workingstep) {
             this._app.actionManager.emit('change-workingstep', doc.workingstep);
         }

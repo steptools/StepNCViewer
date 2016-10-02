@@ -663,18 +663,6 @@ export default class ResponsiveView extends React.Component {
       this.setState(stateup);
   }
 
-  playpause() {
-    let url = '/v3/nc/state/loop/';
-    if (this.state.ppbutton ==='play') {
-      this.ppstate('play');
-      url = url+'start';
-    } else {
-      this.ppstate('pause');
-      url = url+'stop';
-    }
-    request.get(url).end();
-  }
-
   nextws() {
     let url = '/v3/nc/state/ws/next';
     request.get(url).end();
@@ -686,60 +674,12 @@ export default class ResponsiveView extends React.Component {
     request.get(url).end();
   }
 
-  ppstate(state) {
-    let notstate;
-    if (state==='play') {
-      notstate = 'pause';
-    } else {
-      notstate = 'play';
-    }
-    this.setState({'ppbutton':notstate});
-  }
-
-  ppBtnClicked() {
-    let cs = this.state.ppbutton;
-    this.ppstate(cs);
-    this.playpause();
-  }
-
   cbWS(newWS) {
     console.log('cbWS(' + newWS + ')');
     newWS = parseInt(newWS, 10);
     if (newWS !== this.state.ws) {
       this.setState({ws: newWS});
     }
-  }
-
-  speedChanged(speed) {
-    if (!this.state.changeSpeed) {
-      // just update to match server
-      this.setState({'playbackSpeed': Number(speed)});
-    } else if (this.state.playbackSpeed === Number(speed)) {
-      // server speed matches client speed now
-      this.setState({'changeSpeed': false});
-    }
-    // something didn't match up, wait for the proper server response
-  }
-
-  changeSpeed(event) {
-    let speed = event.target.value;
-    if (!speed) {
-      speed = event.target.attributes.value.value;
-    }
-
-    // set the value itself
-    this.setState({'playbackSpeed': Number(speed)});
-
-    if (event.type === 'change') {
-      return;
-    }
-
-    // tell the client to wait for server speed to catch up
-    this.setState({'changeSpeed': true});
-
-    // now send a request to the server to change its speed
-    let url = '/v3/nc/state/loop/' + Number(speed);
-    request.get(url).end(() => {});
   }
 
   render() {

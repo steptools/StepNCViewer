@@ -85,6 +85,14 @@ var findWS = function(current) {
   return change;
 };
 
+var BaseOptFeed = (lineNumber)=>{
+  if(WSGCode.feeds[lineNumber]){
+    return WSGCode.feeds[lineNumber];
+  }else{
+    return {base:-1,optimized:-1};
+  }
+}
+
 let startSequence = "";
 var loadMTCHold = (addr,port)=>{
   return new Promise((resolve)=>{
@@ -141,6 +149,9 @@ var blockUpdate=function(number,block){
   let change = false;
   if(number!=undefined && number!==MTCHold.currentGcodeNumber){
     MTCHold.currentGcodeNumber = number;
+    let feeds = BaseOptFeed(number);
+    MTCHold.baseFeed = feeds.base;
+    MTCHold.optimizedFeed = feeds.optimized;
     change = true;
   }
   if(block!==undefined && block !=="" && block!=MTCHold.currentGcode){

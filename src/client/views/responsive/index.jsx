@@ -471,6 +471,8 @@ export default class ResponsiveView extends React.Component {
     if(this.state.live !=mtc.live) stateup.live = mtc.live;
     if(this.state.spindleSpeed !=mtc.spindleSpeed) stateup.spindleSpeed = mtc.spindleSpeed;
     if(this.state.feedRate != mtc.feedrate) stateup.feedRate = mtc.feedrate;
+    if(this.state.baseFeed != mtc.baseFeed) stateup.baseFeed=mtc.baseFeed;
+    if(this.state.optimizedFeed != mtc.optimizedFeed) stateup.optimizedFeed = mtc.optimizedFeed;
     if(this.state.feedUnit!=mtc.feedrateUnits) stateup.feedUnit = mtc.feedrateUnits;
     if(this.state.currentGcode != mtc.currentGcode) stateup.currentGcode = mtc.currentGcode;
     if(!_.isEmpty(stateup))
@@ -519,6 +521,8 @@ export default class ResponsiveView extends React.Component {
           ws={this.state.ws}
           workingstepCache={this.state.workingstepCache}
           feedRate={this.state.feedRate}
+          baseFeed={this.state.baseFeed}
+          optimizedFeed={this.state.optimizedFeed}
           feedRateUnits={this.state.feedUnit}
           spindleSpeed={this.state.spindleSpeed}
           live={this.state.live}

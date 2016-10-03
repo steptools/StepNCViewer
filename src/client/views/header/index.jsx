@@ -129,8 +129,12 @@ class FeedSpeed extends React.Component {
     <div className='item'>
       <div className={getIcon('feedrate')}/>
       <div className='text'>
-        <div className='title'>Feed rate:</div>
+        <div className='title'>Actual Feedrate:</div>
         <div className='value'>{this.props.feed}</div>
+        <div className='title'>Base Feedrate:</div>
+        <div className='value'>{this.props.baseFeed}</div>
+        <div className='title'>Optimized Feedrate:</div>
+        <div className='value'>{this.props.optimizedFeed}</div>
       </div>
     </div>
     <div className='item'>
@@ -144,6 +148,8 @@ class FeedSpeed extends React.Component {
 }
 FeedSpeed.propTypes = {
   feed: React.PropTypes.number.isRequired,
+  baseFeed: React.PropTypes.number.isRequired,
+  optimizedFeed: React.PropTypes.number.isRequired,
   speed: React.PropTypes.number.isRequired,
   rotation: React.PropTypes.string.isRequired
 }
@@ -299,7 +305,13 @@ export default class HeaderView extends React.Component {
         <Button key='reset' iid='removal' icon='reset'>
           <div className='text'>Reset<br />Removal</div>
         </Button>
-        <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]}/>
+        <FeedSpeed disabled 
+                   feed={feedSpeedInfo[0]} 
+                   baseFeed = {this.props.baseFeed}
+                   optimizedFeed = {this.props.optimizedFeed}
+                   speed={feedSpeedInfo[1]} 
+                   rotation={feedSpeedInfo[2]}
+        />
         <SubMenu
           disabled  // TODO: figure out server-side functionality for switching machines
           title={

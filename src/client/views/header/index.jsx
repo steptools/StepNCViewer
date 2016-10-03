@@ -127,22 +127,23 @@ class FeedSpeed extends React.Component {
   }
   render(){
     let baseopt;
-    if (this.props.baseFeed>-1 && this.props.optimizedFeed >-1 ){
+    if (this.props.baseFeed>-1 && this.props.optimizedFeed >-1 ) {
       baseopt = (
         <div>
-          <div className='title'>Base Feedrate:</div>
-          <div className='value'>{this.props.baseFeed}</div>
-          <div className='title'>Optimized Feedrate:</div>
-          <div className='value'>{this.props.optimizedFeed}</div>
+          <div className='title'>Base: {this.props.baseFeed}</div>
+          <div className='title'>Actual: {this.props.feed}</div>
+          <div className='title'>Optimized: {this.props.optimizedFeed}</div>
         </div>
+      );
+    } else {
+      baseopt = (
+        <div className='title'>Actual: {this.props.feed}</div>
       );
     }
     return (        <MenuItem {...this.props} key='feed-speed' className='info feed-speed'>
     <div className='item'>
       <div className={getIcon('feedrate')}/>
       <div className='text'>
-        <div className='title'>Actual Feedrate:</div>
-        <div className='value'>{this.props.feed}</div>
         {baseopt}
       </div>
     </div>
@@ -153,10 +154,12 @@ class FeedSpeed extends React.Component {
         <div className='value'>{this.props.speed}</div>
       </div>
     </div>*/}
+      <div>{"Feedrate ("+this.props.feedUnit+")"}</div>
   </MenuItem>)}
 }
 FeedSpeed.propTypes = {
   feed: React.PropTypes.number.isRequired,
+  feedUnit: React.PropTypes.string.isRequired,
   baseFeed: React.PropTypes.number.isRequired,
   optimizedFeed: React.PropTypes.number.isRequired,
   speed: React.PropTypes.number.isRequired,
@@ -256,7 +259,7 @@ export default class HeaderView extends React.Component {
     let ss = 'Not defined';
     let ssIcon = null;
     if (this.props.feedRate !== undefined) {
-      fr = Number(this.props.feedRate).toFixed(1) + ' ' + this.props.feedRateUnits;
+      fr = Number(this.props.feedRate).toFixed(1);
     }
     if (this.props.spindleSpeed !== 0) {
       ss = Math.abs(this.props.spindleSpeed) + ' rev/min';
@@ -316,6 +319,7 @@ export default class HeaderView extends React.Component {
         </Button>
         <FeedSpeed disabled 
                    feed={feedSpeedInfo[0]} 
+                   feedUnit={this.props.feedRateUnits}
                    baseFeed = {this.props.baseFeed}
                    optimizedFeed = {this.props.optimizedFeed}
                    speed={feedSpeedInfo[1]} 

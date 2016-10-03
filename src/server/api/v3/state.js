@@ -68,16 +68,16 @@ function updateMTC(){
 var findWS = function(current) {
   var change = false;
 
-  if (current < WSGCode['worksteps'][WSGCodeIndex]) {
+  if (current < WSGCode.worksteps[WSGCodeIndex]) {
     WSGCodeIndex = 0;
     change = true;
     //app.logger.debug("Starting from 0");
   }
 
-  while (current > WSGCode['worksteps'][WSGCodeIndex + 1]) {
+  while (current > WSGCode.worksteps[WSGCodeIndex + 1]) {
     WSGCodeIndex = WSGCodeIndex + 1;
     change = true;
-    if (WSGCodeIndex === WSGCode['worksteps'].length - 1) {
+    if (WSGCodeIndex === WSGCode.worksteps.length - 1) {
       break;
     }
   }

@@ -125,25 +125,34 @@ class FeedSpeed extends React.Component {
   constructor(props){
     super(props);
   }
-  render(){return (        <MenuItem {...this.props} key='feed-speed' className='info feed-speed'>
+  render(){
+    let baseopt;
+    if (this.props.baseFeed>-1 && this.props.optimizedFeed >-1 ){
+      baseopt = (
+        <div>
+          <div className='title'>Base Feedrate:</div>
+          <div className='value'>{this.props.baseFeed}</div>
+          <div className='title'>Optimized Feedrate:</div>
+          <div className='value'>{this.props.optimizedFeed}</div>
+        </div>
+      );
+    }
+    return (        <MenuItem {...this.props} key='feed-speed' className='info feed-speed'>
     <div className='item'>
       <div className={getIcon('feedrate')}/>
       <div className='text'>
         <div className='title'>Actual Feedrate:</div>
         <div className='value'>{this.props.feed}</div>
-        <div className='title'>Base Feedrate:</div>
-        <div className='value'>{this.props.baseFeed}</div>
-        <div className='title'>Optimized Feedrate:</div>
-        <div className='value'>{this.props.optimizedFeed}</div>
+        {baseopt}
       </div>
     </div>
-    <div className='item'>
+        {/*<div className='item'>
       <div className={this.props.rotation}/>
       <div className='text'>
         <div className='title'>Spindle speed:</div>
         <div className='value'>{this.props.speed}</div>
       </div>
-    </div>
+    </div>*/}
   </MenuItem>)}
 }
 FeedSpeed.propTypes = {

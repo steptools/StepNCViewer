@@ -237,7 +237,12 @@ var makeMTC = function(fname){
       let GCcontent = [];
       let MTCFname = fname+".mtc";
       let lineNumber = 0;
-      var GCodes = null;
+      let GCodes = null;
+      let feedcontent = {};
+	
+      let feed_re = /\FEED OVERRIDE ([\d.]+) X ([\d.]+)/;	
+      let feed_parse;
+	
       if (res) {
         GCodes = res.toString().split('\r\n');
       }
@@ -246,6 +251,16 @@ var makeMTC = function(fname){
           if (line.substring(1, 12) === 'WORKINGSTEP') {
             MTCcontent.push(lineNumber);
           }
+	  else if (feed_parse = line.match(feed_re)){
+	      let basefeed = new Number(feed_parse[1]);
+	      let percent = new Number(feed_parse[2]);
+
+	      let optfeed = basefeed * percent / 100;
+	      
+//	      console.log ("Base=" + base + "  percent=" + percent);
+              feedcontent[lineNumber+1].optimized = optfeed;
+              feedcontent[lineNumber+1].base = basefeed;
+          } 
         } else {
           if (line.substring(0,2) != 'IF') {
             GCcontent.push(line);

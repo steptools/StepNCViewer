@@ -238,7 +238,7 @@ var makeMTC = function(fname){
       let MTCFname = fname+".mtc";
       let lineNumber = 0;
       let GCodes = null;
-      let feedcontent = {};
+      let FeedContent = {};
 	
       let feed_re = /\FEED OVERRIDE ([\d.]+) X ([\d.]+)/;	
       let feed_parse;
@@ -257,9 +257,10 @@ var makeMTC = function(fname){
 
 	      let optfeed = basefeed * percent / 100;
 	      
+            FeedContent[lineNumber+1] = {};
 //	      console.log ("Base=" + base + "  percent=" + percent);
-              feedcontent[lineNumber+1].optimized = optfeed;
-              feedcontent[lineNumber+1].base = basefeed;
+              FeedContent[lineNumber+1].optimized = optfeed;
+              FeedContent[lineNumber+1].base = basefeed;
           } 
         } else {
           if (line.substring(0,2) != 'IF') {
@@ -269,7 +270,7 @@ var makeMTC = function(fname){
         }
       });
       MTCcontent[0]=0; //First WS can include pre-setup info
-      let rtn = {'worksteps':MTCcontent,'GCode':GCcontent};
+      let rtn = {worksteps:MTCcontent,feeds:FeedContent,GCode:GCcontent};
       fs.writeFile(MTCFname,
           JSON.stringify(rtn,null,1),
           (err)=>{

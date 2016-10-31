@@ -14,6 +14,34 @@ function _getDelta(req,res){
 function _resetDelta(res){
   file.ms.ResetDeltaGeometry().then(res.status(200).send());
 }
+
+let geomcache = {};
+function _getMesh(id,res){
+  if(geomcache[id]) {
+      res.status(200).send(geomcache[id]);
+      return;
+  }
+  file.ms.GetGeometryJSON(id , 'MESH')
+      .then((out)=>{
+        geomcache[id]=out;
+        res.status(200).send(out);
+        out=null;
+      });
+}
+let polycache = {};
+function _getPoly(id,res){
+    if(polycache[id]) {
+        res.status(200).send(polycache[id]);
+        return;
+    }
+    file.ms.GetGeometryJSON(id , 'POLYLINE')
+      .then((out)=>{
+        polycache[id] = out;
+        res.status(200).send(out);
+        out=null;
+      });
+}
+
 function _getGeometry(req, res) {
   let ms = file.ms;
   let find = file.find;
@@ -28,18 +56,10 @@ function _getGeometry(req, res) {
     return;
   }
   if (req.params.type === 'shell') {
-    ms.GetGeometryJSON(req.params.id , 'MESH')
-      .then((out)=>{
-        res.status(200).send(out);
-        out=null;
-      });
+      _getMesh(req.params.id,res);
     return;
   } else if (req.params.type === 'annotation') {
-    ms.GetGeometryJSON(req.params.id , 'POLYLINE')
-      .then((out)=>{
-        res.status(200).send(out);
-        out=null;
-      });
+    _getPoly(req.params.id,res);
     return;
   } else if (req.params.type === 'tool') {
     let toolId = find.GetToolWorkpiece(Number(req.params.id));

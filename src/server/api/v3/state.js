@@ -31,6 +31,7 @@ let MTCHold = {'feedrateUnits':'Millimeters/Second'};
 
 let currentMachine = 0;
 
+let keyCache = {};
 
 /****************************** Helper Functions ******************************/
 
@@ -165,7 +166,9 @@ var blockUpdate=function(number,block){
             return file.ms.GetKeyStateJSON();
           })
           .then((r)=>{
-            app.ioServer.emit('nc:delta',JSON.parse(r));
+            let key = JSON.parse(r);
+            keyCache = key;
+            app.ioServer.emit('nc:delta',key);
           });
     }
     updateMTC();
@@ -189,7 +192,7 @@ var pathUpdate=function(position){
     coords.z = Number(incoords[2]);
     file.ms.SetToolPosition(coords.x, coords.y, coords.z, 0, 0, 1)
         .then(()=> {
-          return file.ms.GetDeltaStateJSON()
+          return file.ms.GetDeltaStateJSON();
         })
         .then((d)=> {
           app.ioServer.emit('nc:delta', JSON.parse(d));
@@ -386,6 +389,10 @@ var _loopInit = function(req, res) {
 };
 
 var _getKeyState = function (req, res) {
+  if(!_.isEmpty(keyCache)) {
+    res.status(200).send(keyCache);
+    return;
+  }
   var ms = file.ms;
   if (ms === undefined) {
     res.status(404).send('Machine state could not be found');

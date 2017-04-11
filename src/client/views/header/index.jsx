@@ -371,7 +371,8 @@ export default class HeaderView extends React.Component {
     let probeMsg=[];
     if (this.props.probeMsg){
        probeMsg = this.props.probeMsg;
-     }
+    }
+    let curr_ws = this.props.workingstepCache[this.props.ws];
     const headerMenu = (
       <Menu
         mode='horizontal'
@@ -390,6 +391,7 @@ export default class HeaderView extends React.Component {
 	<GeomMenu actionManager = {this.props.actionManager}/>
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
+        <MenuItem className="info"> File: {curr_ws.executabletype}</MenuItem>
         <MenuItem className="info"> File: {this.props.fname}</MenuItem>
       </Menu>
     );

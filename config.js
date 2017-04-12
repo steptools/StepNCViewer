@@ -28,7 +28,7 @@ module.exports = function(environment) {
             "upload": true
           },
           "file" : {
-            "dir": "C:/Users/Ethan/Downloads/BOXY_20170329.stpnc"
+            "dir": "./boxy.stpnc"
           },
           "machine" : {
             "dir" : "C:/Program Files (x86)/STEP Tools/STEP-NC Machine/machines/DMU_85.xml"

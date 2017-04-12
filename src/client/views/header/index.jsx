@@ -372,7 +372,7 @@ export default class HeaderView extends React.Component {
     if (this.props.probeMsg){
        probeMsg = this.props.probeMsg;
      }
-	let curws = this.props.workingstepCache[this.props.ws];
+    let curws = this.props.workingstepCache[this.props.ws];
     const headerMenu = (
       <Menu
         mode='horizontal'

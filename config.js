@@ -28,7 +28,11 @@ module.exports = function(environment) {
             "upload": true
           },
           "file" : {
+<<<<<<< HEAD
             "dir": "./BOXY_20170329.stpnc"
+=======
+            "dir": "./BoxyProbe.stpnc"
+>>>>>>> 6ac41c0047fa3d480f669f59a08fd615ac277008
           },
           "machine" : {
             "dir" : "C:/Program Files (x86)/STEP Tools/STEP-NC Machine/machines/DMU_85.xml"

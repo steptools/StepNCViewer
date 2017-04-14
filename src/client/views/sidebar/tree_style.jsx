@@ -199,13 +199,20 @@ function setNodeInfo(props) {
 
 const Container = (props) => {
   let node = setNodeInfo(props);
-
+  let outerName = node.outerName;
+  if(node.status === 'tolerance red'){
+    outerName+=' status-red'
+  } else if(node.status === 'tolerance yellow') {
+    outerName+=' status-yellow'
+  } else if(node.status === 'tolerance green') {
+    outerName+=' status-green'
+  }
   // TODO: REPLACE WORKINGSTEP ICON WITH A NUMBER
 
   return (
     <div
       id={node.id}
-      className={node.outerName}
+      className={outerName}
     >
       <div
         className={node.toggleName}

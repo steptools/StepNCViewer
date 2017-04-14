@@ -1,10 +1,11 @@
 'use strict';
 var file = require('./file');
 var _ = require('lodash');
+var parseqif = require('./parseqif');
 var tol = file.tol;
 var apt = file.apt;
 var find = file.find;
-
+let app;
 /****************************** Helper Functions ******************************/
 function getModIcon(mod){
   switch(mod){
@@ -91,6 +92,7 @@ function getTolerance(id, wp) {
   }
   let datum = tol.GetToleranceDatumAll(id);
   let datumLabels = datum.map((dat) => getDatum(dat));
+  let status = tol.GetToleranceStatus(id);
   return {
     'id': id,
     'type': 'tolerance',
@@ -105,6 +107,7 @@ function getTolerance(id, wp) {
     'modifiers': mods,
     'modName': modName,
     'children' : datumLabels,
+    'status': status
   };
 }
 
@@ -194,6 +197,7 @@ function _getWps(req, res) {
       _.each(wp.subs, (child) => {
         wp.tolerances = wp.tolerances.concat(child.tolerances);
       });
+      wp.size = find.GetWorkpieceShape(id);
       wp.subs = undefined;
     }
 
@@ -204,9 +208,26 @@ function _getWps(req, res) {
   res.status(200).send(ret);
 }
 
-module.exports = function(app, cb) {
+function _loadQIF(req,res){
+  parseqif.loadQIF(find.GetProjectName()+'_Res.qif')
+    .then(() =>{
+      res.status(200).send();
+      app.ioServer.emit('nc:qifLoad');
+    }).catch((err)=>{
+      res.status(404).send();
+    });
+}
+function _unloadQIF(req,res){
+  file.tol.ResetAllToleranceMeasuredValue();
+  app.ioServer.emit('nc:qifLoad');
+  res.status(200).send();
+}
+module.exports = function(globalApp, cb) {
+  app=globalApp;
   app.router.get('/v3/nc/tolerances/:wsId', _getWsTols);
   app.router.get('/v3/nc/tolerances/', _getTols);
+  app.router.get('/v3/nc/tolerances/qif/load',_loadQIF);
+  app.router.get('/v3/nc/tolerances/qif/unload',_unloadQIF);
   app.router.get('/v3/nc/workpieces/', _getWps);
 
   if (cb) {

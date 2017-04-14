@@ -278,6 +278,10 @@ export default class ResponsiveView extends React.Component {
     // get data for workpiece/tolerance view
     request.get('/v3/nc/workpieces/').then(this.getWPT);
     request.get('/v3/nc/project').then((res)=>{this.setState({'projectName':res.text});});
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6ac41c0047fa3d480f669f59a08fd615ac277008
   }
 
   componentDidMount() {

@@ -391,7 +391,7 @@ export default class HeaderView extends React.Component {
 	<GeomMenu actionManager = {this.props.actionManager}/>
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
-        <MenuItem className="info"> Type: {curr_ws.type}</MenuItem>
+        <MenuItem className="info"> Type: {curr_ws.operationType}</MenuItem>
         <MenuItem className="info"> File: {this.props.fname}</MenuItem>
       </Menu>
     );

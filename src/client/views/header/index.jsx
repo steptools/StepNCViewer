@@ -366,7 +366,7 @@ export default class HeaderView extends React.Component {
     } else {
       ppbtntxt = 'Pause';
     }
-
+    let curws = this.props.workingstepCache[this.props.ws];
     let feedSpeedInfo = this.getFeedSpeedInfo();
     let probeMsg=[];
     if (this.props.probeMsg){
@@ -390,9 +390,8 @@ export default class HeaderView extends React.Component {
 	<GeomMenu actionManager = {this.props.actionManager}/>
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
-        <Button key='changelog'>
-          <div className='version' id='logbutton'>v1.1.0</div>
-        </Button>
+       	<MenuItem className="info"> Type: {ws}</MenuItem>
+        <MenuItem className="info"> File: {this.props.fname}</MenuItem>
       </Menu>
     );
 

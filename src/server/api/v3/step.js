@@ -27,6 +27,7 @@ function exeFromId(id) {
       id: find.GetExecutableWorkpieceRemovalLocal(id),
       inherited: false,
     },
+    'type' : find.GetExecutableType(id),
   };
 
   if (ws.asIs.id === 0) {
@@ -141,6 +142,9 @@ function _getSetup(req, res) {
 }
 function _getProject(req,res){
   res.status(200).send(find.GetProjectName());
+}
+function _getTypee(req, res){
+  res.status(200).send(find.GetExecutableType(req.params.wsId));
 }
 
 module.exports = function(app, cb) {

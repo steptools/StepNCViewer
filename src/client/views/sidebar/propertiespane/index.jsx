@@ -67,6 +67,8 @@ function getIcon(type, data) {
       }
     case 'highlight':
       return 'highlight-button glyphicons glyphicons-eye-' + data;
+    case 'preview':
+      return 'icon preview glyphicons glyphicons-new-window-alt';
     default:
       return 'icon glyphicons glyphicons-question-sign';
   }
@@ -320,14 +322,57 @@ DatumList.propTypes = {
   toggleHighlight: React.PropTypes.func.isRequired,
   selectEntity: React.PropTypes.func.isRequired
 }
-
+export class WorkpieceItem extends React.Component{
+  constructor(props){
+    super(props);
+  }
+  render(){
+    //Draw something
+    return(
+    <div>
+      <span id={this.props.workpiece.id} className='node'>
+        <span className={getIcon('workpiece')}/>
+          <span className='textbox'>
+  	    {this.props.workpiece.name}
+          </span>
+        <span className={getIcon('preview')}/>
+      </span>
+    </div>
+    );
+  }
+}
+WorkpieceItem.propTypes = {
+  workpiece: React.PropTypes.object.isRequired
+}
 export class WorkpieceList extends React.Component{
   constructor(props){
     super(props);
   }
   render(){
-    return null;
+      return(
+	<li className='rc-menu-item-disabled property children'>
+          <div className='title'>Workpieces:</div>
+	  <div className='list'>
+	  <div>
+	    To-Be: 
+	    <WorkpieceItem
+	      workpiece={this.props.tobe}
+	    />
+	  </div>
+	  <div>
+	    As-Is: 
+	    <WorkpieceItem 
+	      workpiece={this.props.asis}
+	    />
+	  </div>
+	  </div>
+        </li>
+      );
   }
+}
+WorkpieceList.propTypes = {
+  asis: React.PropTypes.object.isRequired,
+  tobe: React.PropTypes.object.isRequired
 }
 
 export class WorkpieceProperties extends React.Component{
@@ -486,7 +531,10 @@ export class WorkingstepProperties extends React.Component{
           toggleHighlight={this.props.toggleHighlight} 
           selectEntity={this.props.selectEntity}
         />
-        <WorkpieceList />
+        <WorkpieceList
+	  asis={this.props.toleranceCache[entity.asIs.id]}
+	  tobe={this.props.toleranceCache[entity.toBe.id]}
+	/>
       </div>
     );
   }

@@ -12,7 +12,7 @@ function exeFromId(id) {
     'name': find.GetExecutableName(id),
     'baseTime': find.GetExecutableBaseTime(id),
     'timeUnits': find.GetExecutableTimeUnit(id),
-    'type':find.GetExecutableType(id),
+    'type': find.GetExecutableType(id),
     'distance': find.GetExecutableDistance(id),
     'distanceUnits': find.GetExecutableDistanceUnit(id),
     'setupID': getSetupFromId(id),
@@ -75,6 +75,10 @@ function exeFromId(id) {
     ws.feedUnits = find.GetProcessFeedUnit(id);
     ws.speed = find.GetProcessSpeed(id);
     ws.speedUnits = find.GetProcessSpeedUnit(id);
+    let tolerances = file.tol.GetWorkingstepToleranceAll(id);
+    if(tolerances.length > 0){
+      ws.tolerances = tolerances;
+    }
     return ws;
   } else if (find.IsSelective(id)) {
     ws.type = 'selective';
@@ -136,11 +140,15 @@ function _getSetup(req, res) {
     res.status(200).send(String(newId));
   }
 }
+function _getProject(req,res){
+  res.status(200).send(find.GetProjectName());
+}
 
 module.exports = function(app, cb) {
   app.router.get('/v3/nc/workplan/:wsId', _getExeFromId);
   app.router.get('/v3/nc/workplan', _getMwp);
   app.router.get('/v3/nc/setup/:wsId', _getSetup);
+  app.router.get('/v3/nc/project',_getProject);
   if (cb) {
     cb();
   }

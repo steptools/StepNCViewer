@@ -8,11 +8,11 @@ var _ = require('lodash');
 
 function exeFromId(id) {
   let ws = {
-      'id': id,
-      'operationType': find.GetExecutableType(id),
-      'name': find.GetExecutableName(id),
-      'baseTime': find.GetExecutableBaseTime(id),
-      'timeUnits': find.GetExecutableTimeUnit(id),
+    'id': id,
+    'operationType': find.GetExecutableType(id),
+    'name': find.GetExecutableName(id),
+    'baseTime': find.GetExecutableBaseTime(id),
+    'timeUnits': find.GetExecutableTimeUnit(id),
     'distance': find.GetExecutableDistance(id),
     'distanceUnits': find.GetExecutableDistanceUnit(id),
     'setupID': getSetupFromId(id),

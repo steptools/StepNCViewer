@@ -143,9 +143,6 @@ function _getSetup(req, res) {
 function _getProject(req,res){
   res.status(200).send(find.GetProjectName());
 }
-function _getTypee(req, res){
-  res.status(200).send(find.GetExecutableType(req.params.wsId));
-}
 
 module.exports = function(app, cb) {
   app.router.get('/v3/nc/workplan/:wsId', _getExeFromId);

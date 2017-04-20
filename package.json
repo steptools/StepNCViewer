@@ -37,6 +37,7 @@
     "method-override": "^2.3.6",
     "morgan": "^1.7.0",
     "node-sass": "^3.4.2",
+    "rc-menu": "^5.0.9",
     "react": "^15.2.0",
     "react-dom": "^15.2.0",
     "react-tooltip": "^1.0.4",

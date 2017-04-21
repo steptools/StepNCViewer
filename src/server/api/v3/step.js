@@ -9,6 +9,7 @@ var _ = require('lodash');
 function exeFromId(id) {
   let ws = {
     'id': id,
+    'executableType': find.GetExecutableType(id),
     'name': find.GetExecutableName(id),
     'baseTime': find.GetExecutableBaseTime(id),
     'timeUnits': find.GetExecutableTimeUnit(id),

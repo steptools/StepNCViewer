@@ -345,7 +345,7 @@ export class WorkpieceItem extends React.Component{
             ev.stopPropagation();
             this.props.toggleHighlight(this.props.tolerance.id);
             this.props.selectEntity({key:'preview'}, this.props.workpiece);
-          }
+          }}
         />
       </span>
     </div>

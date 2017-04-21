@@ -246,7 +246,8 @@ WorkingstepList.propTypes = {
   entity: React.PropTypes.object.isRequired,
   curws: React.PropTypes.number.isRequired,
   workingstepcache: React.PropTypes.object.isRequired,
-  clickCb: React.PropTypes.func.isRequired
+  clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isReqired
 }
 
 export class ToleranceList extends React.Component{
@@ -332,19 +333,29 @@ export class WorkpieceItem extends React.Component{
     //Draw something
     return(
     <div>
-      <span id={this.props.workpiece.id} className='node'>
+      <span id={this.props.workpiece.id} className='node' onClick={this.props.clickCb}>
         <span className={getIcon('workpiece')}/>
-          <span className='textbox'>
-  	    {this.props.workpiece.name}
-          </span>
-        <span className={getIcon('preview')}/>
+        <span className='textbox'>
+	        {this.props.workpiece.name}
+        </span>
+        <span 
+          className={getIcon('preview')}
+          onClick={(ev)=>{
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.props.toggleHighlight(this.props.tolerance.id);
+            this.props.selectEntity({key:'preview'}, this.props.workpiece);
+          }
+        />
       </span>
     </div>
     );
   }
 }
 WorkpieceItem.propTypes = {
-  workpiece: React.PropTypes.object.isRequired
+  workpiece: React.PropTypes.object.isRequired,
+  clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 export class WorkpieceList extends React.Component{
   constructor(props){
@@ -359,12 +370,16 @@ export class WorkpieceList extends React.Component{
 	    To-Be: 
 	    <WorkpieceItem
 	      workpiece={this.props.tobe}
+        clickCb={()=>{this.props.clickCb(this.props.tobe)}}
+        selectEntity={this.props.selectEntity}
 	    />
 	  </div>
 	  <div>
 	    As-Is: 
 	    <WorkpieceItem 
 	      workpiece={this.props.asis}
+        clickCb={()=>{this.props.clickCb(this.props.asis)}}
+        selectEntity={this.props.selectEntity}
 	    />
 	  </div>
 	  </div>
@@ -374,7 +389,9 @@ export class WorkpieceList extends React.Component{
 }
 WorkpieceList.propTypes = {
   asis: React.PropTypes.object.isRequired,
-  tobe: React.PropTypes.object.isRequired
+  tobe: React.PropTypes.object.isRequired,
+  clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 
 export class WorkpieceProperties extends React.Component{
@@ -526,17 +543,13 @@ export class WorkingstepProperties extends React.Component{
           clickCb={this.props.clickCb}
           toggleHighlight={this.props.toggleHighlight} 
           selectEntity={this.props.selectEntity}
-          />
-        <DatumList 
-          datums={this.props.toleranceCache[entity.toBe.id].datums}
-          highlightedTolerances={this.props.highlightedTolerances}
-          toggleHighlight={this.props.toggleHighlight} 
-          selectEntity={this.props.selectEntity}
         />
         <WorkpieceList
-	  asis={this.props.toleranceCache[entity.asIs.id]}
-	  tobe={this.props.toleranceCache[entity.toBe.id]}
-	/>
+	        asis={this.props.toleranceCache[entity.asIs.id]}
+	        tobe={this.props.toleranceCache[entity.toBe.id]}
+          clickCb={this.props.clickCb}
+          selectEntity={this.props.selectEntity}
+	      />
       </div>
     );
   }
@@ -575,8 +588,8 @@ export class ToleranceProperties extends React.Component {
           curws={this.props.curws}
           clickCb={()=>{}}
         />
-        <DatumList />
-        <WorkpieceList />
+        {/*<DatumList />
+        <WorkpieceList />*/}
       </div>
     );
   }

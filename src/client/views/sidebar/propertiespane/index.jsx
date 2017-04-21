@@ -343,7 +343,6 @@ export class WorkpieceItem extends React.Component{
           onClick={(ev)=>{
             ev.preventDefault();
             ev.stopPropagation();
-            this.props.toggleHighlight(this.props.tolerance.id);
             this.props.selectEntity({key:'preview'}, this.props.workpiece);
           }}
         />

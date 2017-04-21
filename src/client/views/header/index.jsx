@@ -95,7 +95,7 @@ class GeomBtn extends React.Component {
         {this.props.children}
       </MenuItem>
     );
-  }  
+  }
 }
 class Slider extends React.Component {  constructor(props) {
     super(props);
@@ -224,9 +224,9 @@ class GeomMenu extends React.Component {
       cutter:'view'
     };
     this.props.actionManager.on('changeVis',(arg)=>{
-      let l={}; 
+      let l={};
       if(this.state[arg]==='view')
-        l[arg]='noview'; 
+        l[arg]='noview';
       else
         l[arg]='view';
       this.setState(l);
@@ -372,6 +372,8 @@ export default class HeaderView extends React.Component {
     if (this.props.probeMsg){
        probeMsg = this.props.probeMsg;
      }
+    let curws = this.props.workingstepCache[this.props.ws];
+
     const headerMenu = (
       <Menu
         mode='horizontal'
@@ -390,6 +392,7 @@ export default class HeaderView extends React.Component {
 	<GeomMenu actionManager = {this.props.actionManager}/>
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
+        <MenuItem className="info"> Type: {curws.operationType}</MenuItem>
         <MenuItem className="info"> File: {this.props.fname}</MenuItem>
       </Menu>
     );

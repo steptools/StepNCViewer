@@ -111,7 +111,7 @@ export class WorkingstepItem extends React.Component{
       <span 
         id={this.props.workingstep.id}
         className={classname}
-        onClick={()=>{this.props.clickCb()}}
+        onClick={()=>{this.props.clickCb(this.props.workingstep)}}
       >
         <span className={getIcon('workingstep')} />
         <span className='textbox'> {this.props.workingstep.name} </span>
@@ -547,8 +547,8 @@ export class WorkingstepProperties extends React.Component{
           selectEntity={this.props.selectEntity}
         />
         <WorkpieceList
-	        asis={this.props.toleranceCache[entity.asIs.id]}
-	        tobe={this.props.toleranceCache[entity.toBe.id]}
+	     asis={this.props.toleranceCache[entity.asIs.id]}
+	     tobe={this.props.toleranceCache[entity.toBe.id]}
           clickCb={this.props.clickCb}
           selectEntity={this.props.selectEntity}
 	      />

@@ -12,6 +12,7 @@ function exeFromId(id) {
     'name': find.GetExecutableName(id),
     'baseTime': find.GetExecutableBaseTime(id),
     'timeUnits': find.GetExecutableTimeUnit(id),
+	'type': find.GetExecutableType(id),
     'distance': find.GetExecutableDistance(id),
     'distanceUnits': find.GetExecutableDistanceUnit(id),
     'setupID': getSetupFromId(id),

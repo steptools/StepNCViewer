@@ -332,7 +332,7 @@ export class WorkpieceItem extends React.Component{
     //Draw something
     return(
     <div>
-      <span id={this.props.workpiece.id} className='node'>
+      <span id={this.props.workpiece.id} className='node' onClick={this.props.clickCb}>
         <span className={getIcon('workpiece')}/>
           <span className='textbox'>
   	    {this.props.workpiece.name}
@@ -344,7 +344,8 @@ export class WorkpieceItem extends React.Component{
   }
 }
 WorkpieceItem.propTypes = {
-  workpiece: React.PropTypes.object.isRequired
+  workpiece: React.PropTypes.object.isRequired,
+  clickCb: React.PropTypes.func.isRequired
 }
 export class WorkpieceList extends React.Component{
   constructor(props){
@@ -359,12 +360,14 @@ export class WorkpieceList extends React.Component{
 	    To-Be: 
 	    <WorkpieceItem
 	      workpiece={this.props.tobe}
+        clickCb={this.props.clickCb(this.props.tobe)}
 	    />
 	  </div>
 	  <div>
 	    As-Is: 
 	    <WorkpieceItem 
 	      workpiece={this.props.asis}
+        clickCb={this.props.clickCb(this.props.asis)}
 	    />
 	  </div>
 	  </div>
@@ -374,7 +377,8 @@ export class WorkpieceList extends React.Component{
 }
 WorkpieceList.propTypes = {
   asis: React.PropTypes.object.isRequired,
-  tobe: React.PropTypes.object.isRequired
+  tobe: React.PropTypes.object.isRequired,
+  clickCb: React.PropTypes.func.isRequired
 }
 
 export class WorkpieceProperties extends React.Component{
@@ -536,6 +540,7 @@ export class WorkingstepProperties extends React.Component{
         <WorkpieceList
 	  asis={this.props.toleranceCache[entity.asIs.id]}
 	  tobe={this.props.toleranceCache[entity.toBe.id]}
+    clickCb={this.props.clickCb}
 	/>
       </div>
     );
@@ -576,7 +581,7 @@ export class ToleranceProperties extends React.Component {
           clickCb={()=>{}}
         />
         <DatumList />
-        <WorkpieceList />
+        // <WorkpieceList />
       </div>
     );
   }

@@ -246,8 +246,7 @@ WorkingstepList.propTypes = {
   entity: React.PropTypes.object.isRequired,
   curws: React.PropTypes.number.isRequired,
   workingstepcache: React.PropTypes.object.isRequired,
-  clickCb: React.PropTypes.func.isRequired,
-  selectEntity: React.PropTypes.func.isReqired
+  clickCb: React.PropTypes.func.isRequired
 }
 
 export class ToleranceList extends React.Component{
@@ -587,8 +586,8 @@ export class ToleranceProperties extends React.Component {
           curws={this.props.curws}
           clickCb={()=>{}}
         />
-        {/*<DatumList />
-        <WorkpieceList />*/}
+        <DatumList />
+        <WorkpieceList />
       </div>
     );
   }

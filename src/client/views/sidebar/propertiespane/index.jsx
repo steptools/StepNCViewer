@@ -332,22 +332,17 @@ export class WorkpieceItem extends React.Component{
     //Draw something
     return(
     <div>
-<<<<<<< HEAD
-      <span id={this.props.workpiece.id} className='node'
-        onClick={()=>{this.props.clickCb(this.props.workpiece)}}>
-=======
       <span id={this.props.workpiece.id} className='node' onClick={this.props.clickCb}>
->>>>>>> 29d92d633cbb11cb0378f7831febe4e1c04b84d3
         <span className={getIcon('workpiece')}/>
           <span className='textbox'>
-  	    {this.props.workpiece.name}
+        {this.props.workpiece.name}
           </span>
         <span className={getIcon('preview')}
-        onClick={(ev)=>{
-          ev.preventDefault();
-          ev.stopPropagation();
-          this.props.selectEntity({key:'preview'}, this.props.workpiece);
-        }}
+          onClick={(ev)=>{
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.props.selectEntity({key:'preview'}, this.props.workpiece);
+          }}
         />
       </span>
     </div>
@@ -356,12 +351,8 @@ export class WorkpieceItem extends React.Component{
 }
 WorkpieceItem.propTypes = {
   workpiece: React.PropTypes.object.isRequired,
-<<<<<<< HEAD
   clickCb: React.PropTypes.func.isRequired,
   selectEntity: React.PropTypes.func.isRequired
-=======
-  clickCb: React.PropTypes.func.isRequired
->>>>>>> 29d92d633cbb11cb0378f7831febe4e1c04b84d3
 }
 export class WorkpieceList extends React.Component{
   constructor(props){
@@ -378,48 +369,24 @@ export class WorkpieceList extends React.Component{
         <WorkpieceItem 
           workpiece={wp.entity}
           clickCb={()=>{this.props.clickCb(wp.entity)}}
+          selectEntity={this.props.selectEntity}
         />
       ));
     });
   }
   render(){
       return(
-<<<<<<< HEAD
-	<li className='rc-menu-item-disabled property children'>
-          <div className='title'>Workpieces:</div>
-	  <div className='list'>
-	  <div>
-	    To-Be: 
-	    <WorkpieceItem
-	      workpiece={this.props.tobe}
-        clickCb={this.props.clickCb}
-        selectEntity={this.props.selectEntity}
-	    />
-	  </div>
-	  <div>
-	    As-Is: 
-	    <WorkpieceItem 
-	      workpiece={this.props.asis}
-        clickCb={this.props.clickCb}
-        selectEntity={this.props.selectEntity}
-=======
         <GenericList
         title={this.title}
         elements={this.elements}
->>>>>>> 29d92d633cbb11cb0378f7831febe4e1c04b84d3
-	    />
+      />
       );
   }
 }
 WorkpieceList.propTypes = {
-<<<<<<< HEAD
-  asis: React.PropTypes.object.isRequired,
-  tobe: React.PropTypes.object.isRequired,
-  clickCb: React.PropTypes.func.isRequired,
-  selectEntity: React.PropTypes.func.isRequired
-=======
   workpieces: React.PropTypes.array,
   clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired,
 }
 
 export class GenericList extends React.Component {
@@ -438,7 +405,6 @@ export class GenericList extends React.Component {
 GenericList.propTypes = {
   title:React.PropTypes.string,
   elements:React.PropTypes.array
->>>>>>> 29d92d633cbb11cb0378f7831febe4e1c04b84d3
 }
 
 export class WorkpieceProperties extends React.Component{
@@ -571,14 +537,14 @@ export class WorkingstepProperties extends React.Component{
   }
   render(){
     let entity = this.props.entity;
-	let toleranceMap = (tolids)=>{
-		let obj = {};
-		obj.children = [];
-		_.each(tolids,(tolid)=>{
-			obj.children.push(this.props.toleranceCache[tolid]);//probably the object the ID points to
-		});
-		return obj;
-	};
+  let toleranceMap = (tolids)=>{
+    let obj = {};
+    obj.children = [];
+    _.each(tolids,(tolid)=>{
+      obj.children.push(this.props.toleranceCache[tolid]);//probably the object the ID points to
+    });
+    return obj;
+  };
   let asis ={title:'As-Is:',entity:this.props.toleranceCache[entity.asIs.id]};
   let tobe ={title:'To-Be:',entity:this.props.toleranceCache[entity.toBe.id]};
   let workpieces = [asis,tobe];
@@ -595,17 +561,10 @@ export class WorkingstepProperties extends React.Component{
           selectEntity={this.props.selectEntity}
           />
         <WorkpieceList
-<<<<<<< HEAD
-	     asis={this.props.toleranceCache[entity.asIs.id]}
-	     tobe={this.props.toleranceCache[entity.toBe.id]}
-          clickCb={this.props.clickCb}
-          selectEntity={this.props.selectEntity}
-	      />
-=======
           workpieces={workpieces}
           clickCb={this.props.clickCb}
+          selectEntity={this.props.selectEntity}
         />
->>>>>>> 29d92d633cbb11cb0378f7831febe4e1c04b84d3
       </div>
     );
   }

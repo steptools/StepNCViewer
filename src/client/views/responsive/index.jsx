@@ -158,16 +158,7 @@ export default class ResponsiveView extends React.Component {
         ids.push(node.id);
       }
 
-      if (node.type === 'tolerance') {
-        let workingsteps = [];
-        for (let i of json[node.workpiece].workingsteps) {
-          let ws = this.state.workingstepCache[i];
-          if (ws && node.workpiece === ws.toBe.id) {
-            workingsteps.push(i);
-          }
-        }
-        node.workingsteps = workingsteps;
-      } else if (node.type === 'datum') {
+      if (node.type === 'datum') {
         node.leaf = true;
         node.enabled = true;
       }
@@ -361,7 +352,8 @@ export default class ResponsiveView extends React.Component {
     }
   }
 
-  selectEntity(event, entity) {
+  selectEntity(event, entity , key) {
+    if(key!==undefined) event.key=key;
     if (event.key === 'goto') {
       let url = '/v3/nc/state/ws/' + entity.id;
       request.get(url).end();

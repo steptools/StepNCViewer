@@ -93,6 +93,7 @@ function getTolerance(id, wp) {
   let datum = tol.GetToleranceDatumAll(id);
   let datumLabels = datum.map((dat) => getDatum(dat));
   let status = tol.GetToleranceStatus(id);
+  let steps = tol.NavigateToleranceToWorkingstepAll(id);
   return {
     'id': id,
     'type': 'tolerance',
@@ -107,7 +108,8 @@ function getTolerance(id, wp) {
     'modifiers': mods,
     'modName': modName,
     'children' : datumLabels,
-    'status': status
+    'status': status,
+    'workingsteps':steps
   };
 }
 

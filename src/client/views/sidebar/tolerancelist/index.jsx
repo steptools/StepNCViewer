@@ -1,5 +1,4 @@
 import {Treebeard} from 'react-treebeard';
-import Menu, {Item as MenuItem} from 'rc-menu';
 import ts from '../tree_style.jsx';
 
 let wsList = [];

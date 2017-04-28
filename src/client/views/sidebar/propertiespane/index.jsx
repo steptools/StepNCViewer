@@ -338,11 +338,12 @@ export class WorkpieceItem extends React.Component{
   	    {this.props.workpiece.name}
           </span>
         <span className={getIcon('preview')}
-             onClick={(ev)=>{
-             ev.preventDefault();
-             ev.stopPropagation();
-             this.props.selectEntity({key:'preview'}, this.props.workpiece);
-           }}/>
+            onClick={(ev)=>{
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.props.selectEntity({key:'preview'}, this.props.workpiece);
+          }}
+        />
       </span>
     </div>
     );
@@ -350,10 +351,7 @@ export class WorkpieceItem extends React.Component{
 }
 WorkpieceItem.propTypes = {
   workpiece: React.PropTypes.object.isRequired,
-<<<<<<< HEAD
   selectEntity: React.PropTypes.func.isRequired,
-=======
->>>>>>> refs/remotes/steptools/Properties-Pain
   clickCb: React.PropTypes.func.isRequired
 }
 export class WorkpieceList extends React.Component{
@@ -371,45 +369,24 @@ export class WorkpieceList extends React.Component{
         <WorkpieceItem 
           workpiece={wp.entity}
           clickCb={()=>{this.props.clickCb(wp.entity)}}
+          selectEntity={this.props.selectEntity}
         />
       ));
     });
   }
   render(){
       return(
-<<<<<<< HEAD
-	<li className='rc-menu-item-disabled property children'>
-          <div className='title'>Workpieces:</div>
-	  <div className='list'>
-	  <div>
-	    To-Be: 
-	    <WorkpieceItem
-	      workpiece={this.props.tobe}
-          clickCb={()=>{this.props.clickCb(wp.entity)}}
-          selectEntity={this.props.selectEntity}
-	    />
-	  </div>
-	  <div>
-	    As-Is: 
-	    <WorkpieceItem 
-	      workpiece={this.props.asis}
-=======
         <GenericList
         title={this.title}
         elements={this.elements}
->>>>>>> refs/remotes/steptools/Properties-Pain
 	    />
       );
   }
 }
 WorkpieceList.propTypes = {
-<<<<<<< HEAD
-  asis: React.PropTypes.object.isRequired,
-  tobe: React.PropTypes.object.isRequired,
-  selectEntity: React.PropTypes.func.isRequired
-=======
   workpieces: React.PropTypes.array,
   clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 
 export class GenericList extends React.Component {
@@ -428,7 +405,6 @@ export class GenericList extends React.Component {
 GenericList.propTypes = {
   title:React.PropTypes.string,
   elements:React.PropTypes.array
->>>>>>> refs/remotes/steptools/Properties-Pain
 }
 
 export class WorkpieceProperties extends React.Component{
@@ -587,6 +563,7 @@ export class WorkingstepProperties extends React.Component{
         <WorkpieceList
           workpieces={workpieces}
           clickCb={this.props.clickCb}
+          selectEntity={this.props.selectEntity}
         />
       </div>
     );

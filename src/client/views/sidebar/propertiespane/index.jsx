@@ -336,8 +336,14 @@ export class WorkpieceItem extends React.Component{
         <span className={getIcon('workpiece')}/>
           <span className='textbox'>
   	    {this.props.workpiece.name}
-          </span>
-        <span className={getIcon('preview')}/>
+        </span>
+        <span className={getIcon('preview')}
+              onClick={(ev)=>{
+              ev.preventDefault();
+              ev.stopPropagation();
+              this.props.selectEntity({key:'preview'},this.props.workpiece);
+         }}
+        />
       </span>
     </div>
     );

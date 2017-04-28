@@ -337,6 +337,7 @@ export class WorkpieceItem extends React.Component{
           <span className='textbox'>
   	    {this.props.workpiece.name}
           </span>
+        <span className={getIcon('preview')}/>
         <span className={getIcon('preview')}
             onClick={(ev)=>{
             ev.preventDefault();
@@ -350,6 +351,7 @@ export class WorkpieceItem extends React.Component{
   }
 }
 WorkpieceItem.propTypes = {
+  workpiece: React.PropTypes.object.isRequired
   workpiece: React.PropTypes.object.isRequired,
   selectEntity: React.PropTypes.func.isRequired,
   clickCb: React.PropTypes.func.isRequired
@@ -384,8 +386,14 @@ export class WorkpieceList extends React.Component{
   }
 }
 WorkpieceList.propTypes = {
+<<<<<<< HEAD
   workpieces: React.PropTypes.array,
   clickCb: React.PropTypes.func.isRequired,
+=======
+  asis: React.PropTypes.object.isRequired,
+  tobe: React.PropTypes.object.isRequired
+  tobe: React.PropTypes.object.isRequired,
+>>>>>>> parent of 1ee4afc4... Didn't commit previous correctly
   selectEntity: React.PropTypes.func.isRequired
 }
 

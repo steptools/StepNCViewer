@@ -158,7 +158,16 @@ export default class ResponsiveView extends React.Component {
         ids.push(node.id);
       }
 
-      if (node.type === 'datum') {
+      if (node.type === 'tolerance') {
+        let workingsteps = [];
+        for (let i of json[node.workpiece].workingsteps) {
+          let ws = this.state.workingstepCache[i];
+          if (ws && node.workpiece === ws.toBe.id) {
+            workingsteps.push(i);
+          }
+        }
+        node.workingsteps = workingsteps;
+      } else if (node.type === 'datum') {
         node.leaf = true;
         node.enabled = true;
       }
@@ -241,9 +250,6 @@ export default class ResponsiveView extends React.Component {
     this.props.app.socket.on('nc:spindle', (spindle) => {
       this.setState({'spindleSpeed' : spindle});
     });
-    this.props.app.socket.on('nc:qifLoad', ()=>{
-      request.get('/v3/nc/workpieces/').then(this.getWPT);
-    });
   }
 
 
@@ -268,8 +274,6 @@ export default class ResponsiveView extends React.Component {
     });
     // get data for workpiece/tolerance view
     request.get('/v3/nc/workpieces/').then(this.getWPT);
-    request.get('/v3/nc/project').then((res)=>{this.setState({'projectName':res.text});});
-
   }
 
   componentDidMount() {
@@ -352,8 +356,7 @@ export default class ResponsiveView extends React.Component {
     }
   }
 
-  selectEntity(event, entity , key) {
-    if(key!==undefined) event.key=key;
+  selectEntity(event, entity) {
     if (event.key === 'goto') {
       let url = '/v3/nc/state/ws/' + entity.id;
       request.get(url).end();
@@ -403,14 +406,13 @@ export default class ResponsiveView extends React.Component {
         if (response.text) {
           let workingstep = JSON.parse(response.text);
           let tols = [];
-          if(workingstep.tolerances!==undefined && workingstep.tolerances.length>0){
-            _.each(workingstep.tolerances, (t) => {
-              let tol = this.state.toleranceCache[t];
-              tols.push(tol.id);
-              if(tol.children!==undefined && tol.children.length>0)
-                _.each(tol.children,(d)=>{
-                  tols.push(d.id);
-                });
+          let cache = this.state.toleranceCache[workingstep.toBe.id];
+          if(cache) {
+            _.each(cache.datums, (t) => {
+              tols.push(t.id);
+            });
+            _.each(cache.children, (t) => {
+              tols.push(t.id);
             });
           }
           if (this.state.ws !== workingstep.id) {
@@ -556,7 +558,6 @@ export default class ResponsiveView extends React.Component {
             (newFeedRate) => this.setState({feedRate: newFeedRate})
           }
           probeMsg = {probeMsg}
-          fname = {this.state.projectName}
         />
       );
       SV = (
@@ -566,7 +567,6 @@ export default class ResponsiveView extends React.Component {
           actionManager={this.props.app.actionManager}
           socket={this.props.app.socket}
           mode={this.state.svmode}
-          isRunning={this.state.ppbutton!=='play'}
           ws={this.state.ws}
           tree={this.state.svtree}
           altmenu={this.state.svaltmenu}

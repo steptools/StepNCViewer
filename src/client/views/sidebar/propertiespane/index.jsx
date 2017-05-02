@@ -351,7 +351,8 @@ export class WorkpieceItem extends React.Component{
 }
 WorkpieceItem.propTypes = {
   workpiece: React.PropTypes.object.isRequired,
-  clickCb: React.PropTypes.func.isRequired
+  clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 export class WorkpieceList extends React.Component{
   constructor(props){
@@ -368,6 +369,7 @@ export class WorkpieceList extends React.Component{
         <WorkpieceItem 
           workpiece={wp.entity}
           clickCb={()=>{this.props.clickCb(wp.entity)}}
+          selectEntity={this.props.selectEntity}
         />
       ));
     });
@@ -384,6 +386,7 @@ export class WorkpieceList extends React.Component{
 WorkpieceList.propTypes = {
   workpieces: React.PropTypes.array,
   clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 
 export class GenericList extends React.Component {
@@ -560,6 +563,7 @@ export class WorkingstepProperties extends React.Component{
         <WorkpieceList
           workpieces={workpieces}
           clickCb={this.props.clickCb}
+          selectEntity={this.props.selectEntity}
         />
       </div>
     );

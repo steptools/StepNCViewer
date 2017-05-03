@@ -10,6 +10,7 @@ function exeFromId(id) {
   let ws = {
     'id': id,
     'name': find.GetExecutableName(id),
+    'executabletype': find.GetExecutableType(id),
     'baseTime': find.GetExecutableBaseTime(id),
     'timeUnits': find.GetExecutableTimeUnit(id),
     'distance': find.GetExecutableDistance(id),

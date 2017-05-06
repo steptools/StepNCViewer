@@ -361,6 +361,8 @@ export default class HeaderView extends React.Component {
   render() {
     let ppbtntxt = '';
     let ppbutton = this.props.ppbutton;
+    let curws = this.props.workingstepCache[this.props.ws];
+
     if (this.props.ppbutton === 'play') {
       ppbtntxt = 'Play';
     } else {
@@ -391,6 +393,7 @@ export default class HeaderView extends React.Component {
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
         <MenuItem className="info"> File: {this.props.fname}</MenuItem>
+	<MenuItem className="info"> Type: {curws.opType}</MenuItem>
       </Menu>
     );
 

@@ -53,15 +53,14 @@ function CoreServer() {
   this.config.noCache = !opts.cache;
   this.config.mtConnect = opts.mtConnect;
   // set up machine tool option
-  if(opts.tool){
+  if(opts.tool && opts.tool!==''){
     try{
       fs.accessSync(opts.tool, fs.R_OK);
       this.machinetool = opts.tool;
     }
     catch(err){
-      console.log('Couldn\'t Access Path Provided For Machine, Ending...');
+      console.log('Given Tool Does Not Exist.');
       this.machinetool = null;
-      process.exit();
     }
   }
   else if(this.config.machine !== undefined && this.config.machine.dir !== undefined){
@@ -71,9 +70,7 @@ function CoreServer() {
         this.machinetool = this.config.machine.dir;
       }
       catch(err){
-        console.log('Couldn\'t Access Path Provided For Machine, Ending...');
         this.machinetool = null;
-        process.exit();
       }
     }
     else{        

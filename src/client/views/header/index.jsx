@@ -390,9 +390,7 @@ export default class HeaderView extends React.Component {
 	<GeomMenu actionManager = {this.props.actionManager}/>
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
-        <Button key='changelog'>
-          <div className='version' id='logbutton'>v1.1.0</div>
-        </Button>
+        <MenuItem className="info"> File: {this.props.fname}</MenuItem>
       </Menu>
     );
 
@@ -409,4 +407,5 @@ HeaderView.propTypes = {
   cadManager: React.PropTypes.object.isRequired,
   cbPPButton: React.PropTypes.func.isRequired,
   ppbutton: React.PropTypes.string.isRequired,
+  fname: React.PropTypes.string.isRequired
 };

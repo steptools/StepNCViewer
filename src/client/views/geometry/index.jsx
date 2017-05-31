@@ -145,12 +145,12 @@ export default class GeometryView extends React.Component {
     let highlightColors = {
       'default': {r: 1.0, g: 0, b: 1.0}, // pink
       'A': {r: 1.0, g: 0.6, b: 0.0}, // orange
-      'B': {r: 0.0, g: 1.0, b: 0.0}, // green
+      'B': {r: 0.0, g: 0.92, b: 0.0}, // green
       'C': {r: 0.6, g: 0.0, b: 0.6}, // purple
       'D': {r: 0.0, g: 0.0, b: 1.0}, // blue
-      'E': {r: 1.0, g: 1.0, b: 0.0}, // yellow
+      'E': {r: .92, g: .92, b: 0.0}, // yellow
       'F': {r: 0.0, g: 1.0, b: 1.0}, // cyan
-      'G': {r: 1.0, g: 0.0, b: 0.0}, // red
+      'G': {r: 0.92, g: 0.0, b: 0.0}, // red
     };
 
     let rootModelName = 'state/key';
@@ -192,12 +192,20 @@ export default class GeometryView extends React.Component {
         if (!color) {
           color = highlightColors['default'];
         }
-
+        let status;
+        if (tolerance.status === 'tolerance green') {
+          color = { r: 0.0, g: 1.0, b: 0.0 };
+          status='green';
+        } else if (tolerance.status === 'tolerance red') {
+          color = { r: 1.0, g: 0.0, b: 0.0 };
+          status='red';
+        }
         this.highlightFaces(
           tolerance.faces,
           nextProps.manager.getRootModel(rootModelName),
           false,
-          color
+          color,
+          status
         );
       });
     } else if (nextProps.viewType === 'preview' &&
@@ -448,7 +456,7 @@ export default class GeometryView extends React.Component {
     return newTargetPosition;
   }
 
-  highlightFaces(faces, object, unhighlight, newColor) {
+  highlightFaces(faces, object, unhighlight, newColor,status) {
     if (!object) {
       return;
     }
@@ -480,9 +488,17 @@ export default class GeometryView extends React.Component {
               colors.array[i + 1] = this.state.oldColors[shell.id].array[i + 1];
               colors.array[i + 2] = this.state.oldColors[shell.id].array[i + 2];
             } else if (!unhighlight) {
-              colors.array[i] = newColor.r;
-              colors.array[i + 1] = newColor.g;
-              colors.array[i + 2] = newColor.b;
+              if( (status==='green'||status==='red') && (colors.array[i]===1.0 && colors.array[i+1]===1.0 && colors.array[i+2]===0.0) ) {//Face has yellow status- show it yellow.
+                //nop
+              } else if (status === 'green' && colors.array[i] === 1.0 && colors.array[i + 1] === 0.0 && colors.array[i + 2] == 0.0) { //Face has red status, adding green status- show it yellow.
+                colors.array[i + 1] = 1.0;
+              } else if (status === 'red' && colors.array[i] === 0.0 && colors.array[i + 1] === 1.0 && colors.array[i + 2] == 0.0) { //Face has green status, adding red status- show it yellow.
+                colors.array[i] = 1.0;
+              } else {
+                colors.array[i] = newColor.r;
+                colors.array[i + 1] = newColor.g;
+                colors.array[i + 2] = newColor.b;
+              }
             }
           }
         });

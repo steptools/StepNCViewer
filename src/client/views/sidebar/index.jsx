@@ -147,6 +147,7 @@ export default class SidebarView extends React.Component {
           highlightedTolerances={this.props.highlightedTolerances}
           toggleHighlight={this.props.toggleHighlight}
           isMobile={this.props.isMobile}
+          isRunning={this.props.isRunning}
           ws={this.props.ws}
           selectEntity={this.props.selectEntity}
           openPreview={this.props.openPreview}
@@ -176,7 +177,6 @@ export default class SidebarView extends React.Component {
     } else {
       cName += ' notouch';
     }
-
     return (
       <div className={cName} style={SVWidth}>
         {properties}

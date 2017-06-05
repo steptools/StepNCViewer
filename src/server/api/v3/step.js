@@ -14,6 +14,7 @@ function exeFromId(id) {
     'timeUnits': find.GetExecutableTimeUnit(id),
     'distance': find.GetExecutableDistance(id),
     'distanceUnits': find.GetExecutableDistanceUnit(id),
+    'opType': find.GetExecutableType(id),
     'setupID': getSetupFromId(id),
     'asIs': {
       id: find.GetExecutableWorkpieceAsIsLocal(id),

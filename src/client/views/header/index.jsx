@@ -359,8 +359,11 @@ export default class HeaderView extends React.Component {
   }
 
   render() {
+	  
     let ppbtntxt = '';
     let ppbutton = this.props.ppbutton;
+    let curws = this.props.workingstepCache[this.props.ws];
+	  
     if (this.props.ppbutton === 'play') {
       ppbtntxt = 'Play';
     } else {
@@ -390,6 +393,8 @@ export default class HeaderView extends React.Component {
 	<GeomMenu actionManager = {this.props.actionManager}/>
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
+        <MenuItem className="info"> File: {this.props.fname}</MenuItem>
+        <MenuItem className="info"> Type: {curws.type}</MenuItem>
         <Button key='changelog'>
           <div className='version' id='logbutton'>v1.1.0</div>
         </Button>

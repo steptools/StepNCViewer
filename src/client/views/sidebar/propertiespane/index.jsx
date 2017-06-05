@@ -103,12 +103,12 @@ function getFormattedTime(entity) {
 export class WorkingstepItem extends React.Component{
   constructor(props){
     super(props);
-  }    
+  }
   render(){
     let classname='node';
     if(this.props.running===true) classname+=' running-node';
     return(<div key={this.props.workingstep.id}>
-      <span 
+      <span
         id={this.props.workingstep.id}
         className={classname}
         onClick={()=>{this.props.clickCb(this.props.workingstep)}}
@@ -142,7 +142,7 @@ export class ToleranceItem extends React.Component{
         <span id={this.props.tolerance.id} className='node' onClick = {this.props.clickCb}>
           <span className={getIcon('tolerance',this.props.tolerance.toleranceType)} />
           <span className='textbox'>{this.props.tolerance.name}</span>
-          <span 
+          <span
             className={getIcon('highlight',highlightName)}
             onClick={(ev)=>{
               ev.preventDefault();
@@ -205,7 +205,7 @@ export class WorkingstepList extends React.Component{
 
   constructor(props){
     super(props);
-  }    
+  }
   render() {
     let title, steps, node;
     let nodes = [];
@@ -220,8 +220,8 @@ export class WorkingstepList extends React.Component{
       title = 'Used in Workingsteps:';
       let ikey=0;
       steps = nodes.map((val) => (
-            <WorkingstepItem 
-              workingstep={val} 
+            <WorkingstepItem
+              workingstep={val}
               running={val.id===this.props.curws}
               clickCb={()=>{this.props.clickCb(val)}}
             />
@@ -232,8 +232,8 @@ export class WorkingstepList extends React.Component{
     }
 
     return (
-      <GenericList 
-        key='workingsteps' 
+      <GenericList
+        key='workingsteps'
         title={title}
         elements={steps}
         />
@@ -254,21 +254,21 @@ export class ToleranceList extends React.Component{
     this.populateElements();
   }
   populateElements(){
-    if (this.props.entity.children && this.props.entity.children.length > 0) {
-      this.title = 'Tolerances:';
-      this.elements= this.props.entity.children.map((child)=> 
-      (<ToleranceItem 
-        tolerance={child} 
-        key={child.id}
-        highlighted={_.indexOf(this.props.highlightedTolerances,child.id) > -1}
-        clickCb={()=>{this.props.clickCb(child)}}
-        toggleHighlight={this.props.toggleHighlight} 
-        selectEntity={this.props.selectEntity}
-        />
-      ));
-    } else {
-      this.title = 'No tolerances defined.';
-    }
+  if (this.props.entity.children && this.props.entity.children.length > 0) {
+    this.title = 'Tolerances:';
+    this.elements= this.props.entity.children.map((child)=>
+    (<ToleranceItem
+      tolerance={child}
+      key={child.id}
+      highlighted={_.indexOf(this.props.highlightedTolerances,child.id) > -1}
+      clickCb={()=>{this.props.clickCb(child)}}
+      toggleHighlight={this.props.toggleHighlight}
+      selectEntity={this.props.selectEntity}
+      />
+    ));
+  } else {
+    this.title = 'No tolerances defined.';
+  }
   }
   render() {
     return (
@@ -301,7 +301,7 @@ export class DatumList extends React.Component{
         title='Datum:';
       }
       datums = this.props.datums.map((datum) =>(
-        <DatumItem 
+        <DatumItem
           datum={datum}
           key={datum.id}
           highlighted={_.indexOf(this.props.highlightedTolerances, datum.id) > -1}
@@ -332,12 +332,19 @@ export class WorkpieceItem extends React.Component{
     //Draw something
     return(
     <div>
-      <span id={this.props.workpiece.id} className='node' onClick={this.props.clickCb}>
+      <span id={this.props.workpiece.id} className='node'
+        onClick={()=>{this.props.clickCb(this.props.workpiece)}}>
         <span className={getIcon('workpiece')}/>
           <span className='textbox'>
   	    {this.props.workpiece.name}
           </span>
-        <span className={getIcon('preview')}/>
+        <span className={getIcon('preview')}
+        onClick={(ev)=>{
+          ev.preventDefault();
+          ev.stopPropagation();
+          this.props.selectEntity({key:'preview'}, this.props.workpiece);
+        }
+        }/>
       </span>
     </div>
     );
@@ -345,7 +352,8 @@ export class WorkpieceItem extends React.Component{
 }
 WorkpieceItem.propTypes = {
   workpiece: React.PropTypes.object.isRequired,
-  clickCb: React.PropTypes.func.isRequired
+  clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 export class WorkpieceList extends React.Component{
   constructor(props){
@@ -359,7 +367,7 @@ export class WorkpieceList extends React.Component{
     this.props.workpieces.map((wp)=>{
       if(wp.title) this.elements.push((<div>{wp.title}</div>));
       this.elements.push((
-        <WorkpieceItem 
+        <WorkpieceItem
           workpiece={wp.entity}
           clickCb={()=>{this.props.clickCb(wp.entity)}}
         />
@@ -368,16 +376,37 @@ export class WorkpieceList extends React.Component{
   }
   render(){
       return(
-        <GenericList
-        title={this.title}
-        elements={this.elements}
+
+	<li className='rc-menu-item-disabled property children'>
+          <div className='title'>Workpieces:</div>
+	  <div className='list'>
+	  <div>
+	    To-Be:
+	    <WorkpieceItem
+	      workpiece={this.props.tobe}
+        clickCb={this.props.clickCb}
+        selectEntity={this.props.selectEntity}
 	    />
+	  </div>
+	  <div>
+	    As-Is:
+	    <WorkpieceItem
+	      workpiece={this.props.asis}
+        clickCb={this.props.clickCb}
+        selectEntity={this.props.selectEntity}
+	    />
+      </div>
+      </div>
+    </li>
       );
   }
 }
 WorkpieceList.propTypes = {
-  workpieces: React.PropTypes.array,
+  asis: React.PropTypes.object.isRequired,
+  tobe: React.PropTypes.object.isRequired,
   clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
+
 }
 
 export class GenericList extends React.Component {
@@ -393,10 +422,6 @@ export class GenericList extends React.Component {
     );
   }
 }
-GenericList.propTypes = {
-  title:React.PropTypes.string,
-  elements:React.PropTypes.array
-}
 
 export class WorkpieceProperties extends React.Component{
   constructor(props){
@@ -406,23 +431,23 @@ export class WorkpieceProperties extends React.Component{
   render(){
     return(
       <div>
-        <WorkingstepList 
-          entity={this.props.entity} 
+        <WorkingstepList
+          entity={this.props.entity}
           workingstepcache={this.props.workingstepcache}
           clickCb={this.props.clickCb}
           curws={this.props.curws}
         />
-        <ToleranceList 
-          entity={this.props.entity} 
+        <ToleranceList
+          entity={this.props.entity}
           highlightedTolerances={this.props.highlightedTolerances}
-          clickCb={this.props.clickCb} 
-          toggleHighlight={this.props.toggleHighlight} 
+          clickCb={this.props.clickCb}
+          toggleHighlight={this.props.toggleHighlight}
           selectEntity={this.props.selectEntity}
         />
-        <DatumList 
+        <DatumList
           datums={this.props.entity.datums}
           highlightedTolerances={this.props.highlightedTolerances}
-          toggleHighlight={this.props.toggleHighlight} 
+          toggleHighlight={this.props.toggleHighlight}
           selectEntity={this.props.selectEntity}
         />
       </div>
@@ -544,16 +569,28 @@ export class WorkingstepProperties extends React.Component{
         <RunmodeItem active={this.props.curws===entity.id} enabled={entity.enabled}/>
         <FeedrateItem entity={Number(entity.feedRate)} feedUnits={entity.feedUnits}/>
         <SpindleSpeedItem speed={Number(entity.speed)} speedUnits={entity.speedUnits}/>
-        <ToleranceList 
-          entity={toleranceMap(entity.tolerances)} 
+        <ToleranceList
+          entity={toleranceMap(entity.tolerances)}
           highlightedTolerances={this.props.highlightedTolerances}
           clickCb={this.props.clickCb}
-          toggleHighlight={this.props.toggleHighlight} 
+          toggleHighlight={this.props.toggleHighlight}
           selectEntity={this.props.selectEntity}
           />
+        <DatumList
+          datums={this.props.toleranceCache[entity.toBe.id].datums}
+          highlightedTolerances={this.props.highlightedTolerances}
+          toggleHighlight={this.props.toggleHighlight}
+          selectEntity={this.props.selectEntity}
+        />
         <WorkpieceList
+
+	  asis={this.props.toleranceCache[entity.asIs.id]}
+	  tobe={this.props.toleranceCache[entity.toBe.id]}
+    clickCb={this.props.clickCb}
+    selectEntity={this.props.selectEntity}
+
           workpieces={workpieces}
-          clickCb={this.props.clickCb}
+
         />
       </div>
     );
@@ -583,17 +620,18 @@ export class ToolProperties extends React.Component{
 export class ToleranceProperties extends React.Component {
   constructor(props){
     super(props);
+    let entity = props.entity;
   }
   render(){
     return(
       <div>
-        <WorkingstepList 
-          entity={this.props.entity}
-          workingstepcache={this.props.workingsteps} 
+        <WorkingstepList
+          entity={this.props.entity} workingstepscache={this.props.workingsteps}
           curws={this.props.curws}
           clickCb={()=>{}}
+
         />
-        <DatumList 
+        <DatumList
           datums = {this.props.entity.children}
           highlightedTolerances = {this.props.highlightedTolerances}
           toggleHighlight = {this.props.toggleHighlight}
@@ -962,7 +1000,7 @@ export default class PropertiesPane extends React.Component {
           entityElement = (null);
       }
       header = (
-        <PropertiesHeader 
+        <PropertiesHeader
           backCb={()=>{this.props.propertiesCb(entityData.previousEntity,true);}}
           exitCb={()=>{this.props.propertiesCb(null);this.props.previewCb(false);}}
           icon={entityData.titleIcon}
@@ -971,12 +1009,12 @@ export default class PropertiesPane extends React.Component {
         />
       );
       footer =(
-          <PropertiesFooter 
+          <PropertiesFooter
             selectEntity={(event,key) => {
               this.props.selectEntity(event, this.props.entity,key);
             }}
             type = {entityData.entity.type}
-            iscurws = {entityData.entity.id === this.props.ws} 
+            iscurws = {entityData.entity.id === this.props.ws}
           />
       );
     }

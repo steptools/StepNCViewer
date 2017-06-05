@@ -27,6 +27,7 @@ function exeFromId(id) {
       id: find.GetExecutableWorkpieceRemovalLocal(id),
       inherited: false,
     },
+    'executableType' : find.GetExecutableType(id),
   };
 
   if (ws.asIs.id === 0) {

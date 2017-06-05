@@ -32,7 +32,7 @@ export default class WorkplanList extends React.Component {
   }
 
   componentDidMount() {
-    $('.sidebar ul.sidebar-menu-tabs + ul').addClass('treebeard');
+    $('.sidebar ul.sidebar-menu-tabs ~ ul').filter(':last').addClass('treebeard');
   }
 
   toggleToCurrentWS(node) {

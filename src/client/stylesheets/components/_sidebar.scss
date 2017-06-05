@@ -444,13 +444,22 @@ $icons: '../icons/';
 }
 
 .sidebar .treebeard {
-    padding: 5px;
     height: $sidebarPaneHeight;
     overflow-y: auto;
     background-color: rgba(#FFFFFF, 0.5);
     
     ul {
-        padding-left: 15px;
+        padding: 5px;
+    }
+
+    .status-red{
+        background-color:lightpink;
+    }
+    .status-yellow{
+        background-color:lightyellow;
+    }
+    .status-green{
+        background-color:lightgreen;
     }
 
     .node {
@@ -525,6 +534,22 @@ $icons: '../icons/';
     }
 }
 
+.tolerance-mode {
+    display:flex;
+    border-top: 2px solid black;
+    border-bottom: 4px solid #666666;
+    div {
+        flex:2;
+        text-align:center;
+        padding:2px;
+    }
+    div:hover{
+        background-color: #35B7FD;
+    }
+    .active{
+        background-color: #2AFD8C;
+    }
+}
 .sidebar .icon {
     font-size: 30px;
     

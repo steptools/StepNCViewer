@@ -14,7 +14,10 @@ let feedRate;
 let path = find.GetProjectName();
 let changed=false;
 let setupFlag = false;
+let mtcadapter = require('./ProbeAdapter');
+mtcadapter.ProgramID(find.GetProjectName());
 
+let probepause = false;
 /****************************** Helper Functions ******************************/
 let keyCache = {};
 let deltaCache = {};
@@ -150,9 +153,16 @@ function loop(key) {
       return ms.AdvanceState();
     }).then((shouldSwitch)=>{
       if (shouldSwitch.hasOwnProperty('probe')) {
+        ms.GetWSID()
+          .then((id)=>{
+            let probedata = file.tol.GetProbeResults(id,shouldSwitch.probe.contact[0],shouldSwitch.probe.contact[1],shouldSwitch.probe.contact[2]);
+            mtcadapter.write(probedata);
+          });
         app.ioServer.emit('nc:probe',shouldSwitch.probe);
-        loopStates[path] = false;
-        update('pause');
+        if(probepause){
+          loopStates[path] = false;
+          update('pause');
+        }
         return getDelta(true)
           .then((key)=>{
             keyCache = JSON.parse(key);

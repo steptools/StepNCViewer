@@ -28,15 +28,15 @@ module.exports = function(environment) {
             "upload": true
           },
           "file" : {
-            "dir": "./boxy.stpnc"
+            "dir": "./BoxyProbe.stpnc"
           },
           "machine" : {
-            "dir" : "C:/Program Files (x86)/STEP Tools/STEP-NC Machine/machines/okuma_M560-V.xml"
+            "dir" : "C:/Program Files (x86)/STEP Tools/STEP-NC Machine/machines/DMU_85.xml"
           },
     "machineList" : [
       {
         name: 'Okuma',
-        address: 'okuma.steptools.com:5000'
+        address: 'localhost:5000'
       }
     ]
 

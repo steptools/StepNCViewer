@@ -41,10 +41,10 @@ export default class NC extends THREE.EventDispatcher {
       collapsed:      false,
       usagevis: {
         asis:       false,
-        tobe:       false,
+        tobe:       true,
         machine:    true,
         cutter:     true,
-        inprocess:  true,
+        inprocess:  false,
         toolpath:   true,
         fixture:    true
       }

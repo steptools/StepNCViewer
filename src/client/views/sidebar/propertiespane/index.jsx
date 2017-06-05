@@ -335,9 +335,15 @@ export class WorkpieceItem extends React.Component{
       <span id={this.props.workpiece.id} className='node' onClick={this.props.clickCb}>
         <span className={getIcon('workpiece')}/>
           <span className='textbox'>
-  	    {this.props.workpiece.name}
+  	       {this.props.workpiece.name}
           </span>
-        <span className={getIcon('preview')}/>
+        <span className={getIcon('preview')}
+			onClick={(ev)=>{
+			ev.preventDefault();
+			ev.stopPropagation();
+			this.props.selectEntity({key:'preview'}, this.props.workpiece);
+			}}
+		/>
       </span>
     </div>
     );
@@ -345,7 +351,8 @@ export class WorkpieceItem extends React.Component{
 }
 WorkpieceItem.propTypes = {
   workpiece: React.PropTypes.object.isRequired,
-  clickCb: React.PropTypes.func.isRequired
+  clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 export class WorkpieceList extends React.Component{
   constructor(props){
@@ -362,6 +369,7 @@ export class WorkpieceList extends React.Component{
         <WorkpieceItem 
           workpiece={wp.entity}
           clickCb={()=>{this.props.clickCb(wp.entity)}}
+		  selectEntity={this.props.selectEntity}
         />
       ));
     });
@@ -378,6 +386,7 @@ export class WorkpieceList extends React.Component{
 WorkpieceList.propTypes = {
   workpieces: React.PropTypes.array,
   clickCb: React.PropTypes.func.isRequired,
+  selectEntity: React.PropTypes.func.isRequired
 }
 
 export class GenericList extends React.Component {
@@ -554,6 +563,7 @@ export class WorkingstepProperties extends React.Component{
         <WorkpieceList
           workpieces={workpieces}
           clickCb={this.props.clickCb}
+		  selectEntity={this.props.selectEntity}
         />
       </div>
     );

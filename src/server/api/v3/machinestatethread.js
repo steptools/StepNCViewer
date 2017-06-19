@@ -5,7 +5,11 @@ let ms = {};
 let parseMessage =
   (f)=>{
     if(f.msg==='setMachineState') {
-      ms = new StepNC.machineState(f.path, f.sim,f.tool);
+      if(f.tool) {
+        ms = new StepNC.machineState(f.path, f.sim,f.tool);
+      } else {
+        ms = new StepNC.machineState(f.path, f.sim);        
+      }
     } else if(f.msg==='getMachine') {
       let out;
       if(!f.hasOwnProperty('args') || Object.keys(f.args).length <0) {

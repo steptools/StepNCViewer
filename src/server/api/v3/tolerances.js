@@ -209,7 +209,7 @@ function _getWps(req, res) {
 }
 
 function _loadQIF(req,res){
-  parseqif.loadQIF(find.GetProjectName()+'_Res.qif')
+  parseqif.loadQIF(find.GetProjectName()+'_RES.qif')
     .then(() =>{
       res.status(200).send();
       app.ioServer.emit('nc:qifLoad');

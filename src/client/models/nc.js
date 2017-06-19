@@ -542,10 +542,12 @@ export default class NC extends THREE.EventDispatcher {
         return true;
       }
       if (geom.usage === 'asis' ||
-      geom.usage === 'cutter' ||
-      geom.usage === 'machine' ||
-      geom.usage === 'fixture') {
-        return true;
+        geom.usage === 'cutter' ||
+        geom.usage === 'machine' ||
+        geom.usage === 'fixture') {
+        if (_.has(geom, 'shell')) {
+          return true;
+        }
       }
       return false;
     });

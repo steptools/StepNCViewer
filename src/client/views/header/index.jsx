@@ -244,6 +244,7 @@ class GeomMenu extends React.Component {
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.asis} type='asis'>As-Is</GeomBtn>
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.tobe} type='tobe'>To-Be</GeomBtn>
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.cutter} type='cutter'>Tool</GeomBtn>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.fixture} type='fixture'>Fixture</GeomBtn>
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.machine} type='machine'>Machine</GeomBtn>
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.inprocess} type='inprocess'>Removal</GeomBtn>
         <Button icon={this.state.toolpath} key='toolpath'>Toolpath</Button>

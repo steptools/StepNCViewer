@@ -176,6 +176,12 @@ export default class NC extends THREE.EventDispatcher {
       });
       this.state.usagevis.cutter=!this.state.usagevis.cutter;
       break;
+      case 'fixture':
+      changes = _.filter(this._objects,(obj)=>{
+        return obj.usage==='fixture' && obj.model.live;
+      });
+      this.state.usagevis.fixture=!this.state.usagevis.fixture;
+      break;
       case 'inprocess':
       changes = _.filter(this._objects,(obj)=>{
         return obj.usage==='inprocess' && obj.model.live;

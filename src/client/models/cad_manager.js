@@ -152,6 +152,10 @@ export default class CADManager extends THREE.EventDispatcher {
     return this._models[key];
   }
 
+  getRootVis() {
+    return this._models["state/key"].getVis();
+  }
+
   modelCount() {
     return _.size(this._models);
   }

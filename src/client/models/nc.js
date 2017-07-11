@@ -176,13 +176,13 @@ export default class NC extends THREE.EventDispatcher {
       });
       this.state.usagevis.cutter=!this.state.usagevis.cutter;
       break;
-      case 'removal':
+      case 'inprocess':
       changes = _.filter(this._objects,(obj)=>{
         return obj.usage==='inprocess' && obj.model.live;
       });
       this.state.usagevis.inprocess = !this.state.usagevis.inprocess;
       break;
-      case 'path':
+      case 'toolpath':
       changes = _.filter(this._loader._annotations,(anno)=>{
         return anno.live;
       });
@@ -198,8 +198,8 @@ export default class NC extends THREE.EventDispatcher {
       obj.toggleVisibility();
     });
   }
-  getVis(usage){
-    return this.state[usage];
+  getVis(){
+    return this.state.usagevis;
   }
   addModel(model, usage, type, id, transform, bbox) {
     // console.log('Add Model(' + usage + '): ' + id);
@@ -255,10 +255,7 @@ export default class NC extends THREE.EventDispatcher {
         mesh.userData = obj;
         obj.object3D.add(mesh);
         obj.version = 0;
-        if (!this.state.usagevis[usage]) {
-          //obj.rendered = false;
-          obj.setInvisible();
-        }
+        this.state.usagevis[obj.usage] ? obj.setVisible() : obj.setInvisible();
       });
     } else if (type === 'polyline') {
       model.addEventListener('annotationEndLoad', (event) => {
@@ -459,6 +456,7 @@ export default class NC extends THREE.EventDispatcher {
     obj.version = geom.version;
     obj.baseVersion= geom.base_version;
     obj.precision = geom.precision;
+    this.state.usagevis[obj.usage] ? obj.setVisible() : obj.setInvisible();
     return true;
   }
 
@@ -597,6 +595,11 @@ export default class NC extends THREE.EventDispatcher {
             );
             // Push the annotation for later completion
             this._loader._annotations[name] = annotation;
+            if (this.state.usagevis[geomData.usage]) {
+              this._loader._annotations[name].addToScene();
+            } else {
+              this._loader._annotations[name].removeFromScene();
+            }
             var url = '/v3/nc/';
             this._loader.addRequest({
               path: name,
@@ -605,7 +608,9 @@ export default class NC extends THREE.EventDispatcher {
             });
           } else {
             if (this.state.usagevis[geomData.usage]) {
-              this._loader._annotations[name].addToScene();
+             this._loader._annotations[name].addToScene();
+            } else {
+              this._loader._annotations[name].removeFromScene();
             }
             this._loader._annotations[name].live = true;
           }

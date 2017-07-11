@@ -215,14 +215,9 @@ class GeomMenu extends React.Component {
   constructor(props){
     super(props);
     this.pathClick = this.pathClick.bind(this);
-    this.state = {
-      path:'view',
-      asis:'noview',
-      tobe:'noview',
-      machine:'view',
-      removal:'view',
-      cutter:'view'
-    };
+    this.state = _.mapValues(props.rootVis, function(val) {
+      return val ? 'view' : 'noview';
+    });
     this.props.actionManager.on('changeVis',(arg)=>{
       let l={}; 
       if(this.state[arg]==='view')
@@ -234,8 +229,8 @@ class GeomMenu extends React.Component {
   }
 
   pathClick(info){
-    if(info.key==='path')
-      this.props.actionManager.emit('changeVis','path');
+    if(info.key==='toolpath')
+      this.props.actionManager.emit('changeVis','toolpath');
   }
   render(){ return(
       <SubMenu {...this.props} onClick={this.pathClick} className="geommenu" title={
@@ -250,8 +245,8 @@ class GeomMenu extends React.Component {
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.tobe} type='tobe'>To-Be</GeomBtn>
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.cutter} type='cutter'>Tool</GeomBtn>
         <GeomBtn actionManager = {this.props.actionManager} view={this.state.machine} type='machine'>Machine</GeomBtn>
-        <GeomBtn actionManager = {this.props.actionManager} view={this.state.removal} type='removal'>Removal</GeomBtn>
-        <Button icon={this.state.path} key='path'>Toolpath</Button>
+        <GeomBtn actionManager = {this.props.actionManager} view={this.state.inprocess} type='inprocess'>Removal</GeomBtn>
+        <Button icon={this.state.toolpath} key='toolpath'>Toolpath</Button>
       </SubMenu>
   )}
 }
@@ -388,7 +383,9 @@ export default class HeaderView extends React.Component {
           val={this.props.speed}
           icons='true'
         />
-	<GeomMenu actionManager = {this.props.actionManager}/>
+  { this.props.cadManager.getRootModel("state/key") ?      
+	<GeomMenu actionManager = {this.props.actionManager} rootVis = {this.props.cadManager.getRootVis()}/>
+  : null }
         <FeedSpeed disabled feed={feedSpeedInfo[0]} speed={feedSpeedInfo[1]} rotation={feedSpeedInfo[2]} />
         <ProbeMessage msg={probeMsg}/>
         <MenuItem className="info"> Type: {curr_ws.operationType}</MenuItem>

@@ -342,7 +342,13 @@ export default class NC extends THREE.EventDispatcher {
   }
 
   calcBoundingBox() {
-
+    let bbxform = new THREE.Matrix4();
+    bbxform.set(
+    -1, 0, 0, 0,
+    0, 0, 1, 0,
+    0, 1, 0, 0,
+    0, 0, 0, 1
+    );
     this._overlay3D.remove(this.bbox);
     this.boundingBox = new THREE.Box3();
     let keys = _.keys(this._objects);
@@ -351,7 +357,7 @@ export default class NC extends THREE.EventDispatcher {
       if (object.rendered !== false && object.type !== 'polyline') {
         let newBox = new THREE.Box3().setFromObject(object.object3D);
         if (!newBox.isEmpty()) {
-          object.bbox = newBox;
+          //object.bbox = newBox;
         }
         this.boundingBox.union(object.bbox);
       }
@@ -359,6 +365,7 @@ export default class NC extends THREE.EventDispatcher {
     let bounds = this.boundingBox;
 
     this.bbox = Assembly.buildBoundingBox(bounds);
+    this.bbox.applyMatrix(bbxform);
     if (this.bbox && this.state.selected) {
       this._overlay3D.add(this.bbox);
     }

@@ -39,9 +39,18 @@ export default class DataLoader extends THREE.EventDispatcher {
         if (!str) {
             return new THREE.Box3();
         }
+        let bbxform = new THREE.Matrix4();
+        bbxform.set(
+        -1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 1
+        );
         let vals = str;
         if (typeof str === "string") vals = DataLoader.parseFloatVec(str, 6);
-        return new THREE.Box3(new THREE.Vector3(vals[0], vals[1], vals[2]), new THREE.Vector3(vals[3], vals[4], vals[5]));
+        let rtnbbox = new THREE.Box3(new THREE.Vector3(vals[0], vals[1], vals[2]), new THREE.Vector3(vals[3], vals[4], vals[5]));
+        rtnbbox.applyMatrix4(bbxform);
+        return rtnbbox;
     }
 
     static parseXform(str, colOriented) {
@@ -368,6 +377,7 @@ export default class DataLoader extends THREE.EventDispatcher {
         let nc = new NC(doc.project, doc.workingstep, doc.time_in_workingstep, this);
         nc.applyDelta(doc,true)
           .then(()=>{
+            nc.calcBoundingBox();
             this._app.actionManager.emit('invalidate', {'boundingBox': true, 'model': nc});
             if (doc.workingstep) {
                 this._app.actionManager.emit('change-workingstep', doc.workingstep);

@@ -388,17 +388,25 @@ export default class GeometryView extends React.Component {
 
     // now calculate which side we want to view from
     // TODO: make sure fixtures work properly with machines and other changes
+    let machine = _.find(
+      _.values(object._objects),
+      {'usage': 'machine', 'rendered': true}
+    );
     let fixture = _.find(
       _.values(object._objects),
       {'usage': 'fixture', 'rendered': true}
     );
     let newPos = new THREE.Vector3();
-    this.alignFixture(fixture, newUp, newPos);
+    if (machine) {
+      newPos.crossVectors(newUp, new THREE.Vector3(1, 0, 0));
+    } else {
+      this.alignFixture(fixture, newUp, newPos);
+    }
 
     // TODO: See if we can actually use the tool in calculations
     // zoom to fit just the part
     let newTargetPosition = this.alignCamera(part, tool, toolBox);
-
+    
     this.controls.target.copy(newTargetPosition);
     this.controls.alignTop(newUp, newPos);
   }
@@ -528,7 +536,6 @@ export default class GeometryView extends React.Component {
   }
 
   updateSceneBoundingBox(newBoundingBox) {
-    newBoundingBox.applyMatrix4(this._globalxform);
     this.sceneCenter.copy(newBoundingBox.center());
     this.sceneRadius = newBoundingBox.size().length() / 2;
   }
